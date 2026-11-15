@@ -13,8 +13,9 @@ async function CurrentYear() {
 }
 
 /**
- * Shared CRM footer (ported from cwl and protection): a navy band, then the
- * copyright line and social links. GHTI's contact details appear once supplied.
+ * Footer: GHTI's band (links, contact details once supplied), then the
+ * copyright line, whose "Charismatic Renewal Ministries" links to
+ * crm-world.org.ng, and the CRM social links.
  */
 function Footer() {
   const { address, phone, email } = site.contact;

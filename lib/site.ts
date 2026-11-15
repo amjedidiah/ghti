@@ -17,18 +17,9 @@ export const site = {
   },
 };
 
-/** The six links shared by every CRM subdomain header. Keep in sync with cwl and protection. */
-export const crmNavLinks = [
-  { name: "Home", href: "https://crm-world.org.ng/" },
-  { name: "Discover CRM", href: "https://crm-world.org.ng/about-us/" },
-  { name: "Connect", href: "https://crm-world.org.ng/discover-crm/" },
-  { name: "Next Steps", href: "https://crm-world.org.ng/next-steps/" },
-  { name: "Grow", href: "https://crm-world.org.ng/crm-reflections/" },
-  { name: "Contacts", href: "https://crm-world.org.ng/contacts/" },
-] as const;
-
 /** GHTI's own navigation. */
 export const ghtiNavLinks = [
+  { name: "About", href: "/about" },
   { name: "Academics", href: "/academics" },
   { name: "Admissions", href: "/admissions" },
   { name: "Contact", href: "/contact" },
@@ -36,7 +27,6 @@ export const ghtiNavLinks = [
 
 /** Footer-only links: about the institution and legal pages. */
 export const footerLinks = [
-  { name: "About", href: "/about" },
   { name: "Statement of Faith", href: "/statement-of-faith" },
   { name: "Privacy notice", href: "/privacy" },
 ] as const;

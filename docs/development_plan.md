@@ -26,7 +26,7 @@ Also carried over from the original brief: course materials downloads, links to 
 - **Keep running costs at or near zero until the platform matures.** Every service starts on a free tier; upgrades are triggered by real usage.
 - **Videos:** YouTube, as unlisted videos. **Course materials and lecture schedules:** Google Drive. **Database and authentication:** Supabase.
 - **Content is uploaded manually** to YouTube or Drive, and the links are pasted into the portal. The lecturer and admin portals must make this easy and validate the links.
-- **Uniform look with the other subdomains.** Reuse the shared CRM header and footer from `cwl` and `protection` for marketing pages
+- **Uniform look with the other subdomains.** Reuse the CRM brand (navy, gold, typefaces) and footer from `cwl` and `protection`. _(15 Nov 2026: GHTI's own header comes first; the CRM navigation is reduced to the copyright link to crm-world.org.ng.)_
 - **Simplicity and ease of use first**, the same priority as the hymns web app.
 
 ### One exception: applicant documents
@@ -104,7 +104,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 1.1. First ride: the look, on a live URL (target: end of week 1)
 
-- [x] Port `Header` from `cwl`/`protection`: CRM logo, the six nav links to `crm-world.org.ng`, mobile menu. Add a second row (or a right-hand slot) for GHTI's own links: Academics, Admissions, Contact, **Portal sign-in**.
+- [x] Port `Header` from `cwl`/`protection`: CRM logo, the six nav links to `crm-world.org.ng`, mobile menu. Add a second row (or a right-hand slot) for GHTI's own links: Academics, Admissions, Contact, **Portal sign-in**. _(Revised 15 Nov 2026: GHTI header first, with About added; CRM links reduced to the footer copyright link.)_
 - [x] Port `Footer`: copyright line linking to `crm-world.org.ng` and the Facebook, Instagram and YouTube links. Add GHTI's address and phone. _(Slots in `lib/site.ts`; shown once the client supplies them.)_
 - [x] Brand tokens: CRM navy and gold (as on `protection`), cream ground. Playfair Display (headings) + Inter (body), the same pairing as `cwl`.
 - [x] Semantic colour tokens (`--color-bg`, `--color-text-primary`, `--color-accent`, …) so dark mode can come later without rework.

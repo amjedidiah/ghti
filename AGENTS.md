@@ -146,7 +146,7 @@ An admitted applicant becomes a `student` on the same account. Staff accounts ar
 
 ## Design System
 
-- **Uniform with the other CRM subdomains.** Port `Header` and `Footer` from `../cwl/components/` and `../crm-protection/components/`: same CRM logo, the six nav links to `crm-world.org.ng`, same social links. Add GHTI's own links (Academics, Admissions, Contact, Portal sign-in) without removing the CRM ones.
+- **GHTI's header comes first** (decision 15 Nov 2026, differs from `cwl` and `protection`). The header is GHTI's own: the GHTI wordmark with "Charismatic Renewal Ministries" beneath it, then About, Academics, Admissions, Contact and the account button. The six CRM navigation links are not shown; the footer's copyright line links "Charismatic Renewal Ministries" to crm-world.org.ng, beside the CRM social links. `public/brand/crm-logo.png` is kept for award certificates (step 3.4).
 - **Brand:** CRM navy and gold (as on `protection`), cream ground. Playfair Display for headings, Inter for body, loaded with `next/font/google`.
 - **Tailwind v4:** theme defined with `@theme` in `globals.css`, no config file. Components use **semantic tokens** (`bg`, `bg-card`, `text-primary`, `text-secondary`, `accent`, `border`, …), not raw palette values, so dark mode can be added later.
 - **Simplicity and ease of use first.** Many users are on phones: every screen must work at 375px width. Forms show clear, specific errors.

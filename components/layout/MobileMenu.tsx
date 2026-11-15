@@ -4,9 +4,9 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
-import { crmNavLinks, ghtiNavLinks, signInLink, site } from "@/lib/site";
+import { ghtiNavLinks } from "@/lib/site";
 
-/** One menu for phones and tablets: GHTI links first, then the shared CRM links. */
+/** Menu for phones and tablets: GHTI's own links. The account button stays in the header; CRM links are in the footer. */
 function MobileMenu() {
   const [open, setOpen] = useState(false);
   const panelId = useId();
@@ -42,7 +42,7 @@ function MobileMenu() {
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={open ? "Close menu" : "Open menu"}
-        className="-mr-2 inline-flex size-11 items-center justify-center rounded-md text-secondary hover:bg-muted hover:text-primary"
+        className="-mr-2 inline-flex size-11 items-center justify-center rounded-md text-on-brand hover:bg-brand-deep"
       >
         {open ? <X className="size-6" aria-hidden /> : <Menu className="size-6" aria-hidden />}
       </button>
@@ -54,9 +54,6 @@ function MobileMenu() {
           className="absolute inset-x-0 top-full z-50 border-t border-border bg-card shadow-lg"
         >
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-            <p className="px-3 pb-1 text-xs font-semibold tracking-wider text-accent-strong uppercase">
-              {site.name}
-            </p>
             <ul className="space-y-1">
               {ghtiNavLinks.map((link) => (
                 <li key={link.href}>
@@ -67,31 +64,6 @@ function MobileMenu() {
                   >
                     {link.name}
                   </Link>
-                </li>
-              ))}
-              <li>
-                <Link
-                  href={signInLink.href}
-                  onClick={close}
-                  className="block rounded-md px-3 py-2.5 text-base font-semibold text-accent-strong hover:bg-muted"
-                >
-                  {signInLink.name}
-                </Link>
-              </li>
-            </ul>
-
-            <p className="mt-4 border-t border-border px-3 pt-4 pb-1 text-xs font-semibold tracking-wider text-secondary uppercase">
-              {site.ministry}
-            </p>
-            <ul className="space-y-1">
-              {crmNavLinks.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="block rounded-md px-3 py-2.5 text-base font-medium text-secondary hover:bg-muted hover:text-primary"
-                  >
-                    {link.name}
-                  </a>
                 </li>
               ))}
             </ul>
