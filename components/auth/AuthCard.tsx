@@ -13,7 +13,7 @@ function AuthCard({
   footer?: ReactNode;
 }) {
   return (
-    <div className="bg-muted px-4 py-10 sm:py-16">
+    <div className="flex-1 bg-muted px-4 py-10 sm:py-16">
       <div className="mx-auto w-full max-w-md">
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
           <h1 className="font-display text-2xl font-bold tracking-tight text-primary sm:text-3xl">

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { cache } from "react";
 
 import { ROLE_HOME, SIGN_IN_PATH, type AppRole } from "@/lib/auth/rules";
@@ -19,6 +20,9 @@ export type CurrentUser = {
  * Deduplicated per request.
  */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  // Request-time only: getClaims() reads the clock (Date.now) to check expiry,
+  // which Next forbids while prerendering (blocking-prerender-current-time).
+  await connection();
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const claims = claimsData?.claims;
