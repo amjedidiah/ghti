@@ -2,11 +2,13 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import ProgrammeCard from "@/components/programmes/ProgrammeCard";
+import Placeholder from "@/components/shared/Placeholder";
+import { content } from "@/lib/content";
 import { getPublishedProgrammes } from "@/lib/queries/programmes";
 import { site } from "@/lib/site";
 
-// Welcome banner copy is a placeholder. The client's banner text and images,
-// vision, history and Statement of Faith replace it in step 1.5.
+// Welcome banner copy is a placeholder until the client's banner text and
+// images arrive (client input #9). Vision and faith come from lib/content.ts.
 
 async function HomePage() {
   const programmes = await getPublishedProgrammes();
@@ -40,6 +42,30 @@ async function HomePage() {
               How to apply
             </Link>
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="faith-heading" className="border-b border-border">
+        <h2 id="faith-heading" className="sr-only">
+          Vision and faith
+        </h2>
+        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-14 sm:px-6 md:grid-cols-2 lg:px-8">
+          <Pillar title="Our vision" href="/about" linkLabel="About GHTI">
+            {content.vision ? (
+              <p className="font-display text-xl leading-snug text-primary">{content.vision}</p>
+            ) : (
+              <Placeholder what="the vision statement." input={9} />
+            )}
+          </Pillar>
+          <Pillar title="What we believe" href="/statement-of-faith" linkLabel="Statement of Faith">
+            {content.statementOfFaith ? (
+              <p className="leading-relaxed text-secondary">
+                {content.statementOfFaith.map((article) => article.title).join(" · ")}
+              </p>
+            ) : (
+              <Placeholder what="the Statement of Faith." input={9} />
+            )}
+          </Pillar>
         </div>
       </section>
 
@@ -99,6 +125,34 @@ async function HomePage() {
         </div>
       </section>
     </>
+  );
+}
+
+function Pillar({
+  title,
+  href,
+  linkLabel,
+  children,
+}: {
+  title: string;
+  href: string;
+  linkLabel: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm">
+      <h3 className="text-xs font-semibold tracking-widest text-accent-strong uppercase">
+        {title}
+      </h3>
+      <div className="mt-4 flex-1">{children}</div>
+      <Link
+        href={href}
+        className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-accent-strong hover:underline"
+      >
+        {linkLabel}
+        <ArrowRight className="size-4" aria-hidden />
+      </Link>
+    </div>
   );
 }
 

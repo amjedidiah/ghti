@@ -549,8 +549,16 @@ function ConsentField({ form }: { form: Form }) {
         />
         <span>
           The information I have given is true and complete. I agree that GHTI may store and use it,
-          and the documents I upload, to consider my application for admission, in line with the
-          Nigeria Data Protection Act 2023.
+          and the documents I upload, to consider my application for admission, as described in the{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-accent-strong underline"
+          >
+            privacy notice
+          </a>
+          .
         </span>
       </label>
       {error && (

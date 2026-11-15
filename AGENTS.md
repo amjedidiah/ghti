@@ -17,7 +17,7 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 ## Project Status
 
-Stage 1 🚲 Bicycle in progress. Steps 1.1 to 1.3 are done and live (CRM chrome, programmes, accounts and roles, online applications). Step 1.4 (admin review) is built locally. Next: step 1.5 (ready for real applicants). Custom SMTP (Resend) is deferred but must land before applications open in step 1.5 (see the plan).
+Stage 1 🚲 Bicycle in progress. Steps 1.1 to 1.4 are done and live (CRM chrome, programmes, accounts and roles, online applications, admin review). Step 1.5 (ready for real applicants) is under way: public pages with placeholders, privacy notice draft and the keep-alive cron are built; backups, rate limiting, DNS and real content remain. Custom SMTP (Resend) must land before applications open.
 
 ### Supabase environments
 
@@ -77,6 +77,8 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `lib/supabase/`: `server.ts` (Server Components/Actions), `client.ts` (Client Components), `admin.ts` (secret key, server-only, bypasses RLS), `proxy.ts` (`updateSession` used by root `proxy.ts`), `public.ts` (anonymous, cookie-less client for public data; the only client allowed inside `"use cache"`), `env.ts` (env var access), `database.types.ts` (generated, never hand-edited)
 - `lib/queries/`: server-only data access (`"use cache"` reads of public data with `cacheTag`; revalidate the tag when admins change the data)
 - `lib/site.ts`: site name, CRM nav and social links, contact details (null until the client supplies them)
+- `lib/content.ts`: GHTI's own words for public pages (vision, history, Statement of Faith, map, privacy contacts); null shows a `Placeholder` ("Waiting for GHTI")
+- `app/api/cron/keep-alive/`: daily Vercel Cron (vercel.json) so the free Supabase project never pauses; requires `CRON_SECRET`
 - `lib/auth/`: `rules.ts` (role homes, route guards, safe redirects; pure, tested), `session.ts` (`getCurrentUser`, `requireRole`), `actions.ts` (auth Server Actions)
 - `lib/validation/`: Zod schemas shared by client forms and Server Actions (`auth.ts`, `application.ts`)
 - `lib/applications/`: `actions.ts` (start, save, submit, record/remove documents), `mapping.ts` (row <-> form values; pure, tested)

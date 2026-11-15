@@ -34,6 +34,13 @@ export const ghtiNavLinks = [
   { name: "Contact", href: "/contact" },
 ] as const;
 
+/** Footer-only links: about the institution and legal pages. */
+export const footerLinks = [
+  { name: "About", href: "/about" },
+  { name: "Statement of Faith", href: "/statement-of-faith" },
+  { name: "Privacy notice", href: "/privacy" },
+] as const;
+
 export const signInLink = { name: "Portal sign-in", href: "/sign-in" } as const;
 
 export const socialLinks = [

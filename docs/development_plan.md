@@ -119,7 +119,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 - [x] `profiles` table, created by trigger on sign-up with role `applicant`; RLS + pgTAP tests (own profile only; only admins change roles). _(Also admin write access to `programmes`.)_
 - [x] Supabase Auth with **email + password** and **magic link**; email confirmation on sign-up. _(Cloud settings applied with `bun run auth:push`; branded templates wait for Resend.)_
 - [ ] Custom SMTP (Resend). Supabase's built-in mailer is rate-limited and not meant for production. **Deferred; must be done before step 1.5 (applications open).** Until then, in the cloud:
-  - The built-in mailer sends at most **2 emails an hour** for the whole project.
+  - The built-in mailer sends at most **2 emails an hour** for the whole project, and failed attempts (e.g. a rejected address) count too. It does deliver to any address, not only team members (live test, 15 Nov 2026).
   - Supabase does not allow custom email templates on the free tier without custom SMTP, so cloud emails use Supabase's default wording and links. Those links (`?code=`) only sign people in when opened in the same browser that asked for them; confirmation still verifies the email either way.
   - To finish: create a Resend account, verify the sending domain (client input #12), add Resend as SMTP in Supabase, then run `bun run auth:push --site-url <production URL> --apply` to upload the branded templates.
 - [x] Sign-up, sign-in, sign-out and password reset pages. Sign-up lives at `/apply/register` (applicants only).
@@ -145,11 +145,11 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 1.5. Ready for real applicants
 
-- [ ] Public pages: `/about`, `/statement-of-faith` and `/contact` (phones as `tel:` links, addresses, Google Maps embed with no API key, "Get directions" link). Text lives in the code for now; admins can edit it from step 3.5.
-- [ ] `/privacy`: privacy notice (Nigeria Data Protection Act 2023).
+- [x] Public pages: `/about`, `/statement-of-faith` and `/contact` (phones as `tel:` links, addresses, Google Maps embed with no API key, "Get directions" link). Text lives in the code for now; admins can edit it from step 3.5. _(Built with visible "Waiting for GHTI" placeholders; text in `lib/content.ts` and `lib/site.ts`, client inputs #9 and #10.)_
+- [x] `/privacy`: privacy notice (Nigeria Data Protection Act 2023). _(Draft written from what the system does; GHTI to review and supply controller details, #13, and retention period, #19.)_
 - [ ] Replace the placeholders in the cloud database: the fake seeded programmes (client input #7) and the placeholder intake "Second semester, 2026/2027" (client input #6).
 - [ ] Rate limiting on sign-up, login and applications (Supabase Auth settings + Vercel Firewall rule).
-- [ ] **Supabase keep-alive:** free projects pause after 7 days without activity. A daily Vercel Cron hit to a lightweight query prevents this.
+- [x] **Supabase keep-alive:** free projects pause after 7 days without activity. A daily Vercel Cron hit to a lightweight query prevents this. _(`/api/cron/keep-alive`, daily at 05:00 UTC; `CRON_SECRET` set in Vercel production.)_
 - [ ] **Backups:** the free tier has no downloadable backups. A weekly GitHub Action runs `pg_dump` (database) and copies the storage bucket to ministry-owned storage. With applicant records at stake, this is **not optional**.
 - [ ] DNS: point the chosen subdomain at Vercel; production environment variables. When the domain changes from `ghti-nine.vercel.app`: update `NEXT_PUBLIC_SITE_URL` in Vercel and rerun `bun run auth:push --site-url https://<new domain> --apply`.
 - [ ] **Quality check:** walk the whole applicant and admin journey at 375px.

@@ -3,7 +3,7 @@ import { cacheLife } from "next/cache";
 import Link from "next/link";
 
 import SocialIcon from "@/components/layout/SocialIcon";
-import { ghtiNavLinks, site, socialLinks } from "@/lib/site";
+import { footerLinks, ghtiNavLinks, site, socialLinks } from "@/lib/site";
 
 /** Cached so the prerendered shell can show the year (Cache Components forbids a bare `new Date()`). */
 async function CurrentYear() {
@@ -35,7 +35,7 @@ function Footer() {
           <div className="grid gap-6 sm:grid-cols-2">
             <nav aria-label="Footer">
               <ul className="space-y-2 text-sm">
-                {ghtiNavLinks.map((link) => (
+                {[...ghtiNavLinks, ...footerLinks].map((link) => (
                   <li key={link.href}>
                     <Link href={link.href} className="text-on-brand-muted hover:text-on-brand">
                       {link.name}
