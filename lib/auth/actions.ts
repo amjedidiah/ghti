@@ -56,6 +56,8 @@ function friendlyAuthError(error: AuthError): string {
       return "That email and password do not match. Check them and try again.";
     case "email_not_confirmed":
       return "Please confirm your email address first. Open the link we emailed you when you registered.";
+    case "email_address_invalid":
+      return "We cannot send email to that address. Check it for typos, or use a different email.";
     case "weak_password":
       return "Choose a stronger password: at least 8 characters, ideally a short phrase.";
     case "same_password":

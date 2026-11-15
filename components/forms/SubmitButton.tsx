@@ -15,17 +15,23 @@ function SubmitButton({
   children,
   pending,
   className,
+  type = "submit",
+  onClick,
 }: {
   children: ReactNode;
   pending?: boolean;
   className?: string;
+  /** "button" with onClick for forms that submit programmatically. */
+  type?: "submit" | "button";
+  onClick?: () => void;
 }) {
   const status = useFormStatus();
   const busy = pending ?? status.pending;
 
   return (
     <button
-      type="submit"
+      type={type}
+      onClick={onClick}
       disabled={busy}
       aria-disabled={busy}
       className={cn(

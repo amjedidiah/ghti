@@ -4,7 +4,7 @@ export type ProgrammeLevel = Database["public"]["Enums"]["programme_level"];
 
 export type ProgrammeSummary = Pick<
   Database["public"]["Tables"]["programmes"]["Row"],
-  "slug" | "title" | "level" | "duration" | "description"
+  "id" | "slug" | "title" | "level" | "duration" | "description"
 >;
 
 export type Programme = ProgrammeSummary &

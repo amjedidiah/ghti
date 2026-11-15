@@ -128,14 +128,14 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 1.3. Apply
 
-- [ ] `terms` (intakes), `applications`, `documents` tables + RLS + pgTAP tests. Applicants read and write only their own application while it is `draft`; read-only after submission.
-- [ ] Private bucket `documents`; path `{owner_id}/{application_id}/{uuid}.{ext}`. PDF, JPG, PNG; max 5 MB. Storage policies: owners upload and read their own files; admins read all.
-- [ ] `FileDrop`: type and size checks, browser compression of phone photos, progress, remove.
-- [ ] Form fields reused from `cwl/components/FormFields.tsx` where possible.
-- [ ] **Single-page application form** in sections: programme and intake; personal details (full name, date of birth, gender, phone, email, address, state of origin, nationality, CRM branch/church; confirm against the client's paper form); education; referees / next of kin; documents (transcript required; ID and passport photo per client); data-protection consent; submit. "Save draft" button so applicants can return later.
-- [ ] `/apply/status`: read-only view of the submitted application and its live status (`StatusBadge`).
-- [ ] Emails (React Email + Resend): application submitted; decision made.
-- [ ] `/admissions` page: requirements, how to apply, key dates, "Start application".
+- [x] `terms` (intakes), `applications`, `documents` tables + RLS + pgTAP tests. Applicants read and write only their own application while it is `draft`; read-only after submission. _(Submission goes through `submit_application()`, which checks completeness in the database.)_
+- [x] Private bucket `documents`; path `{owner_id}/{application_id}/{uuid}.{ext}`. PDF, JPG, PNG; max 5 MB. Storage policies: owners upload and read their own files; admins read all.
+- [x] `FileDrop`: type and size checks, browser compression of phone photos, progress, remove. _(`DocumentUpload`: direct browser-to-Storage upload with progress; photos over 1 MB resized to 2000px JPEG.)_
+- [x] Form fields reused from `cwl/components/FormFields.tsx` where possible.
+- [x] **Single-page application form** in sections: programme and intake; personal details (full name, date of birth, gender, phone, email, address, state of origin, nationality, CRM branch/church; confirm against the client's paper form); education; referees / next of kin; documents (transcript required; ID and passport photo per client); data-protection consent; submit. "Save draft" button so applicants can return later. _(Field list and required documents are placeholders until client inputs #4 and #5.)_
+- [x] `/apply/status`: read-only view of the submitted application and its live status (`StatusBadge`).
+- [ ] Emails (React Email + Resend): application submitted; decision made. _(Blocked on Resend; see step 1.2. The status page shows every decision meanwhile.)_
+- [x] `/admissions` page: requirements, how to apply, key dates, "Start application". _(Steps and open intakes are live; requirements and key dates wait for client input #6.)_
 
 #### 1.4. Review
 
@@ -147,7 +147,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 - [ ] Public pages: `/about`, `/statement-of-faith` and `/contact` (phones as `tel:` links, addresses, Google Maps embed with no API key, "Get directions" link). Text lives in the code for now; admins can edit it from step 3.5.
 - [ ] `/privacy`: privacy notice (Nigeria Data Protection Act 2023).
-- [ ] Replace the fake seeded programmes in the cloud database with the client's real programme list.
+- [ ] Replace the placeholders in the cloud database: the fake seeded programmes (client input #7) and the placeholder intake "Second semester, 2026/2027" (client input #6).
 - [ ] Rate limiting on sign-up, login and applications (Supabase Auth settings + Vercel Firewall rule).
 - [ ] **Supabase keep-alive:** free projects pause after 7 days without activity. A daily Vercel Cron hit to a lightweight query prevents this.
 - [ ] **Backups:** the free tier has no downloadable backups. A weekly GitHub Action runs `pg_dump` (database) and copies the storage bucket to ministry-owned storage. With applicant records at stake, this is **not optional**.

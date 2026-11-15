@@ -16,7 +16,7 @@ export async function getPublishedProgrammes(): Promise<ProgrammeSummary[]> {
 
   const { data, error } = await createPublicClient()
     .from("programmes")
-    .select("slug, title, level, duration, description")
+    .select("id, slug, title, level, duration, description")
     .eq("status", "published")
     .order("level")
     .order("position")
@@ -34,7 +34,7 @@ export async function getPublishedProgramme(slug: string): Promise<Programme | n
 
   const { data, error } = await createPublicClient()
     .from("programmes")
-    .select("slug, title, level, duration, description, requirements")
+    .select("id, slug, title, level, duration, description, requirements")
     .eq("status", "published")
     .eq("slug", slug)
     .maybeSingle();

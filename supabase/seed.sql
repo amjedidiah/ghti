@@ -43,3 +43,8 @@ insert into public.programmes (slug, title, level, duration, description, requir
     'draft',
     2
   );
+
+-- An open intake (FAKE dates: real intakes and key dates come from the client, input #6).
+insert into public.terms (session, name, starts_on, ends_on, accepting_applications) values
+  ('2026/2027', 'Second semester', '2027-02-01', '2027-06-30', true),
+  ('2026/2027', 'First semester', '2026-09-14', '2027-01-29', false);

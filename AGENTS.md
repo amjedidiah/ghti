@@ -17,12 +17,13 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 ## Project Status
 
-Stage 1 🚲 Bicycle in progress. Steps 1.1 (CRM chrome, programmes) and 1.2 (accounts and roles) are done and live. Next: step 1.3 (apply). Custom SMTP (Resend) is deferred but must land before applications open in step 1.5 (see the plan).
+Stage 1 🚲 Bicycle in progress. Steps 1.1 (CRM chrome, programmes) and 1.2 (accounts and roles) are done and live. Step 1.3 (apply: terms, applications, documents, storage bucket, application form, status page) is built locally, not yet in the cloud. Next: step 1.4 (admin review). Custom SMTP (Resend) is deferred but must land before applications open in step 1.5 (see the plan).
 
 ### Supabase environments
 
 - **Local (current):** all development runs against the local Docker stack (`supabase start`). `.env.local` holds the local URL and keys from `supabase status`.
-- **Cloud:** project `ghti` (ref `htbaujxaorlblkixiixx`, region `eu-west-2` London, free tier), linked since step 1.1. It holds real data from step 1.5 on. **Never run `supabase db push`, `db reset --linked`, seeding or any other write against it without the user's say-so**; always `--dry-run` first. Seeded with the fake placeholder programmes for the client preview; replace them with the real list before applications open (step 1.5).
+- **Cloud:** project `ghti` (ref `htbaujxaorlblkixiixx`, region `eu-west-2` London, free tier), linked since step 1.1. It holds real data from step 1.5 on. **Never run `supabase db push`, `db reset --linked`, seeding or any other write against it without the user's say-so**; always `--dry-run` first. Seeded with fake placeholder programmes and one placeholder open intake ("Second semester, 2026/2027"); replace both with real data before applications open (step 1.5).
+- **Cloud email limits (until Resend):** Supabase's built-in mailer sends at most **2 auth emails an hour** for the whole project (sign-up, sign-in links, resets, invites). Do not test email flows against the cloud casually: each test email uses up real users' allowance. Test them locally (Mailpit at http://127.0.0.1:54324) instead.
 - **Vercel:** project `ghti` in the `amjedidiahs-projects` scope (Hobby), connected to GitHub: **every push to `main` deploys to production**, other branches get previews. Production URL: `https://ghti-nine.vercel.app` until the `ghti.crm-world.org.ng` subdomain is set up. `vercel.json` sets the Next.js preset and pins functions to `lhr1` (London, next to the database). Preview and production have `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; production also has `NEXT_PUBLIC_SITE_URL`. No secret key in Vercel yet. Deployment Protection is off (turned off for client review), so every preview URL is public: never deploy anything that exposes real personal data on a preview.
 
 ## Tech Stack
@@ -77,7 +78,10 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `lib/queries/`: server-only data access (`"use cache"` reads of public data with `cacheTag`; revalidate the tag when admins change the data)
 - `lib/site.ts`: site name, CRM nav and social links, contact details (null until the client supplies them)
 - `lib/auth/`: `rules.ts` (role homes, route guards, safe redirects; pure, tested), `session.ts` (`getCurrentUser`, `requireRole`), `actions.ts` (auth Server Actions)
-- `lib/validation/`: Zod schemas shared by client forms and Server Actions
+- `lib/validation/`: Zod schemas shared by client forms and Server Actions (`auth.ts`, `application.ts`)
+- `lib/applications/`: `actions.ts` (start, save, submit, record/remove documents), `mapping.ts` (row <-> form values; pure, tested)
+- `lib/files.ts` (upload rules, paths; pure, tested) and `lib/upload-browser.ts` (photo compression, direct-to-Storage upload with progress)
+- `components/applications/`: `ApplicationForm`, `DocumentUpload`
 - `components/forms/`: `Field`, `TextInput`, `PasswordInput`, `SubmitButton`, `FormMessage`, `useActionForm` (React Hook Form + `useActionState`)
 - `app/auth/confirm/`: landing route for every auth email link (`token_hash` + `verifyOtp`); templates in `supabase/templates/`
 - `scripts/create-admin.ts`: `bun run admin:create --email … --name …` invites or promotes an admin
