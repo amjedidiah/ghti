@@ -139,9 +139,9 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 1.4. Review
 
-- [ ] `/admin/applications`: list with status filter and search by name.
-- [ ] `/admin/applications/[id]`: biodata and documents side by side; documents open through signed URLs that expire after 10 minutes; each admin view of a document is logged.
-- [ ] Admit or reject with a note (status only; the admitted applicant becomes a student in step 2.2).
+- [x] `/admin/applications`: list with status filter and search by name. _(Name search runs in the browser so names never reach URLs or logs; status filters are in the URL.)_
+- [x] `/admin/applications/[id]`: biodata and documents side by side; documents open through signed URLs that expire after 10 minutes; each admin view of a document is logged. _(`document_views` table; documents open only through `/admin/documents/[id]`.)_
+- [x] Admit or reject with a note (status only; the admitted applicant becomes a student in step 2.2). _(`start_review()` and `decide_application()`; a rejection needs a note, which the applicant sees.)_
 
 #### 1.5. Ready for real applicants
 

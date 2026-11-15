@@ -165,6 +165,42 @@ export type Database = {
           },
         ]
       }
+      document_views: {
+        Row: {
+          document_id: string
+          id: number
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          document_id: string
+          id?: never
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Update: {
+          document_id?: string
+          id?: never
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_views_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_views_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           application_id: string | null
@@ -327,7 +363,95 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      decide_application: {
+        Args: {
+          p_application_id: string
+          p_decision: Database["public"]["Enums"]["application_status"]
+          p_note: string
+        }
+        Returns: {
+          address: string | null
+          applicant_id: string
+          consent_given_at: string | null
+          created_at: string
+          crm_branch: string | null
+          date_of_birth: string | null
+          decided_at: string | null
+          decision_note: string | null
+          education: Json
+          email: string | null
+          first_name: string | null
+          gender: string | null
+          id: string
+          intake_term_id: string | null
+          nationality: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
+          other_names: string | null
+          phone: string | null
+          programme_id: string | null
+          referee_email: string | null
+          referee_name: string | null
+          referee_phone: string | null
+          referee_position: string | null
+          reviewed_by: string | null
+          state_of_origin: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          submitted_at: string | null
+          surname: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_admin: { Args: never; Returns: boolean }
+      start_review: {
+        Args: { p_application_id: string }
+        Returns: {
+          address: string | null
+          applicant_id: string
+          consent_given_at: string | null
+          created_at: string
+          crm_branch: string | null
+          date_of_birth: string | null
+          decided_at: string | null
+          decision_note: string | null
+          education: Json
+          email: string | null
+          first_name: string | null
+          gender: string | null
+          id: string
+          intake_term_id: string | null
+          nationality: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
+          other_names: string | null
+          phone: string | null
+          programme_id: string | null
+          referee_email: string | null
+          referee_name: string | null
+          referee_phone: string | null
+          referee_position: string | null
+          reviewed_by: string | null
+          state_of_origin: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          submitted_at: string | null
+          surname: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       submit_application: {
         Args: { p_application_id: string }
         Returns: {

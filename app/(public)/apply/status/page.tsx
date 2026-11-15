@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import SignOutButton from "@/components/auth/SignOutButton";
 import PageHeader from "@/components/shared/PageHeader";
 import StatusBadge from "@/components/shared/StatusBadge";
+import { applicantName, DOCUMENT_LABELS } from "@/lib/applications/labels";
 import { requireRole } from "@/lib/auth/session";
 import { formatBytes } from "@/lib/files";
 import { LEVEL_LABELS } from "@/lib/programmes";
@@ -12,13 +13,6 @@ import { getMyApplication, type MyApplication } from "@/lib/queries/applications
 import { formatPhone } from "@/lib/validation/application";
 
 export const metadata: Metadata = { title: "Application status", robots: { index: false } };
-
-const DOCUMENT_LABELS: Record<string, string> = {
-  transcript: "Transcript or result",
-  id_card: "Means of identification",
-  photo: "Passport photograph",
-  other: "Other document",
-};
 
 const NEXT_STEPS: Record<MyApplication["status"], string> = {
   draft: "",
@@ -47,9 +41,7 @@ async function StatusContent() {
   const application = await getMyApplication(user.id);
   if (!application || application.status === "draft") redirect("/apply");
 
-  const name = [application.first_name, application.other_names, application.surname]
-    .filter(Boolean)
-    .join(" ");
+  const name = applicantName(application);
 
   return (
     <>
@@ -112,9 +104,7 @@ async function StatusContent() {
           <ul className="mt-4 divide-y divide-border text-sm">
             {application.documents.map((doc) => (
               <li key={doc.id} className="flex flex-wrap justify-between gap-2 py-3">
-                <span className="font-medium text-primary">
-                  {DOCUMENT_LABELS[doc.kind] ?? doc.kind}
-                </span>
+                <span className="font-medium text-primary">{DOCUMENT_LABELS[doc.kind]}</span>
                 <span className="text-secondary">
                   {doc.file_name} · {formatBytes(doc.size_bytes)}
                 </span>

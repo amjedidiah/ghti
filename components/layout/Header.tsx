@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 
+import { AccountLink, SignInButton } from "@/components/layout/AccountLink";
 import MobileMenu from "@/components/layout/MobileMenu";
-import { crmNavLinks, ghtiNavLinks, signInLink, site } from "@/lib/site";
+import { crmNavLinks, ghtiNavLinks, site } from "@/lib/site";
 
 import crmLogo from "@/public/brand/crm-logo.png";
 
@@ -59,13 +61,9 @@ function Header() {
                 </li>
               ))}
             </ul>
-            <Link
-              href={signInLink.href}
-              className="rounded-md bg-accent px-3 py-1.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-soft lg:ml-2 lg:px-4 lg:py-2"
-            >
-              <span className="lg:hidden">Sign in</span>
-              <span className="hidden lg:inline">{signInLink.name}</span>
-            </Link>
+            <Suspense fallback={<SignInButton />}>
+              <AccountLink />
+            </Suspense>
           </nav>
         </div>
       </div>

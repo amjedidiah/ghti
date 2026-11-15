@@ -17,7 +17,7 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 ## Project Status
 
-Stage 1 🚲 Bicycle in progress. Steps 1.1 (CRM chrome, programmes) and 1.2 (accounts and roles) are done and live. Step 1.3 (apply: terms, applications, documents, storage bucket, application form, status page) is built locally, not yet in the cloud. Next: step 1.4 (admin review). Custom SMTP (Resend) is deferred but must land before applications open in step 1.5 (see the plan).
+Stage 1 🚲 Bicycle in progress. Steps 1.1 to 1.3 are done and live (CRM chrome, programmes, accounts and roles, online applications). Step 1.4 (admin review) is built locally. Next: step 1.5 (ready for real applicants). Custom SMTP (Resend) is deferred but must land before applications open in step 1.5 (see the plan).
 
 ### Supabase environments
 
@@ -82,6 +82,8 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `lib/applications/`: `actions.ts` (start, save, submit, record/remove documents), `mapping.ts` (row <-> form values; pure, tested)
 - `lib/files.ts` (upload rules, paths; pure, tested) and `lib/upload-browser.ts` (photo compression, direct-to-Storage upload with progress)
 - `components/applications/`: `ApplicationForm`, `DocumentUpload`
+- `components/admin/`: `ApplicationsList` (browser-side name filter), `DocumentViewer`, `ReviewPanel`; `lib/admin/actions.ts` and `lib/queries/admin-applications.ts`
+- `app/(public)/admin/documents/[id]/route.ts`: the only way to open an applicant document. Logs the view in `document_views`, then redirects to a 10-minute signed URL
 - `components/forms/`: `Field`, `TextInput`, `PasswordInput`, `SubmitButton`, `FormMessage`, `useActionForm` (React Hook Form + `useActionState`)
 - `app/auth/confirm/`: landing route for every auth email link (`token_hash` + `verifyOtp`); templates in `supabase/templates/`
 - `scripts/create-admin.ts`: `bun run admin:create --email … --name …` invites or promotes an admin
