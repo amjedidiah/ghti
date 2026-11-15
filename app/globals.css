@@ -19,6 +19,10 @@
   --crm-cream: #fefbf6;
   --crm-sand: #f5efe4;
   --crm-stone: #e7dfd1;
+  --red-700: #b42318;
+  --red-50: #fef3f2;
+  --green-700: #067647;
+  --green-50: #ecfdf3;
   --white: #ffffff;
 
   /* Semantic tokens (light) */
@@ -37,6 +41,10 @@
   /* Gold that passes WCAG AA as text on cream and white. */
   --accent-strong: var(--crm-gold-deep);
   --border: var(--crm-stone);
+  --danger: var(--red-700);
+  --danger-soft: var(--red-50);
+  --success: var(--green-700);
+  --success-soft: var(--green-50);
   --focus: var(--crm-gold);
 }
 
@@ -56,6 +64,10 @@
   --color-accent-strong: var(--accent-strong);
   --color-border: var(--border);
   --color-focus: var(--focus);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;

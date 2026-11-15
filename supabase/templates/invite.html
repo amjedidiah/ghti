@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>You have been invited to GHTI</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background: #fefbf6;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #172a46;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background: #fefbf6"
+    >
+      <tr>
+        <td align="center" style="padding: 24px 12px">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              max-width: 520px;
+              background: #ffffff;
+              border: 1px solid #e7dfd1;
+              border-radius: 12px;
+              overflow: hidden;
+            "
+          >
+            <tr>
+              <td
+                style="
+                  background: #1a365d;
+                  padding: 20px 28px;
+                  color: #ffffff;
+                  font-family: Georgia, &quot;Times New Roman&quot;, serif;
+                  font-size: 24px;
+                  font-weight: bold;
+                "
+              >
+                GHTI
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 28px">
+                <h1
+                  style="
+                    margin: 0 0 12px;
+                    font-family: Georgia, &quot;Times New Roman&quot;, serif;
+                    font-size: 22px;
+                    color: #172a46;
+                  "
+                >
+                  You have been invited to GHTI
+                </h1>
+                <p style="margin: 0 0 24px; font-size: 16px; line-height: 1.5; color: #4a5568">
+                  You have been given a staff account on the GHTI portal. Set your password to
+                  finish setting it up. The link expires in one hour.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="border-radius: 6px; background: #d69e2e">
+                      <a
+                        href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&amp;type=invite&amp;next=/reset-password"
+                        style="
+                          display: inline-block;
+                          padding: 14px 24px;
+                          font-size: 16px;
+                          font-weight: bold;
+                          color: #102542;
+                          text-decoration: none;
+                        "
+                        >Set my password</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 24px 0 0; font-size: 13px; line-height: 1.5; color: #4a5568">
+                  If you were not expecting this invitation, you can ignore this email.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="
+                  padding: 16px 28px;
+                  border-top: 1px solid #e7dfd1;
+                  font-size: 12px;
+                  color: #4a5568;
+                "
+              >
+                GHTI, a Charismatic Renewal Ministries institution. God Bless You.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

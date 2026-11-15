@@ -12,17 +12,18 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 - `docs/development_plan.md`: delivery stages (Bicycle → Tricycle → Car), data model, routes per portal, open questions, trade-offs. **Read it before starting any task**, and tick its checkboxes as work is completed.
 - `docs/client_proposal.md`: client-facing scope summary. Do not change its scope without the user's say-so.
+- `docs/client_inputs.md`: living list of what we need from the client, by stage. **Whenever a task depends on information only GHTI can give (content, names, decisions, DNS), add a row there** and use a clearly marked placeholder in code until it arrives.
 - If code and the plan disagree, ask. Do not silently diverge from the plan.
 
 ## Project Status
 
-Stage 1 🚲 Bicycle in progress. Step 1.1 built locally (CRM header and footer, brand tokens, `programmes` table with RLS and pgTAP tests, home and programme pages); its preview deploy is pending. Next: step 1.2 (accounts and roles). Work in vertical slices: each table ships with its policies and tests in the stage that first needs it, never ahead of time. Update this file whenever conventions change.
+Stage 1 🚲 Bicycle in progress. Steps 1.1 (CRM chrome, programmes) and 1.2 (accounts and roles) are done and live. Next: step 1.3 (apply). Custom SMTP (Resend) is deferred but must land before applications open in step 1.5 (see the plan).
 
 ### Supabase environments
 
 - **Local (current):** all development runs against the local Docker stack (`supabase start`). `.env.local` holds the local URL and keys from `supabase status`.
 - **Cloud:** project `ghti` (ref `htbaujxaorlblkixiixx`, region `eu-west-2` London, free tier), linked since step 1.1. It holds real data from step 1.5 on. **Never run `supabase db push`, `db reset --linked`, seeding or any other write against it without the user's say-so**; always `--dry-run` first. Seeded with the fake placeholder programmes for the client preview; replace them with the real list before applications open (step 1.5).
-- **Vercel:** project `ghti` in the `amjedidiahs-projects` scope (Hobby), deployed with the CLI (`vercel deploy`; not yet connected to GitHub). `vercel.json` sets the Next.js preset and pins functions to `lhr1` (London, next to the database). Preview and production have `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` only. Preview URLs sit behind Vercel Deployment Protection.
+- **Vercel:** project `ghti` in the `amjedidiahs-projects` scope (Hobby), connected to GitHub: **every push to `main` deploys to production**, other branches get previews. Production URL: `https://ghti-nine.vercel.app` until the `ghti.crm-world.org.ng` subdomain is set up. `vercel.json` sets the Next.js preset and pins functions to `lhr1` (London, next to the database). Preview and production have `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; production also has `NEXT_PUBLIC_SITE_URL`. No secret key in Vercel yet. Deployment Protection is off (turned off for client review), so every preview URL is public: never deploy anything that exposes real personal data on a preview.
 
 ## Tech Stack
 
@@ -75,6 +76,12 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `lib/supabase/`: `server.ts` (Server Components/Actions), `client.ts` (Client Components), `admin.ts` (secret key, server-only, bypasses RLS), `proxy.ts` (`updateSession` used by root `proxy.ts`), `public.ts` (anonymous, cookie-less client for public data; the only client allowed inside `"use cache"`), `env.ts` (env var access), `database.types.ts` (generated, never hand-edited)
 - `lib/queries/`: server-only data access (`"use cache"` reads of public data with `cacheTag`; revalidate the tag when admins change the data)
 - `lib/site.ts`: site name, CRM nav and social links, contact details (null until the client supplies them)
+- `lib/auth/`: `rules.ts` (role homes, route guards, safe redirects; pure, tested), `session.ts` (`getCurrentUser`, `requireRole`), `actions.ts` (auth Server Actions)
+- `lib/validation/`: Zod schemas shared by client forms and Server Actions
+- `components/forms/`: `Field`, `TextInput`, `PasswordInput`, `SubmitButton`, `FormMessage`, `useActionForm` (React Hook Form + `useActionState`)
+- `app/auth/confirm/`: landing route for every auth email link (`token_hash` + `verifyOtp`); templates in `supabase/templates/`
+- `scripts/create-admin.ts`: `bun run admin:create --email … --name …` invites or promotes an admin
+- `scripts/push-auth-config.ts`: `bun run auth:push --site-url <url> [--apply]` sets the cloud project's auth settings (site URL, redirect allow list, password length) and, once custom SMTP exists, the branded email templates. Dry run by default; rerun when the domain changes
 - `lib/links.ts`: YouTube and Google Drive URL parsers
 - `lib/grades.ts`: score → letter → grade point, GPA and CGPA
 - `supabase/migrations/`, `supabase/seed.sql`, `supabase/tests/`
@@ -100,6 +107,9 @@ An admitted applicant becomes a `student` on the same account. Staff accounts ar
 - **Access control lives in the database.** Hiding a button is never the only check. Every Server Action re-checks the user's role on the server.
 - **The Supabase secret key is server-only.** Use it only in `lib/supabase/admin.ts` (which imports `server-only`), and only where RLS genuinely can't apply (e.g. cron jobs). Never in client components, never in `NEXT_PUBLIC_*` variables.
 - **Schema changes only through migration files** in `supabase/migrations/`. Never edit the schema in the Supabase dashboard. Regenerate types after each migration.
+- **Deploy order:** Supabase migrations are not applied by Vercel. Before pushing code that needs a new migration to `main`, push the migration to the cloud project (`supabase db push --dry-run`, then `supabase db push`, with the user's say-so). Code first means a broken production site.
+- **Grants are explicit.** On this Supabase version new tables give `anon`, `authenticated` and `service_role` no privileges. Every table migration revokes everything, then grants only what its policies need, `service_role` included.
+- **Role checks:** `public.is_admin()` and `public.current_app_role()` (SECURITY DEFINER) in policies; `requireRole()` from `@/lib/auth/session` at the top of every protected page and Server Action. The proxy (`lib/auth/rules.ts`) only steers navigation. Never read a role from user metadata.
 - **Grades:** students see `published` grades only. Lecturers cannot edit `published` grades. Every change to a published grade requires a reason and is written to `grade_changes` by a database trigger. Never bypass or disable that trigger.
 - **Personal data (Nigeria Data Protection Act 2023):** never log biodata, documents or grades; never put personal data in URLs or analytics; applicant documents are opened only through signed URLs that expire in 10 minutes.
 - **Seed data is fake.** Never commit real applicant or student data.

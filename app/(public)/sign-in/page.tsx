@@ -1,17 +1,31 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 
-import ComingSoon from "@/components/shared/ComingSoon";
+import AuthCard from "@/components/auth/AuthCard";
+import SignInForm from "@/components/auth/SignInForm";
 
 export const metadata: Metadata = { title: "Sign in", robots: { index: false } };
 
 function SignInPage() {
   return (
-    <ComingSoon title="Portal sign-in">
-      <p>
-        Applicants, students, lecturers and staff will sign in here to reach their part of the
-        portal.
-      </p>
-    </ComingSoon>
+    <AuthCard
+      title="Sign in"
+      description="Applicants, students, lecturers and staff all sign in here."
+      footer={
+        <>
+          New applicant?{" "}
+          <Link href="/apply/register" className="font-semibold text-accent-strong hover:underline">
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      {/* The form reads ?next= and ?error= from the URL, which is request-time data. */}
+      <Suspense>
+        <SignInForm />
+      </Suspense>
+    </AuthCard>
   );
 }
 

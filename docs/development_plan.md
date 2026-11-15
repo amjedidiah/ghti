@@ -59,13 +59,7 @@ These change scope. Defaults below are what the plan assumes until answered. **N
 
 ### Content needed from the client
 
-- [ ] **Stage 1:** welcome banner text and images, vision, history, Statement of Faith.
-- [ ] **Stage 1:** programme list: level, title, duration, entry requirements.
-- [ ] **Stage 1:** office phone numbers, email, campus address(es), map location.
-- [ ] **Stage 1:** application form fields and admission requirements.
-- [ ] **Stage 1:** names and emails of the first admins.
-- [ ] **Stage 2:** courses per programme, year and semester; grading scale.
-- [ ] **Stage 3:** lecture schedules (PDFs or Docs, to be uploaded to the ministry Drive); award names; names and emails of the first lecturers.
+Tracked in [client_inputs.md](client_inputs.md): a living list of everything we need from GHTI, grouped by the stage that needs it. Add to it whenever development finds a new need.
 
 ## Delivery Approach: Bicycle → Tricycle → Car
 
@@ -122,12 +116,15 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 1.2. Accounts and roles
 
-- [ ] `profiles` table, created by trigger on sign-up with role `applicant`; RLS + pgTAP tests (own profile only; only admins change roles).
-- [ ] Supabase Auth with **email + password** and **magic link**; email confirmation on sign-up.
-- [ ] Custom SMTP (Resend). Supabase's built-in mailer is rate-limited and not meant for production.
-- [ ] Sign-up, sign-in, sign-out and password reset pages.
-- [ ] `proxy.ts` guards `/apply` and `/admin` by role (`/portal` and `/teach` follow in Stages 2 and 3).
-- [ ] First admins created by a one-off script (no staff invitation screen yet; that arrives in step 3.1).
+- [x] `profiles` table, created by trigger on sign-up with role `applicant`; RLS + pgTAP tests (own profile only; only admins change roles). _(Also admin write access to `programmes`.)_
+- [x] Supabase Auth with **email + password** and **magic link**; email confirmation on sign-up. _(Cloud settings applied with `bun run auth:push`; branded templates wait for Resend.)_
+- [ ] Custom SMTP (Resend). Supabase's built-in mailer is rate-limited and not meant for production. **Deferred; must be done before step 1.5 (applications open).** Until then, in the cloud:
+  - The built-in mailer sends at most **2 emails an hour** for the whole project.
+  - Supabase does not allow custom email templates on the free tier without custom SMTP, so cloud emails use Supabase's default wording and links. Those links (`?code=`) only sign people in when opened in the same browser that asked for them; confirmation still verifies the email either way.
+  - To finish: create a Resend account, verify the sending domain (client input #12), add Resend as SMTP in Supabase, then run `bun run auth:push --site-url <production URL> --apply` to upload the branded templates.
+- [x] Sign-up, sign-in, sign-out and password reset pages. Sign-up lives at `/apply/register` (applicants only).
+- [x] `proxy.ts` guards `/apply` and `/admin` by role (`/portal` and `/teach` follow in Stages 2 and 3).
+- [x] First admins created by a one-off script (no staff invitation screen yet; that arrives in step 3.1). _(`bun run admin:create`; real admins once the client sends names and emails.)_
 
 #### 1.3. Apply
 
@@ -154,7 +151,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 - [ ] Rate limiting on sign-up, login and applications (Supabase Auth settings + Vercel Firewall rule).
 - [ ] **Supabase keep-alive:** free projects pause after 7 days without activity. A daily Vercel Cron hit to a lightweight query prevents this.
 - [ ] **Backups:** the free tier has no downloadable backups. A weekly GitHub Action runs `pg_dump` (database) and copies the storage bucket to ministry-owned storage. With applicant records at stake, this is **not optional**.
-- [ ] DNS: point the chosen subdomain at Vercel; production environment variables.
+- [ ] DNS: point the chosen subdomain at Vercel; production environment variables. When the domain changes from `ghti-nine.vercel.app`: update `NEXT_PUBLIC_SITE_URL` in Vercel and rerun `bun run auth:push --site-url https://<new domain> --apply`.
 - [ ] **Quality check:** walk the whole applicant and admin journey at 375px.
 - [ ] **Milestone: applications open** for a real (pilot) intake.
 

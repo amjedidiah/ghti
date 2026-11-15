@@ -12,7 +12,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "bun test",
     "db:types": "supabase gen types typescript --local > lib/supabase/database.types.ts",
-    "check": "bun run lint && bun run format:check && bun run typecheck && bun run test && bun run build"
+    "check": "bun run lint && bun run format:check && bun run typecheck && bun run test && bun run build",
+    "admin:create": "bun scripts/create-admin.ts",
+    "auth:push": "bun scripts/push-auth-config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.6",

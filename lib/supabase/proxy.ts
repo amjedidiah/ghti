@@ -6,7 +6,8 @@ import { getSupabasePublishableKey, getSupabaseUrl } from "@/lib/supabase/env";
 
 /**
  * Refresh the Supabase session cookie on every request and return the
- * response to send, plus the user's JWT claims (null when signed out).
+ * response to send, the request-scoped client, and the user's JWT claims
+ * (null when signed out).
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -34,5 +35,5 @@ export async function updateSession(request: NextRequest) {
   // the JWT and triggers the refresh that writes the cookies above.
   const { data } = await supabase.auth.getClaims();
 
-  return { response, claims: data?.claims ?? null };
+  return { response, supabase, claims: data?.claims ?? null };
 }

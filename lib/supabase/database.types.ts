@@ -34,6 +34,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          id: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       programmes: {
         Row: {
           created_at: string
@@ -81,9 +108,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      current_app_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
+      app_role: "applicant" | "student" | "lecturer" | "admin"
       programme_level: "certificate" | "diploma" | "degree"
       programme_status: "draft" | "published" | "archived"
     }
@@ -216,6 +248,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      app_role: ["applicant", "student", "lecturer", "admin"],
       programme_level: ["certificate", "diploma", "degree"],
       programme_status: ["draft", "published", "archived"],
     },

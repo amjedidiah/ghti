@@ -1,0 +1,45 @@
+# Client Inputs
+
+Everything we need from GHTI to keep building, in the order we need it. This is a living list: add a row whenever development finds a new need, and mark rows **Received** (with the date) as answers arrive. Open questions refer to the numbers in [the development plan](development_plan.md#open-questions).
+
+**Status key:** Waiting · Received (date) · Not needed
+
+## Now: Stage 1 🚲 Apply online
+
+| #   | What we need                                                                                                                        | Needed for                                              | Status  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ------- |
+| 1   | **Look-and-feel approval** on the preview link (https://ghti-nine.vercel.app)                                                       | Step 1.1 milestone                                      | Waiting |
+| 2   | GHTI's **full name**, and whether there is more of the spec than section 2 (open question 1)                                        | Header, footer, emails, page titles                     | Waiting |
+| 3   | **Fees:** is there an application fee or tuition to pay online? (open question 2)                                                   | Application flow; plan assumes no online payments in v1 | Waiting |
+| 4   | **Application form fields:** the current paper form, if there is one (open question 4)                                              | Step 1.3 application form                               | Waiting |
+| 5   | **Documents to upload:** transcript is required; are ID card and passport photo required, optional or not needed?                   | Step 1.3 document upload                                | Waiting |
+| 6   | **Admission requirements and key dates** (intake, application deadline)                                                             | Step 1.3 `/admissions` page                             | Waiting |
+| 7   | **Programme list:** level, title, duration, entry requirements, description. Replaces the fake sample programmes now on the preview | Step 1.5, before applications open                      | Waiting |
+| 8   | **Names and emails of the first admins** (registrar, faculty)                                                                       | Step 1.4 application review; `bun run admin:create`     | Waiting |
+| 9   | **Welcome banner** text and images; **vision**, **history**, **Statement of Faith**                                                 | Step 1.5 home, About and Statement of Faith pages       | Waiting |
+| 10  | **Office phone numbers, email, campus address(es), map location**                                                                   | Step 1.5 contact page and footer                        | Waiting |
+| 11  | **Subdomain** confirmed as `ghti.crm-world.org.ng` (open question 8), and **who manages DNS** for `crm-world.org.ng`                | Step 1.5 go-live; also the email sending domain (#12)   | Waiting |
+| 12  | **Email sending address** (e.g. `admissions@ghti.crm-world.org.ng`) and DNS records added for Resend (we supply the records)        | Real emails: confirmations, sign-in links, decisions    | Waiting |
+| 13  | **Privacy notice details:** who is the data controller, and a contact for data requests (Nigeria Data Protection Act 2023)          | Step 1.5 `/privacy` page and consent wording            | Waiting |
+| 14  | **Year-one numbers and launch date** (open question 9)                                                                              | Capacity planning; free-tier limits                     | Waiting |
+| 15  | **GHTI logo** (optional): if GHTI has its own mark; otherwise we keep the CRM logo and favicon                                      | Header row, favicon, certificates later                 | Waiting |
+
+## By week 5: Stage 2 🛺 Records
+
+| #   | What we need                                                                                                        | Needed for                                    | Status  |
+| --- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------- |
+| 16  | **Courses** for each programme, by year and semester (code, title, credit units)                                    | Step 2.1 academic structure, programme pages  | Waiting |
+| 17  | **Grading scale** (e.g. 5-point CGPA), and whether scores split into continuous assessment + exam (open question 3) | Step 2.3 grades and GPA                       | Waiting |
+| 18  | **Matric number format** (e.g. `GHTI/2026/DIP/001`)                                                                 | Step 2.2 admitting applicants as students     | Waiting |
+| 19  | **How long to keep documents of rejected applicants** before they are deleted                                       | Step 2.6 scheduled clean-up (data protection) | Waiting |
+
+## By week 9: Stage 3 🚗 Full system
+
+| #   | What we need                                                                                                       | Needed for                           | Status  |
+| --- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------ | ------- |
+| 20  | **Who enters grades:** lecturers, registrar, or both (open question 5)                                             | Step 3.3 grade workflow              | Waiting |
+| 21  | **Teaching mode:** in person, online or both (open question 6)                                                     | Step 3.2 course content              | Waiting |
+| 22  | **Certificates:** printed by the school, or downloaded from the portal (open question 7); award names; signatories | Step 3.4 awards and verification     | Waiting |
+| 23  | **Lecture schedules** (PDFs or Docs)                                                                               | Step 3.2 schedules                   | Waiting |
+| 24  | **Names and emails of the first lecturers**                                                                        | Step 3.1 staff invitations           | Waiting |
+| 25  | A **ministry-owned Google Drive folder** and **YouTube channel** (owned by the institution, not a person)          | Step 3.2 course materials and videos | Waiting |
