@@ -10,13 +10,13 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 ## Source of Truth
 
-- `docs/development_plan.md`: phases, data model, routes per portal, open questions, trade-offs. **Read it before starting any task**, and tick its checkboxes as work is completed.
+- `docs/development_plan.md`: delivery stages (Bicycle → Tricycle → Car), data model, routes per portal, open questions, trade-offs. **Read it before starting any task**, and tick its checkboxes as work is completed.
 - `docs/client_proposal.md`: client-facing scope summary. Do not change its scope without the user's say-so.
 - If code and the plan disagree, ask. Do not silently diverge from the plan.
 
 ## Project Status
 
-Scaffolded (Phase 1.6): Next.js app, tooling, Supabase clients and a session-refresh `proxy.ts`. No migrations or UI yet. Next up: Phase 1.2 migrations, then 1.3 RLS + pgTAP tests, before any UI. Update this file whenever conventions change.
+Stage 0 (Setup) done: Next.js app, tooling, Supabase clients and a session-refresh `proxy.ts`. No migrations or UI yet. Next up: Stage 1 🚲 Bicycle, step 1.1 (CRM header and footer, `programmes` table with RLS and pgTAP tests, programme pages, first preview deploy). Work in vertical slices: each table ships with its policies and tests in the stage that first needs it, never ahead of time. Update this file whenever conventions change.
 
 ### Supabase environments
 

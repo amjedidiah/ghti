@@ -7,12 +7,11 @@ import { updateSession } from "@/lib/supabase/proxy";
  *
  * Today: refreshes the Supabase session cookie.
  *
- * TODO (Phase 1.4, once `profiles.role` exists): guard the portals by role and
- * redirect to sign-in when signed out.
- *   /apply  -> applicant
- *   /portal -> student
- *   /teach  -> lecturer
- *   /admin  -> admin
+ * TODO: guard the portals by role and redirect to sign-in when signed out.
+ *   /apply  -> applicant  (Stage 1, step 1.2)
+ *   /admin  -> admin      (Stage 1, step 1.2)
+ *   /portal -> student    (Stage 2, step 2.2)
+ *   /teach  -> lecturer   (Stage 3, step 3.1)
  * This is a UX convenience only. RLS and the per-action role checks in Server
  * Actions remain the real access control.
  */
