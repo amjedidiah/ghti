@@ -16,12 +16,13 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 ## Project Status
 
-Stage 0 (Setup) done: Next.js app, tooling, Supabase clients and a session-refresh `proxy.ts`. No migrations or UI yet. Next up: Stage 1 🚲 Bicycle, step 1.1 (CRM header and footer, `programmes` table with RLS and pgTAP tests, programme pages, first preview deploy). Work in vertical slices: each table ships with its policies and tests in the stage that first needs it, never ahead of time. Update this file whenever conventions change.
+Stage 1 🚲 Bicycle in progress. Step 1.1 built locally (CRM header and footer, brand tokens, `programmes` table with RLS and pgTAP tests, home and programme pages); its preview deploy is pending. Next: step 1.2 (accounts and roles). Work in vertical slices: each table ships with its policies and tests in the stage that first needs it, never ahead of time. Update this file whenever conventions change.
 
 ### Supabase environments
 
 - **Local (current):** all development runs against the local Docker stack (`supabase start`). `.env.local` holds the local URL and keys from `supabase status`.
-- **Cloud:** project `ghti` (ref `htbaujxaorlblkixiixx`, region `eu-west-2` London, free tier). The repo is **not linked** to it yet. Do not run `supabase link`, `supabase db push` or anything else against the cloud project without the user's say-so.
+- **Cloud:** project `ghti` (ref `htbaujxaorlblkixiixx`, region `eu-west-2` London, free tier), linked since step 1.1. It holds real data from step 1.5 on. **Never run `supabase db push`, `db reset --linked`, seeding or any other write against it without the user's say-so**; always `--dry-run` first. Seeded with the fake placeholder programmes for the client preview; replace them with the real list before applications open (step 1.5).
+- **Vercel:** project `ghti` in the `amjedidiahs-projects` scope (Hobby), deployed with the CLI (`vercel deploy`; not yet connected to GitHub). `vercel.json` sets the Next.js preset and pins functions to `lhr1` (London, next to the database). Preview and production have `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` only. Preview URLs sit behind Vercel Deployment Protection.
 
 ## Tech Stack
 
@@ -57,11 +58,11 @@ supabase migration new <name>   # New migration file
 supabase test db       # pgTAP tests for RLS policies
 ```
 
-Run `bun run check` and `supabase test db` before calling a task done.
+Run `bun run check` and `supabase test db` before calling a task done. `bun run build` prerenders pages that read the database, so `supabase start` must be running locally (Vercel builds read the cloud project).
 
 ## Layout
 
-Single Next.js app at the repository root (no separate backend). Exists today: `app/` (placeholder layout and page), `lib/utils.ts`, `lib/supabase/*`, `proxy.ts`, `supabase/config.toml`. The rest is planned.
+Single Next.js app at the repository root (no separate backend). Exists today: `app/(public)/` (home, academics, "Coming soon" admissions/contact/sign-in), `components/layout/`, `components/programmes/`, `components/shared/`, `lib/`, `proxy.ts`, `supabase/` (one migration, seed, tests). The rest is planned.
 
 - `app/(public)/`: website: `/`, `/about`, `/statement-of-faith`, `/academics`, `/academics/[slug]`, `/admissions`, `/contact`, `/verify/[id]`, `/privacy`
 - `app/apply/`: admissions (applicant role)
@@ -71,7 +72,9 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `app/materials/[id]/`, `app/schedules/[id]/`: access-checked redirects to Google Drive
 - `components/layout/`: shared CRM `Header` and `Footer`
 - `components/shared/`: cross-portal components (`DataTable`, `StatusBadge`, `StepForm`, `FileDrop`, …)
-- `lib/supabase/`: `server.ts` (Server Components/Actions), `client.ts` (Client Components), `admin.ts` (secret key, server-only, bypasses RLS), `proxy.ts` (`updateSession` used by root `proxy.ts`), `env.ts` (env var access), `database.types.ts` (generated, never hand-edited)
+- `lib/supabase/`: `server.ts` (Server Components/Actions), `client.ts` (Client Components), `admin.ts` (secret key, server-only, bypasses RLS), `proxy.ts` (`updateSession` used by root `proxy.ts`), `public.ts` (anonymous, cookie-less client for public data; the only client allowed inside `"use cache"`), `env.ts` (env var access), `database.types.ts` (generated, never hand-edited)
+- `lib/queries/`: server-only data access (`"use cache"` reads of public data with `cacheTag`; revalidate the tag when admins change the data)
+- `lib/site.ts`: site name, CRM nav and social links, contact details (null until the client supplies them)
 - `lib/links.ts`: YouTube and Google Drive URL parsers
 - `lib/grades.ts`: score → letter → grade point, GPA and CGPA
 - `supabase/migrations/`, `supabase/seed.sql`, `supabase/tests/`
@@ -142,3 +145,13 @@ Keep `.env.example` up to date. For local development, copy it to `.env.local` a
 
 - Commit or push only when the user says so.
 - No AI attribution in commits or PRs: no `Co-Authored-By` trailers, no "Generated with" lines.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

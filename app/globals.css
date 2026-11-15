@@ -1,1 +1,83 @@
 @import "tailwindcss";
+
+/*
+ * Brand palette (CRM, as on protection.crm-world.org.ng) and semantic tokens.
+ * Components use the semantic utilities only (bg-bg, bg-card, text-primary,
+ * text-secondary, bg-brand, text-on-brand, bg-accent, text-accent-strong,
+ * border-border, bg-muted), never raw palette values, so a dark theme can be
+ * added later by redefining the semantic variables.
+ */
+:root {
+  /* Palette */
+  --crm-navy: #1a365d;
+  --crm-navy-deep: #102542;
+  --crm-ink: #172a46;
+  --crm-slate: #4a5568;
+  --crm-gold: #d69e2e;
+  --crm-gold-light: #f6e05e;
+  --crm-gold-deep: #8a5a12;
+  --crm-cream: #fefbf6;
+  --crm-sand: #f5efe4;
+  --crm-stone: #e7dfd1;
+  --white: #ffffff;
+
+  /* Semantic tokens (light) */
+  --bg: var(--crm-cream);
+  --card: var(--white);
+  --muted: var(--crm-sand);
+  --text-primary: var(--crm-ink);
+  --text-secondary: var(--crm-slate);
+  --brand: var(--crm-navy);
+  --brand-deep: var(--crm-navy-deep);
+  --on-brand: var(--white);
+  --on-brand-muted: #c9d4e3;
+  --accent: var(--crm-gold);
+  --accent-soft: var(--crm-gold-light);
+  --on-accent: var(--crm-navy-deep);
+  /* Gold that passes WCAG AA as text on cream and white. */
+  --accent-strong: var(--crm-gold-deep);
+  --border: var(--crm-stone);
+  --focus: var(--crm-gold);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-on-brand: var(--on-brand);
+  --color-on-brand-muted: var(--on-brand-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-border: var(--border);
+  --color-focus: var(--focus);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--on-accent);
+  }
+}

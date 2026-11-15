@@ -34,7 +34,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      programmes: {
+        Row: {
+          created_at: string
+          description: string
+          duration: string
+          id: string
+          level: Database["public"]["Enums"]["programme_level"]
+          position: number
+          requirements: string
+          slug: string
+          status: Database["public"]["Enums"]["programme_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          duration: string
+          id?: string
+          level: Database["public"]["Enums"]["programme_level"]
+          position?: number
+          requirements?: string
+          slug: string
+          status?: Database["public"]["Enums"]["programme_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          duration?: string
+          id?: string
+          level?: Database["public"]["Enums"]["programme_level"]
+          position?: number
+          requirements?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["programme_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -43,7 +84,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      programme_level: "certificate" | "diploma" | "degree"
+      programme_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -173,7 +215,10 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {},
+    Enums: {
+      programme_level: ["certificate", "diploma", "degree"],
+      programme_status: ["draft", "published", "archived"],
+    },
   },
 } as const
 

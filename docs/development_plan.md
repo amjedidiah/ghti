@@ -95,7 +95,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 - [ ] Get answers to the Open Questions, in the order of the **Needed by** column (Stage 1 first: 1, 2, 4, 8, 9).
 - [ ] Create the GitHub repo and give the team access. _(Repo created: `amjedidiah/ghti`; team access pending.)_
 - [x] Create Cursor rules and a `CLAUDE.md` file (stack, folder conventions, RLS-first rule, storage rule).
-- [x] Create the Supabase project (free tier). Project `ghti`, ref `htbaujxaorlblkixiixx`, `eu-west-2`. Not linked yet; development stays on the local Docker stack until step 1.1 needs a preview deploy.
+- [x] Create the Supabase project (free tier). Project `ghti`, ref `htbaujxaorlblkixiixx`, `eu-west-2`. Linked in step 1.1; day-to-day development stays on the local Docker stack.
 - [ ] Set up a ministry-owned Google Drive folder for course materials and schedules, and a YouTube channel (or playlist convention) for unlisted lectures. Both belong to the institution, not a person. _(Deferred until Stage 3.)_
 - [x] Initialize a Next.js app (App Router) with TypeScript, Tailwind and ESLint. Install `@supabase/ssr`, `@supabase/supabase-js`, `lucide-react`, `clsx`, `tailwind-merge`, `zod`, `react-hook-form`, `libphonenumber-js`.
 - [x] Prettier + ESLint setup; `bun run check` (lint, format, typecheck, test, build).
@@ -110,14 +110,14 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 1.1. First ride: the look, on a live URL (target: end of week 1)
 
-- [ ] Port `Header` from `cwl`/`protection`: CRM logo, the six nav links to `crm-world.org.ng`, mobile menu. Add a second row (or a right-hand slot) for GHTI's own links: Academics, Admissions, Contact, **Portal sign-in**.
-- [ ] Port `Footer`: copyright line linking to `crm-world.org.ng` and the Facebook, Instagram and YouTube links. Add GHTI's address and phone.
-- [ ] Brand tokens: CRM navy and gold (as on `protection`), cream ground. Playfair Display (headings) + Inter (body), the same pairing as `cwl`.
-- [ ] Semantic colour tokens (`--color-bg`, `--color-text-primary`, `--color-accent`, …) so dark mode can come later without rework.
-- [ ] Favicon with GHTI or CRM branding.
-- [ ] `programmes` table + RLS (public reads `published` programmes; admins write) + pgTAP tests; seed one programme of each level.
-- [ ] Pages: Home, `/academics` (programmes grouped by level, `ProgrammeCard`), `/academics/[slug]` (overview and requirements).
-- [ ] Link the cloud project, push migrations, deploy a Vercel preview with environment variables for preview.
+- [x] Port `Header` from `cwl`/`protection`: CRM logo, the six nav links to `crm-world.org.ng`, mobile menu. Add a second row (or a right-hand slot) for GHTI's own links: Academics, Admissions, Contact, **Portal sign-in**.
+- [x] Port `Footer`: copyright line linking to `crm-world.org.ng` and the Facebook, Instagram and YouTube links. Add GHTI's address and phone. _(Slots in `lib/site.ts`; shown once the client supplies them.)_
+- [x] Brand tokens: CRM navy and gold (as on `protection`), cream ground. Playfair Display (headings) + Inter (body), the same pairing as `cwl`.
+- [x] Semantic colour tokens (`--color-bg`, `--color-text-primary`, `--color-accent`, …) so dark mode can come later without rework.
+- [x] Favicon with GHTI or CRM branding. _(CRM favicon for now.)_
+- [x] `programmes` table + RLS (public reads `published` programmes; admins write) + pgTAP tests; seed one programme of each level.
+- [x] Pages: Home, `/academics` (programmes grouped by level, `ProgrammeCard`), `/academics/[slug]` (overview and requirements). Header links to Admissions, Contact and Sign in go to "Coming soon" pages until their steps land.
+- [x] Link the cloud project, push migrations, deploy a Vercel preview with environment variables for preview. _(Vercel project `ghti`, London region; cloud seeded with the fake programmes, to be replaced in step 1.5.)_
 - [ ] **Milestone: look-and-feel approval** from the client on the preview link.
 
 #### 1.2. Accounts and roles
@@ -150,6 +150,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 - [ ] Public pages: `/about`, `/statement-of-faith` and `/contact` (phones as `tel:` links, addresses, Google Maps embed with no API key, "Get directions" link). Text lives in the code for now; admins can edit it from step 3.5.
 - [ ] `/privacy`: privacy notice (Nigeria Data Protection Act 2023).
+- [ ] Replace the fake seeded programmes in the cloud database with the client's real programme list.
 - [ ] Rate limiting on sign-up, login and applications (Supabase Auth settings + Vercel Firewall rule).
 - [ ] **Supabase keep-alive:** free projects pause after 7 days without activity. A daily Vercel Cron hit to a lightweight query prevents this.
 - [ ] **Backups:** the free tier has no downloadable backups. A weekly GitHub Action runs `pg_dump` (database) and copies the storage bucket to ministry-owned storage. With applicant records at stake, this is **not optional**.
