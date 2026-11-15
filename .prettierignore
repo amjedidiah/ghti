@@ -1,0 +1,7 @@
+.next
+node_modules
+bun.lock
+next-env.d.ts
+lib/supabase/database.types.ts
+supabase/.temp
+supabase/.branches

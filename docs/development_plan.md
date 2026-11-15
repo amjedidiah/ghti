@@ -74,10 +74,10 @@ These change scope. Defaults below are what the plan assumes until answered.
 > Goal: Lock scope and set the rules before any code is written.
 
 - [ ] Get answers to the Open Questions (at minimum 1, 3, 4, 5 and 8).
-- [ ] Create the GitHub repo and give the team access.
-- [ ] Create Cursor rules and a `CLAUDE.md` file (stack, folder conventions, RLS-first rule, storage rule).
-- [ ] Create the Supabase project (free tier).
-- [ ] Set up a ministry-owned Google Drive folder for course materials and schedules, and a YouTube channel (or playlist convention) for unlisted lectures. Both belong to the institution, not a person.
+- [ ] Create the GitHub repo and give the team access. _(Repo created: `amjedidiah/ghti`; team access pending.)_
+- [x] Create Cursor rules and a `CLAUDE.md` file (stack, folder conventions, RLS-first rule, storage rule).
+- [x] Create the Supabase project (free tier). Project `ghti`, ref `htbaujxaorlblkixiixx`, `eu-west-2`. Not linked yet; development stays on the local Docker stack.
+- [ ] Set up a ministry-owned Google Drive folder for course materials and schedules, and a YouTube channel (or playlist convention) for unlisted lectures. Both belong to the institution, not a person. _(Deferred: later.)_
 
 ### Phase 1 — Architecture & The "Source of Truth"
 
@@ -159,9 +159,9 @@ An applicant who is admitted becomes a `student` on the same account.
 
 #### 1.6. Scaffolding the App
 
-- [ ] Initialize a Next.js app (App Router) with TypeScript, Tailwind and ESLint. Install `@supabase/ssr`, `@supabase/supabase-js`, `lucide-react`, `clsx`, `tailwind-merge`, `zod`, `react-hook-form`, `libphonenumber-js`.
-- [ ] Prettier + ESLint setup.
-- [ ] `proxy.ts` (middleware) refreshes the Supabase session and guards `/apply`, `/portal`, `/teach` and `/admin` by role.
+- [x] Initialize a Next.js app (App Router) with TypeScript, Tailwind and ESLint. Install `@supabase/ssr`, `@supabase/supabase-js`, `lucide-react`, `clsx`, `tailwind-merge`, `zod`, `react-hook-form`, `libphonenumber-js`.
+- [x] Prettier + ESLint setup.
+- [ ] `proxy.ts` (middleware) refreshes the Supabase session and guards `/apply`, `/portal`, `/teach` and `/admin` by role. _(Session refresh done; role guards wait for `profiles.role` in 1.2/1.4.)_
 
 > **Why Next.js, when** `cwl` **and** `protection` **are Vite static sites?** Admissions, records and grades need server-side auth checks, protected routes and file uploads. The shared header and footer are plain React components, so they port across unchanged.
 

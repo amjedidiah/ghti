@@ -16,7 +16,12 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 ## Project Status
 
-Pre-code. Only `docs/` exists. The commands, layout and environment variables below are the **planned** setup; update this file when the scaffold lands (Phase 1.6) and whenever conventions change.
+Scaffolded (Phase 1.6): Next.js app, tooling, Supabase clients and a session-refresh `proxy.ts`. No migrations or UI yet. Next up: Phase 1.2 migrations, then 1.3 RLS + pgTAP tests, before any UI. Update this file whenever conventions change.
+
+### Supabase environments
+
+- **Local (current):** all development runs against the local Docker stack (`supabase start`). `.env.local` holds the local URL and keys from `supabase status`.
+- **Cloud:** project `ghti` (ref `htbaujxaorlblkixiixx`, region `eu-west-2` London, free tier). The repo is **not linked** to it yet. Do not run `supabase link`, `supabase db push` or anything else against the cloud project without the user's say-so.
 
 ## Tech Stack
 
@@ -32,28 +37,31 @@ Pre-code. Only `docs/` exists. The commands, layout and environment variables be
 - **Hosting:** Vercel
 - **Package manager:** Bun
 
-## Commands (planned)
+## Commands
 
 ```bash
 bun run dev            # Next.js dev server
 bun run build          # Production build
-bun run lint           # ESLint
-bun run format         # Prettier
+bun run lint           # ESLint (with eslint-config-prettier)
+bun run format         # Prettier, write (includes Tailwind class sorting)
+bun run format:check   # Prettier, check only
+bun run typecheck      # next typegen + tsc --noEmit
 bun run test           # Bun test runner (pure functions: link parsing, grade maths)
-bun run check          # Lint + test + build (full validation)
+bun run check          # lint + format:check + typecheck + test + build (full validation)
+bun run db:types       # Regenerate lib/supabase/database.types.ts from the local DB
 
 supabase start         # Local Supabase stack (Docker)
+supabase status        # Local URLs and keys (for .env.local)
 supabase db reset      # Re-apply all migrations + seed locally
 supabase migration new <name>   # New migration file
 supabase test db       # pgTAP tests for RLS policies
-supabase gen types typescript --local > lib/supabase/database.types.ts
 ```
 
 Run `bun run check` and `supabase test db` before calling a task done.
 
-## Layout (planned)
+## Layout
 
-Single Next.js app at the repository root (no separate backend).
+Single Next.js app at the repository root (no separate backend). Exists today: `app/` (placeholder layout and page), `lib/utils.ts`, `lib/supabase/*`, `proxy.ts`, `supabase/config.toml`. The rest is planned.
 
 - `app/(public)/`: website: `/`, `/about`, `/statement-of-faith`, `/academics`, `/academics/[slug]`, `/admissions`, `/contact`, `/verify/[id]`, `/privacy`
 - `app/apply/`: admissions (applicant role)
@@ -63,7 +71,7 @@ Single Next.js app at the repository root (no separate backend).
 - `app/materials/[id]/`, `app/schedules/[id]/`: access-checked redirects to Google Drive
 - `components/layout/`: shared CRM `Header` and `Footer`
 - `components/shared/`: cross-portal components (`DataTable`, `StatusBadge`, `StepForm`, `FileDrop`, …)
-- `lib/supabase/`: `server.ts`, `client.ts`, `admin.ts` (secret key, server-only), `database.types.ts` (generated)
+- `lib/supabase/`: `server.ts` (Server Components/Actions), `client.ts` (Client Components), `admin.ts` (secret key, server-only, bypasses RLS), `proxy.ts` (`updateSession` used by root `proxy.ts`), `env.ts` (env var access), `database.types.ts` (generated, never hand-edited)
 - `lib/links.ts`: YouTube and Google Drive URL parsers
 - `lib/grades.ts`: score → letter → grade point, GPA and CGPA
 - `supabase/migrations/`, `supabase/seed.sql`, `supabase/tests/`
@@ -72,12 +80,12 @@ Single Next.js app at the repository root (no separate backend).
 
 ## Roles
 
-| Role | Scope |
-| --- | --- |
-| `applicant` | Own application (editable only while `draft`) and own documents |
-| `student` | Own record, registrations, **published** grades, course content for registered offerings, own awards |
-| `lecturer` | Content and draft/submitted grades for their assigned offerings only |
-| `admin` | Everything; the only role that admits, publishes grades, changes roles and issues awards |
+| Role        | Scope                                                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------------- |
+| `applicant` | Own application (editable only while `draft`) and own documents                                      |
+| `student`   | Own record, registrations, **published** grades, course content for registered offerings, own awards |
+| `lecturer`  | Content and draft/submitted grades for their assigned offerings only                                 |
+| `admin`     | Everything; the only role that admits, publishes grades, changes roles and issues awards             |
 
 An admitted applicant becomes a `student` on the same account. Staff accounts are invited by admins, never self-registered.
 
@@ -107,6 +115,7 @@ An admitted applicant becomes a `student` on the same account. Staff accounts ar
 - Use the `@/` path alias for imports.
 - Use `cn()` from `@/lib/utils` to combine Tailwind classes conditionally.
 - **Server Components by default.** Add `'use client'` only for interactivity.
+- **Cache Components is on** (`cacheComponents: true`, the Next 16 scaffold default). Request-time data (`cookies()`, the Supabase server client, `searchParams`) must sit inside a `<Suspense>` boundary; use `"use cache"` only for data that is the same for every user.
 - **No `forwardRef`.** Pass `ref` as a regular prop (React 19).
 - **Mutations through Server Actions** (`"use server"`), validated with Zod on the server. Client forms use React Hook Form with the same Zod schema; `useActionState` for submission state, `useFormStatus` for submit buttons.
 - Use the generated `Database` types for every Supabase query. No `any`.
@@ -119,9 +128,9 @@ An admitted applicant becomes a `student` on the same account. Staff accounts ar
 - **Tailwind v4:** theme defined with `@theme` in `globals.css`, no config file. Components use **semantic tokens** (`bg`, `bg-card`, `text-primary`, `text-secondary`, `accent`, `border`, …), not raw palette values, so dark mode can be added later.
 - **Simplicity and ease of use first.** Many users are on phones: every screen must work at 375px width. Forms show clear, specific errors.
 
-## Environment Variables (planned)
+## Environment Variables
 
-Keep `.env.example` up to date. Never commit `.env*` files with real values.
+Keep `.env.example` up to date. For local development, copy it to `.env.local` and fill the Supabase values from `supabase status`. Never commit `.env*` files with real values.
 
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: client and server.
 - `SUPABASE_SECRET_KEY`: server only (`lib/supabase/admin.ts`).
