@@ -109,20 +109,21 @@ async function HomePage() {
         </section>
       )}
 
-      <section aria-labelledby="apply-heading" className="surface-dark bg-brand text-on-brand">
+      {/* Dove gold, so the green header and green footer never stack. */}
+      <section aria-labelledby="apply-heading" className="bg-accent-soft text-primary">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center lg:px-8">
           <div>
             <h2 id="apply-heading" className="font-display text-3xl font-bold tracking-tight">
               Ready to apply?
             </h2>
-            <p className="mt-2 max-w-xl text-on-brand-muted">
+            <p className="mt-2 max-w-xl text-secondary">
               Create an account, fill in your application and upload your transcript, all from your
               phone.
             </p>
           </div>
           <Link
             href="/admissions"
-            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-accent px-6 py-3 text-base font-semibold text-on-accent transition-colors hover:bg-accent-soft"
+            className="inline-flex shrink-0 items-center gap-2 rounded-md bg-brand px-6 py-3 text-base font-semibold text-on-brand transition-colors hover:bg-brand-deep"
           >
             Start your application
             <ArrowRight className="size-4" aria-hidden />
