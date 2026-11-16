@@ -29,6 +29,13 @@ export const metadata: Metadata = {
     template: `%s | ${site.name}`,
   },
   description: site.description,
+  // The image comes from app/opengraph-image.tsx; pages inherit these fields.
+  openGraph: {
+    type: "website",
+    locale: "en_NG",
+    siteName: site.fullName ?? site.name,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
