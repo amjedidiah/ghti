@@ -161,14 +161,14 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 2.1. Academic structure
 
-- [ ] `courses`, `course_offerings` (lecturer optional until Stage 3), `registrations`, `grading_scale` tables + RLS + pgTAP tests.
+- [x] `courses`, `course_offerings` (lecturer optional until Stage 3), `registrations`, `grading_scale` tables + RLS + pgTAP tests. _(Migration `20261116090000_academic_records.sql`, tests in `supabase/tests/academic_records.test.sql`. The public reads the courses of published programmes; students read only their own registrations, offerings and courses; admins write. Lecturer policies arrive in Stage 3. Local seed has a fake 5-point scale and fake courses until client inputs #16 and #17.)_
 - [ ] `/admin/academics`: programmes, courses, terms. `/admin/offerings`: offerings per term.
 - [ ] **Registrations:** register students on a term's offerings in bulk.
 - [ ] Programme pages list courses by year and semester.
 
 #### 2.2. From applicant to student
 
-- [ ] `students` table + RLS + pgTAP tests (students read only their own record).
+- [x] `students` table + RLS + pgTAP tests (students read only their own record). _(Built with step 2.1, since registrations need it. Students cannot edit their record; `application_id` links back to the application they were admitted from.)_
 - [ ] Admit assigns a matric number and entry term, and changes the role to `student` on the same account.
 - [ ] Welcome email on admission (matric number, how to sign in).
 - [ ] `proxy.ts` guards `/portal`.
@@ -274,22 +274,22 @@ Migrations live in `supabase/migrations/` (versioned in Git, never edited in the
 | `profiles`     | `id` (= auth user), `full_name`, `phone`, `role`                                                                                 | Created by trigger on sign-up, default `applicant`                                            | 1     |
 | `applications` | `id`, `applicant_id`, `programme_id`, `intake_term_id`, biodata fields, `status`, `reviewed_by`, `decision_note`, `submitted_at` | `status`: `draft` \| `submitted` \| `under_review` \| `admitted` \| `rejected` \| `withdrawn` | 1     |
 | `documents`    | `id`, `owner_id`, `application_id?`, `kind`, `storage_path`, `size_bytes`, `mime`                                                | `kind`: `transcript` \| `id_card` \| `photo` \| `other`                                       | 1     |
-| `students`     | `id` (= profile), `matric_no`, `programme_id`, `entry_term_id`, `status`                                                         | `status`: `active` \| `deferred` \| `withdrawn` \| `graduated`                                | 2     |
+| `students`     | `id` (= profile), `matric_no`, `programme_id`, `entry_term_id`, `application_id?`, `status`                                      | `status`: `active` \| `deferred` \| `withdrawn` \| `graduated`                                | 2     |
 | `record_notes` | `id`, `student_id`, `author_id`, `body`, `created_at`                                                                            | The "log" in the spec: dated notes on a student's file                                        | 2     |
 
 **Academics:**
 
-| Table               | Key fields                                                                                            | Notes                                                                                          | Stage |
-| ------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
-| `programmes`        | `id`, `slug`, `title`, `level`, `duration`, `description`, `requirements`, `status`                   | `level`: `certificate` \| `diploma` \| `postgraduate_diploma` (was `degree` until 16 Nov 2026) | 1     |
-| `terms`             | `id`, `session` (e.g. `2026/2027`), `name`, `starts_on`, `ends_on`                                    | Semesters or terms; also used as intakes                                                       | 1     |
-| `courses`           | `id`, `programme_id`, `code`, `title`, `credit_units`, `year`, `semester`                             |                                                                                                | 2     |
-| `course_offerings`  | `id`, `course_id`, `term_id`, `lecturer_id`                                                           | A course taught in a given term                                                                | 2     |
-| `registrations`     | `id`, `student_id`, `offering_id`                                                                     | Student takes an offering                                                                      | 2     |
-| `grades`            | `registration_id`, `ca_score`, `exam_score`, `total`, `letter`, `grade_point`, `status`, `entered_by` | `status`: `draft` \| `submitted` \| `published`                                                | 2     |
-| `grade_changes`     | `id`, `grade_id`, `old_values`, `new_values`, `changed_by`, `reason`, `changed_at`                    | Written by trigger; never edited                                                               | 2     |
-| `grading_scale`     | `min_score`, `max_score`, `letter`, `grade_point`                                                     | Configurable by admins                                                                         | 2     |
-| `lecture_schedules` | `id`, `programme_id`, `term_id`, `title`, `drive_file_id`                                             | Downloadable schedules (spec item 2)                                                           | 3     |
+| Table               | Key fields                                                                                            | Notes                                                                                                                                                     | Stage |
+| ------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `programmes`        | `id`, `slug`, `title`, `level`, `duration`, `description`, `requirements`, `status`                   | `level`: `certificate` \| `diploma` \| `postgraduate_diploma` (was `degree` until 16 Nov 2026)                                                            | 1     |
+| `terms`             | `id`, `session` (e.g. `2026/2027`), `name`, `starts_on`, `ends_on`                                    | Semesters or terms; also used as intakes                                                                                                                  | 1     |
+| `courses`           | `id`, `programme_id`, `code`, `title`, `credit_units`, `year`, `semester`                             |                                                                                                                                                           | 2     |
+| `course_offerings`  | `id`, `course_id`, `term_id`, `lecturer_id`                                                           | A course taught in a given term                                                                                                                           | 2     |
+| `registrations`     | `id`, `student_id`, `offering_id`                                                                     | Student takes an offering                                                                                                                                 | 2     |
+| `grades`            | `registration_id`, `ca_score`, `exam_score`, `total`, `letter`, `grade_point`, `status`, `entered_by` | `status`: `draft` \| `submitted` \| `published`                                                                                                           | 2     |
+| `grade_changes`     | `id`, `grade_id`, `old_values`, `new_values`, `changed_by`, `reason`, `changed_at`                    | Written by trigger; never edited                                                                                                                          | 2     |
+| `grading_scale`     | `min_score`, `letter`, `grade_point`                                                                  | A total gets the band with the highest `min_score` at or below it (lower bounds only, so decimal totals never fall between bands); configurable by admins | 2     |
+| `lecture_schedules` | `id`, `programme_id`, `term_id`, `title`, `drive_file_id`                                             | Downloadable schedules (spec item 2)                                                                                                                      | 3     |
 
 **Learning content and awards:**
 

@@ -165,6 +165,99 @@ export type Database = {
           },
         ]
       }
+      course_offerings: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          lecturer_id: string | null
+          term_id: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          lecturer_id?: string | null
+          term_id: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          lecturer_id?: string | null
+          term_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_offerings_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_offerings_lecturer_id_fkey"
+            columns: ["lecturer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_offerings_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          code: string
+          created_at: string
+          credit_units: number
+          id: string
+          programme_id: string
+          semester: number
+          title: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          credit_units: number
+          id?: string
+          programme_id: string
+          semester: number
+          title: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          credit_units?: number
+          id?: string
+          programme_id?: string
+          semester?: number
+          title?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_views: {
         Row: {
           document_id: string
@@ -252,6 +345,33 @@ export type Database = {
           },
         ]
       }
+      grading_scale: {
+        Row: {
+          created_at: string
+          grade_point: number
+          id: string
+          letter: string
+          min_score: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          grade_point: number
+          id?: string
+          letter: string
+          min_score: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          grade_point?: number
+          id?: string
+          letter?: string
+          min_score?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -320,6 +440,114 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      registrations: {
+        Row: {
+          created_at: string
+          id: string
+          offering_id: string
+          registered_by: string | null
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offering_id: string
+          registered_by?: string | null
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offering_id?: string
+          registered_by?: string | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "course_offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_registered_by_fkey"
+            columns: ["registered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          application_id: string | null
+          created_at: string
+          entry_term_id: string
+          id: string
+          matric_no: string
+          programme_id: string
+          status: Database["public"]["Enums"]["student_status"]
+          updated_at: string
+        }
+        Insert: {
+          application_id?: string | null
+          created_at?: string
+          entry_term_id: string
+          id: string
+          matric_no: string
+          programme_id: string
+          status?: Database["public"]["Enums"]["student_status"]
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string | null
+          created_at?: string
+          entry_term_id?: string
+          id?: string
+          matric_no?: string
+          programme_id?: string
+          status?: Database["public"]["Enums"]["student_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_entry_term_id_fkey"
+            columns: ["entry_term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       terms: {
         Row: {
@@ -507,6 +735,7 @@ export type Database = {
       document_kind: "transcript" | "id_card" | "photo" | "other"
       programme_level: "certificate" | "diploma" | "postgraduate_diploma"
       programme_status: "draft" | "published" | "archived"
+      student_status: "active" | "deferred" | "withdrawn" | "graduated"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -649,6 +878,7 @@ export const Constants = {
       document_kind: ["transcript", "id_card", "photo", "other"],
       programme_level: ["certificate", "diploma", "postgraduate_diploma"],
       programme_status: ["draft", "published", "archived"],
+      student_status: ["active", "deferred", "withdrawn", "graduated"],
     },
   },
 } as const
