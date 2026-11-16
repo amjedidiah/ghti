@@ -109,7 +109,7 @@ async function HomePage() {
         </section>
       )}
 
-      <section aria-labelledby="apply-heading" className="bg-brand text-on-brand">
+      <section aria-labelledby="apply-heading" className="surface-dark bg-brand text-on-brand">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center lg:px-8">
           <div>
             <h2 id="apply-heading" className="font-display text-3xl font-bold tracking-tight">

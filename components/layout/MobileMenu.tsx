@@ -51,7 +51,7 @@ function MobileMenu() {
         <nav
           id={panelId}
           aria-label="Site menu"
-          className="absolute inset-x-0 top-full z-50 border-t border-border bg-card shadow-lg"
+          className="surface-light absolute inset-x-0 top-full z-50 border-t border-border bg-card shadow-lg"
         >
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <ul className="space-y-1">

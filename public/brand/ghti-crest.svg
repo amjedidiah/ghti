@@ -26,8 +26,8 @@
              C175,220 215,290 232,362 C200,345 160,300 135,250 C120,220 113,190 108,158 Z"/>
   </defs>
 
-  <!-- Shield: navy rim, cream keyline, green field -->
-  <use href="#shield" fill="#1a365d" stroke="#1a365d" stroke-width="44" stroke-linejoin="round"/>
+  <!-- Shield: indigo rim (CRM), cream keyline, green field -->
+  <use href="#shield" fill="#2a166f" stroke="#2a166f" stroke-width="44" stroke-linejoin="round"/>
   <use href="#shield" fill="none" stroke="#f5e6c8" stroke-width="16" stroke-linejoin="round"/>
   <use href="#shield" fill="#13703f"/>
 

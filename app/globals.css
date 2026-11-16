@@ -1,51 +1,69 @@
 @import "tailwindcss";
 
 /*
- * Brand palette (CRM, as on protection.crm-world.org.ng) and semantic tokens.
+ * Palette: the GHTI crest's colours, with CRM's as a light touch (decision
+ * 16 Nov 2026). Crest green for the header, footer and actions, dove gold as
+ * the accent, the crest's cream keyline as the ground, green-black ink. CRM's
+ * indigo (also the crest's rim) is used sparingly: the logo rim, the CRM link
+ * and its social links. CRM's flame red, deepened, marks errors.
+ *
  * Components use the semantic utilities only (bg-bg, bg-card, text-primary,
- * text-secondary, bg-brand, text-on-brand, bg-accent, text-accent-strong,
- * border-border, bg-muted), never raw palette values, so a dark theme can be
- * added later by redefining the semantic variables.
+ * text-secondary, bg-brand, text-on-brand, bg-band, text-ministry, bg-accent,
+ * text-accent-strong, border-border, bg-muted), never raw palette values, so a
+ * dark theme can be added later by redefining the semantic variables.
+ * Contrast pairs checked 16 Nov 2026: all text pairs pass WCAG AA.
  */
 :root {
-  /* Palette */
-  --crm-navy: #1a365d;
-  --crm-navy-deep: #102542;
-  --crm-ink: #172a46;
-  --crm-slate: #4a5568;
-  --crm-gold: #d69e2e;
-  --crm-gold-light: #f6e05e;
-  --crm-gold-deep: #8a5a12;
-  --crm-cream: #fefbf6;
-  --crm-sand: #f5efe4;
-  --crm-stone: #e7dfd1;
-  --red-700: #b42318;
+  /* Palette: GHTI crest */
+  --ghti-green: #13703f;
+  --ghti-green-deep: #0e5530;
+  --ghti-green-darker: #0a4126;
+  --ghti-green-night: #08301c;
+  --ghti-ink: #15261d;
+  --ghti-slate: #4a5a51;
+  --ghti-gold: #f2b632;
+  --ghti-gold-light: #f8d77a;
+  --ghti-gold-deep: #8a5a12;
+  --ghti-cream: #fefbf6;
+  --ghti-sand: #f5efe4;
+  --ghti-stone: #e7dfd1;
+  /* Palette: CRM logo (used sparingly) */
+  --crm-indigo: #2a166f;
+  --crm-red: #db2820;
+  --crm-red-deep: #b9261d;
   --red-50: #fef3f2;
   --green-700: #067647;
   --green-50: #ecfdf3;
   --white: #ffffff;
 
   /* Semantic tokens (light) */
-  --bg: var(--crm-cream);
+  --bg: var(--ghti-cream);
   --card: var(--white);
-  --muted: var(--crm-sand);
-  --text-primary: var(--crm-ink);
-  --text-secondary: var(--crm-slate);
-  --brand: var(--crm-navy);
-  --brand-deep: var(--crm-navy-deep);
+  --muted: var(--ghti-sand);
+  --text-primary: var(--ghti-ink);
+  --text-secondary: var(--ghti-slate);
+  --brand: var(--ghti-green-deep);
+  --brand-deep: var(--ghti-green-darker);
   --on-brand: var(--white);
-  --on-brand-muted: #c9d4e3;
-  --accent: var(--crm-gold);
-  --accent-soft: var(--crm-gold-light);
-  --on-accent: var(--crm-navy-deep);
+  --on-brand-muted: #cfe3d6;
+  /* Footer band: the crest's deepest green. */
+  --band: var(--ghti-green-night);
+  --on-band-muted: #c6dccf;
+  /* The CRM link and social links: CRM's indigo, the one place it appears. */
+  --ministry: var(--crm-indigo);
+  --accent: var(--ghti-gold);
+  --accent-soft: var(--ghti-gold-light);
+  --on-accent: var(--ghti-ink);
   /* Gold that passes WCAG AA as text on cream and white. */
-  --accent-strong: var(--crm-gold-deep);
-  --border: var(--crm-stone);
-  --danger: var(--red-700);
+  --accent-strong: var(--ghti-gold-deep);
+  --border: var(--ghti-stone);
+  /* CRM flame red, deepened to pass AA as text. */
+  --danger: var(--crm-red-deep);
   --danger-soft: var(--red-50);
   --success: var(--green-700);
   --success-soft: var(--green-50);
-  --focus: var(--crm-gold);
+  /* Deep gold on light surfaces; dark bands switch to bright gold. */
+  --focus: var(--ghti-gold-deep);
 }
 
 @theme inline {
@@ -58,6 +76,9 @@
   --color-brand-deep: var(--brand-deep);
   --color-on-brand: var(--on-brand);
   --color-on-brand-muted: var(--on-brand-muted);
+  --color-band: var(--band);
+  --color-on-band-muted: var(--on-band-muted);
+  --color-ministry: var(--ministry);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
@@ -81,11 +102,24 @@
   body {
     background-color: var(--bg);
     color: var(--text-primary);
+    caret-color: var(--brand);
+    accent-color: var(--brand);
+    scrollbar-color: var(--ghti-stone) var(--bg);
   }
 
   :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
+  }
+
+  /* Dark bands (header, footer, call to action): bright gold focus ring. */
+  .surface-dark {
+    --focus: var(--accent);
+  }
+
+  /* A light panel inside a dark band (e.g. the mobile menu). */
+  .surface-light {
+    --focus: var(--accent-strong);
   }
 
   ::selection {

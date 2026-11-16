@@ -19,7 +19,7 @@
   </defs>
 
   <!-- Simplified mark for small sizes: no text, no fine lines -->
-  <use href="#shield" fill="#1a365d" stroke="#1a365d" stroke-width="44" stroke-linejoin="round"/>
+  <use href="#shield" fill="#2a166f" stroke="#2a166f" stroke-width="44" stroke-linejoin="round"/>
   <use href="#shield" fill="none" stroke="#f5e6c8" stroke-width="20" stroke-linejoin="round"/>
   <use href="#shield" fill="#13703f"/>
 

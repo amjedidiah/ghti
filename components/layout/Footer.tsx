@@ -23,14 +23,14 @@ function Footer() {
 
   return (
     <footer>
-      <section className="bg-brand-deep text-on-brand">
+      <section className="surface-dark border-t-[3px] border-accent bg-band text-on-brand">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:px-8">
           <div>
             <p className="font-display text-3xl font-bold tracking-tight">{site.name}</p>
-            <p className="mt-2 text-sm text-on-brand-muted">
+            <p className="mt-2 text-sm text-on-band-muted">
               {site.fullName ?? `A ${site.ministry} institution`}
             </p>
-            <p className="mt-4 text-sm text-on-brand-muted">God Bless You</p>
+            <p className="mt-4 text-sm text-on-band-muted">God Bless You</p>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2">
@@ -38,7 +38,7 @@ function Footer() {
               <ul className="space-y-2 text-sm">
                 {[...ghtiNavLinks, ...footerLinks].map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-on-brand-muted hover:text-on-brand">
+                    <Link href={link.href} className="text-on-band-muted hover:text-on-brand">
                       {link.name}
                     </Link>
                   </li>
@@ -47,7 +47,7 @@ function Footer() {
             </nav>
 
             {hasContact && (
-              <address className="space-y-2 text-sm text-on-brand-muted not-italic">
+              <address className="space-y-2 text-sm text-on-band-muted not-italic">
                 {address && (
                   <p className="flex gap-2">
                     <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden />
@@ -80,7 +80,7 @@ function Footer() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-8 sm:px-6 md:flex-row lg:px-8">
           <p className="text-center text-sm text-secondary md:text-left">
             &copy; <CurrentYear />{" "}
-            <a href={site.ministryUrl} className="font-medium text-brand hover:underline">
+            <a href={site.ministryUrl} className="font-medium text-ministry hover:underline">
               {site.ministry}
             </a>
             . All rights reserved.
@@ -94,7 +94,7 @@ function Footer() {
                   title={link.name}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex size-11 items-center justify-center rounded-md text-secondary transition-colors hover:bg-muted hover:text-brand"
+                  className="inline-flex size-11 items-center justify-center rounded-md text-secondary transition-colors hover:bg-muted hover:text-ministry"
                 >
                   <SocialIcon name={link.name} />
                 </a>
