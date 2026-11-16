@@ -54,12 +54,20 @@ async function ClassListContent({
       </AdminPageHeader>
 
       <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
-        <Link
-          href={`/admin/offerings/${termId}/register`}
-          className="inline-flex items-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-deep"
-        >
-          Register students
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/admin/offerings/${termId}/register`}
+            className="inline-flex items-center rounded-md bg-brand px-4 py-2.5 text-sm font-semibold text-on-brand hover:bg-brand-deep"
+          >
+            Register students
+          </Link>
+          <Link
+            href={`/admin/grades/${offeringId}`}
+            className="inline-flex items-center rounded-md border border-brand bg-card px-4 py-2.5 text-sm font-semibold text-brand hover:bg-muted"
+          >
+            Enter grades
+          </Link>
+        </div>
 
         {count === 0 ? (
           <p className="rounded-xl border border-dashed border-border bg-card p-6 text-center text-secondary">

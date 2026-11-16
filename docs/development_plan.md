@@ -175,9 +175,9 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 2.3. Grades
 
-- [ ] `grades` and `grade_changes` tables + RLS + pgTAP tests. Students see `published` grades only. Changing a published grade requires a reason and is written to `grade_changes` by a trigger.
-- [ ] `lib/grades.ts`: score → letter → grade point, GPA and CGPA, with Bun tests.
-- [ ] `/admin/grades`: admins enter CA and exam scores per offering and publish. (Lecturer entry with admin approval arrives in step 3.3.)
+- [x] `grades` and `grade_changes` tables + RLS + pgTAP tests. Students see `published` grades only. Changing a published grade requires a reason and is written to `grade_changes` by a trigger. _(Done 16 Nov 2026, `20261116140000_grades.sql`: total, letter and grade point are worked out by trigger and stored (a later scale change never rewrites old results); a published grade changes only through `change_published_grade()` with a reason, is logged with old and new values, and can never be deleted; a registration with a grade cannot be removed. 34 pgTAP tests.)_
+- [x] `lib/grades.ts`: score → letter → grade point, GPA and CGPA, with Bun tests. _(Plus `GRADE_SPLIT`, CA 40 / exam 60, the plan's default until client input #17; `lib/grade-sheet.ts` plans each sheet save.)_
+- [x] `/admin/grades`: admins enter CA and exam scores per offering and publish. (Lecturer entry with admin approval arrives in step 3.3.) _(Done 16 Nov 2026: per term, each course's progress (graded, published); the grade sheet previews total and letter as you type, saves drafts, publishes complete grades, and asks for a reason before changing a published one. Unpublishing is possible in the database (`change_published_grade` with status `draft`) but has no button yet.)_
 - [ ] "Results published" email to students.
 
 #### 2.4. Student portal

@@ -142,3 +142,13 @@ from (values
 cross join public.programmes p
 cross join public.terms t
 where p.slug = 'certificate-in-theology' and t.session = '2026/2027' and t.name = 'First semester';
+
+-- Both students take the Certificate's first-semester courses (FAKE).
+insert into public.registrations (student_id, offering_id)
+select s.id, o.id
+from public.students s
+join public.course_offerings o on true
+join public.courses c on c.id = o.course_id and c.programme_id = s.programme_id
+join public.terms t on t.id = o.term_id
+where s.matric_no in ('GHTI/2026/CERT/101', 'GHTI/2026/CERT/102')
+  and t.session = '2026/2027' and t.name = 'First semester';

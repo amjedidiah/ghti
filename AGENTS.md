@@ -95,7 +95,7 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `scripts/create-admin.ts`: `bun run admin:create --email … --name …` invites or promotes an admin
 - `scripts/push-auth-config.ts`: `bun run auth:push --site-url <url> [--apply]` sets the cloud project's auth settings (site URL, redirect allow list, password length) and, once custom SMTP exists, the branded email templates. Dry run by default; rerun when the domain changes
 - `lib/links.ts`: YouTube and Google Drive URL parsers
-- `lib/grades.ts`: score → letter → grade point, GPA and CGPA
+- `lib/grades.ts`: score → letter → grade point, GPA and CGPA, and `GRADE_SPLIT` (CA/exam maximums, the one place to change when GHTI confirms its split); `lib/grade-sheet.ts` plans a grade sheet save (pure, tested). Grade entry: `/admin/grades` (`components/admin/GradeSheetForm.tsx`, `lib/admin/grades.ts`, `lib/queries/admin-grades.ts`)
 - `supabase/migrations/`, `supabase/seed.sql`, `supabase/tests/`
 - `emails/`: React Email templates
 - `proxy.ts`: session refresh and role guards for `/apply`, `/portal`, `/teach`, `/admin`

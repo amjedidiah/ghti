@@ -345,6 +345,121 @@ export type Database = {
           },
         ]
       }
+      grade_changes: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          grade_id: string
+          id: number
+          new_values: Json
+          old_values: Json
+          reason: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          grade_id: string
+          id?: never
+          new_values: Json
+          old_values: Json
+          reason: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          grade_id?: string
+          id?: never
+          new_values?: Json
+          old_values?: Json
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grade_changes_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grade_changes_grade_id_fkey"
+            columns: ["grade_id"]
+            isOneToOne: false
+            referencedRelation: "grades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grades: {
+        Row: {
+          ca_score: number | null
+          created_at: string
+          entered_by: string | null
+          exam_score: number | null
+          grade_point: number | null
+          id: string
+          letter: string | null
+          published_at: string | null
+          published_by: string | null
+          registration_id: string
+          status: Database["public"]["Enums"]["grade_status"]
+          total: number | null
+          updated_at: string
+        }
+        Insert: {
+          ca_score?: number | null
+          created_at?: string
+          entered_by?: string | null
+          exam_score?: number | null
+          grade_point?: number | null
+          id?: string
+          letter?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          registration_id: string
+          status?: Database["public"]["Enums"]["grade_status"]
+          total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ca_score?: number | null
+          created_at?: string
+          entered_by?: string | null
+          exam_score?: number | null
+          grade_point?: number | null
+          id?: string
+          letter?: string | null
+          published_at?: string | null
+          published_by?: string | null
+          registration_id?: string
+          status?: Database["public"]["Enums"]["grade_status"]
+          total?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grades_entered_by_fkey"
+            columns: ["entered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grades_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grades_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: true
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grading_scale: {
         Row: {
           created_at: string
@@ -587,6 +702,36 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      change_published_grade: {
+        Args: {
+          p_ca_score: number
+          p_exam_score: number
+          p_grade_id: string
+          p_reason: string
+          p_status: Database["public"]["Enums"]["grade_status"]
+        }
+        Returns: {
+          ca_score: number | null
+          created_at: string
+          entered_by: string | null
+          exam_score: number | null
+          grade_point: number | null
+          id: string
+          letter: string | null
+          published_at: string | null
+          published_by: string | null
+          registration_id: string
+          status: Database["public"]["Enums"]["grade_status"]
+          total: number | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "grades"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
@@ -756,6 +901,7 @@ export type Database = {
         | "rejected"
         | "withdrawn"
       document_kind: "transcript" | "id_card" | "photo" | "other"
+      grade_status: "draft" | "submitted" | "published"
       programme_level: "certificate" | "diploma" | "postgraduate_diploma"
       programme_status: "draft" | "published" | "archived"
       student_status: "active" | "deferred" | "withdrawn" | "graduated"
@@ -899,6 +1045,7 @@ export const Constants = {
         "withdrawn",
       ],
       document_kind: ["transcript", "id_card", "photo", "other"],
+      grade_status: ["draft", "submitted", "published"],
       programme_level: ["certificate", "diploma", "postgraduate_diploma"],
       programme_status: ["draft", "published", "archived"],
       student_status: ["active", "deferred", "withdrawn", "graduated"],

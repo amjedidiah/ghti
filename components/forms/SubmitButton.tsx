@@ -17,6 +17,8 @@ function SubmitButton({
   className,
   type = "submit",
   onClick,
+  name,
+  value,
 }: {
   children: ReactNode;
   pending?: boolean;
@@ -24,6 +26,9 @@ function SubmitButton({
   /** "button" with onClick for forms that submit programmatically. */
   type?: "submit" | "button";
   onClick?: () => void;
+  /** Submitted with the form when this button is pressed (e.g. intent=publish). */
+  name?: string;
+  value?: string;
 }) {
   const status = useFormStatus();
   const busy = pending ?? status.pending;
@@ -32,6 +37,8 @@ function SubmitButton({
     <button
       type={type}
       onClick={onClick}
+      name={name}
+      value={value}
       disabled={busy}
       aria-disabled={busy}
       className={cn(
