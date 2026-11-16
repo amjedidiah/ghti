@@ -90,3 +90,69 @@ export async function getTermForAdmin(id: string) {
 export function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value);
 }
+
+// Offerings ------------------------------------------------------------------------
+
+/** Every term with how many courses it offers, newest session first. */
+export async function listTermsWithOfferingCounts() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("terms")
+    .select("id, session, name, starts_on, ends_on, course_offerings(count)")
+    .order("session", { ascending: false })
+    .order("starts_on", { ascending: true, nullsFirst: false })
+    .order("name");
+
+  if (error) throw new Error(`Could not load terms: ${error.message}`);
+  return data.map(({ course_offerings, ...term }) => ({
+    ...term,
+    offeringCount: course_offerings[0]?.count ?? 0,
+  }));
+}
+
+/**
+ * A term, every course that could run in it (grouped by programme; archived
+ * programmes only when one of their courses is already offered), and the
+ * term's current offerings with their number of registered students.
+ */
+export async function getTermOfferingsForAdmin(termId: string) {
+  const supabase = await createClient();
+  const [term, programmes, offerings] = await Promise.all([
+    supabase.from("terms").select("id, session, name").eq("id", termId).maybeSingle(),
+    supabase
+      .from("programmes")
+      .select("id, title, level, status, courses(id, code, title, credit_units, year, semester)")
+      .order("level")
+      .order("position")
+      .order("title")
+      .order("year", { referencedTable: "courses" })
+      .order("semester", { referencedTable: "courses" })
+      .order("code", { referencedTable: "courses" }),
+    supabase
+      .from("course_offerings")
+      .select("id, course_id, registrations(count)")
+      .eq("term_id", termId),
+  ]);
+
+  if (term.error) throw new Error(`Could not load term: ${term.error.message}`);
+  if (programmes.error) throw new Error(`Could not load courses: ${programmes.error.message}`);
+  if (offerings.error) throw new Error(`Could not load offerings: ${offerings.error.message}`);
+  if (!term.data) return null;
+
+  const registrationsByCourse = new Map(
+    offerings.data.map((offering) => [offering.course_id, offering.registrations[0]?.count ?? 0]),
+  );
+
+  return {
+    term: term.data,
+    offered: registrationsByCourse,
+    programmes: programmes.data.filter(
+      (programme) =>
+        programme.courses.length > 0 &&
+        (programme.status !== "archived" ||
+          programme.courses.some((course) => registrationsByCourse.has(course.id))),
+    ),
+  };
+}
+
+export type TermOfferings = NonNullable<Awaited<ReturnType<typeof getTermOfferingsForAdmin>>>;

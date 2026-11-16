@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/session";
+import { describeChanges, diffOfferings } from "@/lib/offerings";
 import { TERMS_TAG } from "@/lib/queries/applications";
 import { PROGRAMMES_TAG } from "@/lib/queries/programmes";
 import { createClient } from "@/lib/supabase/server";
@@ -224,4 +225,69 @@ export async function updateTerm(
 
   refreshTerms();
   return SAVED;
+}
+
+// Offerings ------------------------------------------------------------------------
+
+/**
+ * Set which courses run in a term from the ticked `courseId` boxes. Offerings
+ * with registered students are never removed (diffOfferings keeps them).
+ */
+export async function saveOfferings(
+  termId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireRole("admin");
+  if (!uuid.safeParse(termId).success) return UNKNOWN;
+  const selected = formData
+    .getAll("courseId")
+    .filter((value): value is string => typeof value === "string" && uuid.safeParse(value).success);
+
+  const supabase = await createClient();
+  const { data: existing, error: readError } = await supabase
+    .from("course_offerings")
+    .select("course_id, registrations(count)")
+    .eq("term_id", termId);
+  if (readError) return failure(readError);
+
+  const changes = diffOfferings(
+    existing.map((offering) => ({
+      courseId: offering.course_id,
+      registrations: offering.registrations[0]?.count ?? 0,
+    })),
+    selected,
+  );
+
+  if (changes.add.length > 0) {
+    const { error } = await supabase
+      .from("course_offerings")
+      .insert(changes.add.map((courseId) => ({ course_id: courseId, term_id: termId })));
+    if (error?.code === "23503") return UNKNOWN;
+    if (error) return failure(error);
+  }
+
+  if (changes.remove.length > 0) {
+    const { error } = await supabase
+      .from("course_offerings")
+      .delete()
+      .eq("term_id", termId)
+      .in("course_id", changes.remove);
+    if (error?.code === "23503") {
+      return {
+        status: "error",
+        message:
+          "Students registered on one of these courses while you were editing, so nothing was removed. Refresh the page and try again.",
+      };
+    }
+    if (error) return failure(error);
+  }
+
+  revalidatePath("/admin/offerings", "layout");
+  revalidatePath("/admin/academics", "layout");
+  const kept =
+    changes.kept.length > 0
+      ? ` ${changes.kept.length} course${changes.kept.length === 1 ? " has" : "s have"} registered students, so ${changes.kept.length === 1 ? "it stays" : "they stay"}.`
+      : "";
+  return { status: "success", message: describeChanges(changes) + kept };
 }

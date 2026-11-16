@@ -162,7 +162,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 #### 2.1. Academic structure
 
 - [x] `courses`, `course_offerings` (lecturer optional until Stage 3), `registrations`, `grading_scale` tables + RLS + pgTAP tests. _(Migration `20261116090000_academic_records.sql`, tests in `supabase/tests/academic_records.test.sql`. The public reads the courses of published programmes; students read only their own registrations, offerings and courses; admins write. Lecturer policies arrive in Stage 3. Local seed has a fake 5-point scale and fake courses until client inputs #16 and #17.)_
-- [ ] `/admin/academics`: programmes, courses, terms. `/admin/offerings`: offerings per term. _(`/admin/academics` done 16 Nov 2026: create and edit programmes (status, web address, description, entry requirements), add, edit and delete courses (the database keeps courses that have been offered), create and edit terms (open for applications or not). Saving refreshes the public programme pages and the application form's intakes at once. `/admin/offerings` next.)_
+- [x] `/admin/academics`: programmes, courses, terms. `/admin/offerings`: offerings per term. _(Done 16 Nov 2026. `/admin/academics`: create and edit programmes (status, web address, description, entry requirements), add, edit and delete courses (the database keeps courses that have been offered), create and edit terms (open for applications or not); saving refreshes the public programme pages and the application form's intakes at once. `/admin/offerings`: per term, tick the courses that run, by programme, year and semester; a course with registered students stays offered (`lib/offerings.ts`). Lecturers are assigned to offerings in Stage 3.)_
 - [ ] **Registrations:** register students on a term's offerings in bulk.
 - [ ] Programme pages list courses by year and semester.
 
@@ -236,7 +236,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 3.5. Admin and applicant polish
 
-- [ ] `site_content` table + RLS + pgTAP tests; `/admin/content` so vision, history, Statement of Faith and contact details can change without a developer (moves the Stage 1 text into the database).
+- [ ] `site_content` table + RLS + pgTAP tests; `/admin/content` so vision, history, Statement of Faith and contact details can change without a developer (moves the Stage 1 text into the database). Built in our own admin, not with a headless CMS: see "Content management: when to revisit Payload CMS" under Post-MVP Ideas.
 - [ ] `/admin` overview: applications pending, students by programme, grades awaiting approval.
 - [ ] CSV exports for applications, students, results.
 - [ ] Admins upload documents on a student's behalf.
@@ -437,3 +437,15 @@ Templates built with React Email; sent through Resend (free tier: 3,000/month, 1
 - WhatsApp or SMS alerts for admission decisions and results.
 - Alumni records and award verification requests from other institutions.
 - Dark mode (tokens already in place).
+
+### Content management: when to revisit Payload CMS
+
+Considered 16 Nov 2026 and **not adopted**. Payload (a Next.js-native headless CMS on Postgres) is strong at editorial content, but this project is a records system: access control lives in the database (RLS, the grade-change trigger, pgTAP tests), there is one login (Supabase Auth), and every schema change is a hand-written migration. Payload brings its own users, its own app-level access control, its own tables and migrations, an admin at `/admin` that clashes with ours, and a media library that would need a second storage bucket. For the planned content (vision, history, Statement of Faith, welcome banner, contact details), the `site_content` table in step 3.5 is cheaper and keeps one login and one permission model.
+
+Revisit when **any** of these becomes true:
+
+- GHTI wants a content site, not a handful of text blocks: news, events, a sermon or publications archive, staff profiles, many pages with images.
+- Non-technical staff need page building, scheduled publishing, drafts with preview, or editorial approval workflows.
+- The amount of public content outgrows simple Markdown fields.
+
+If revisited, run Payload as a **separate small app** (its own subdomain, database schema and users) that the public site reads from, and keep the records system as it is. Check then that the Payload version supports this project's Next.js version, and that its storage and hosting fit the free tiers.

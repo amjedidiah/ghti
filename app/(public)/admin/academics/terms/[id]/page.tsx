@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -36,7 +37,13 @@ async function TermContent({ params }: Pick<PageProps<"/admin/academics/terms/[i
         <p>
           {term.accepting_applications
             ? "Open for applications: applicants can choose it as their intake."
-            : "Not open for applications."}
+            : "Not open for applications."}{" "}
+          <Link
+            href={`/admin/offerings/${term.id}`}
+            className="font-semibold text-accent-strong hover:underline"
+          >
+            Courses offered this term
+          </Link>
         </p>
       </AdminPageHeader>
       <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8">

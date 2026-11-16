@@ -87,7 +87,7 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `lib/files.ts` (upload rules, paths; pure, tested) and `lib/upload-browser.ts` (photo compression, direct-to-Storage upload with progress)
 - `components/applications/`: `ApplicationForm`, `DocumentUpload`
 - `components/admin/`: `ApplicationsList` (browser-side name filter), `DocumentViewer`, `ReviewPanel`; `lib/admin/actions.ts` and `lib/queries/admin-applications.ts`
-- Academics admin (`/admin/academics`): `components/admin/` `ProgrammeForm`, `CourseForm`, `TermForm`, `DeleteCourseButton`; `lib/admin/academics.ts` (Server Actions), `lib/queries/admin-academics.ts`, `lib/validation/academics.ts` (schemas and row mapping; pure, tested). `lib/validation/form.ts` turns a Zod failure into a `FormState`
+- Academics admin (`/admin/academics`, `/admin/offerings`): `components/admin/` `ProgrammeForm`, `CourseForm`, `TermForm`, `DeleteCourseButton`, `OfferingsForm`; `lib/offerings.ts` (what to add or remove; pure, tested); `lib/admin/academics.ts` (Server Actions), `lib/queries/admin-academics.ts`, `lib/validation/academics.ts` (schemas and row mapping; pure, tested). `lib/validation/form.ts` turns a Zod failure into a `FormState`
 - `app/(public)/admin/documents/[id]/route.ts`: the only way to open an applicant document. Logs the view in `document_views`, then redirects to a 10-minute signed URL
 - `components/forms/`: `Field`, `TextInput`, `PasswordInput`, `SubmitButton`, `FormMessage`, `useActionForm` (React Hook Form + `useActionState`)
 - `app/auth/confirm/`: landing route for every auth email link (`token_hash` + `verifyOtp`); templates in `supabase/templates/`
@@ -132,6 +132,7 @@ An admitted applicant becomes a `student` on the same account. Staff accounts ar
 - **Never render raw Drive links.** Students reach materials through `/materials/[id]`, which checks registration and then redirects.
 - **PDFs are generated on demand** and never stored.
 - Stay inside free tiers (Supabase, Vercel Hobby, Resend). Flag anything that would add a paid service or a recurring cost before adding it.
+- **No headless CMS (e.g. Payload) inside this app.** Public text moves into the `site_content` table and our own admin (step 3.5). The plan's "Content management: when to revisit Payload CMS" says when to reconsider, and then only as a separate app.
 
 ## Code Conventions
 
