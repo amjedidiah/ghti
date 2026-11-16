@@ -5,6 +5,7 @@ import SignOutButton from "@/components/auth/SignOutButton";
 const ADMIN_LINKS = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/applications", label: "Applications" },
+  { href: "/admin/academics", label: "Academics" },
 ];
 
 /** Admin area chrome: a sub-navigation bar under the site header. Access is checked per page. */
@@ -25,7 +26,7 @@ function AdminLayout({ children }: LayoutProps<"/admin">) {
             ))}
           </nav>
           <div className="shrink-0 py-2">
-            <SignOutButton />
+            <SignOutButton compact />
           </div>
         </div>
       </div>

@@ -162,7 +162,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 #### 2.1. Academic structure
 
 - [x] `courses`, `course_offerings` (lecturer optional until Stage 3), `registrations`, `grading_scale` tables + RLS + pgTAP tests. _(Migration `20261116090000_academic_records.sql`, tests in `supabase/tests/academic_records.test.sql`. The public reads the courses of published programmes; students read only their own registrations, offerings and courses; admins write. Lecturer policies arrive in Stage 3. Local seed has a fake 5-point scale and fake courses until client inputs #16 and #17.)_
-- [ ] `/admin/academics`: programmes, courses, terms. `/admin/offerings`: offerings per term.
+- [ ] `/admin/academics`: programmes, courses, terms. `/admin/offerings`: offerings per term. _(`/admin/academics` done 16 Nov 2026: create and edit programmes (status, web address, description, entry requirements), add, edit and delete courses (the database keeps courses that have been offered), create and edit terms (open for applications or not). Saving refreshes the public programme pages and the application form's intakes at once. `/admin/offerings` next.)_
 - [ ] **Registrations:** register students on a term's offerings in bulk.
 - [ ] Programme pages list courses by year and semester.
 
