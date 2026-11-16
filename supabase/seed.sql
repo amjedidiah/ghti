@@ -84,6 +84,8 @@ where c.year = 1 and c.semester = 1
 --   admin:      local-admin@example.test / local-admin-pass-123
 --   applicants: amaka.admitted@example.test, tunde.submitted@example.test
 --               (password local-applicant-pass-123)
+--   students:   chidi.student@example.test, ngozi.student@example.test
+--               (password local-student-pass-123)
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
   raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
@@ -97,7 +99,9 @@ select
 from (values
   ('00000000-0000-0000-0000-00000000ad01'::uuid, 'local-admin@example.test', 'local-admin-pass-123', 'Local Admin'),
   ('00000000-0000-0000-0000-00000000a701'::uuid, 'amaka.admitted@example.test', 'local-applicant-pass-123', 'Amaka Okafor'),
-  ('00000000-0000-0000-0000-00000000a702'::uuid, 'tunde.submitted@example.test', 'local-applicant-pass-123', 'Tunde Bello')
+  ('00000000-0000-0000-0000-00000000a702'::uuid, 'tunde.submitted@example.test', 'local-applicant-pass-123', 'Tunde Bello'),
+  ('00000000-0000-0000-0000-0000000005a1'::uuid, 'chidi.student@example.test', 'local-student-pass-123', 'Chidi Eze'),
+  ('00000000-0000-0000-0000-0000000005a2'::uuid, 'ngozi.student@example.test', 'local-student-pass-123', 'Ngozi Adeyemi')
 ) as u (id, email, password, full_name);
 
 insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
@@ -105,7 +109,7 @@ select gen_random_uuid(), u.id, u.id::text,
   jsonb_build_object('sub', u.id::text, 'email', u.email, 'email_verified', true),
   'email', now(), now(), now()
 from auth.users u
-where u.email in ('local-admin@example.test', 'amaka.admitted@example.test', 'tunde.submitted@example.test');
+where u.email like '%@example.test';
 
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-00000000ad01';
 
@@ -123,3 +127,18 @@ from (values
 cross join public.programmes p
 cross join public.terms t
 where p.slug = 'certificate-in-theology' and t.session = '2026/2027' and t.name = 'Second semester';
+
+-- Two enrolled students on the Certificate, starting in the first semester
+-- (FAKE matric numbers until GHTI's format arrives, client input #18).
+update public.profiles set role = 'student'
+where id in ('00000000-0000-0000-0000-0000000005a1', '00000000-0000-0000-0000-0000000005a2');
+
+insert into public.students (id, matric_no, programme_id, entry_term_id)
+select s.id, s.matric_no, p.id, t.id
+from (values
+  ('00000000-0000-0000-0000-0000000005a1'::uuid, 'GHTI/2026/CERT/101'),
+  ('00000000-0000-0000-0000-0000000005a2'::uuid, 'GHTI/2026/CERT/102')
+) as s (id, matric_no)
+cross join public.programmes p
+cross join public.terms t
+where p.slug = 'certificate-in-theology' and t.session = '2026/2027' and t.name = 'First semester';
