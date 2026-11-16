@@ -60,7 +60,7 @@ export async function getApplicationForReview(id: string) {
   const { data, error } = await supabase
     .from("applications")
     .select(
-      "*, programme:programmes(title, level), intake:terms(session, name), reviewer:profiles!applications_reviewed_by_fkey(full_name), documents(id, kind, file_name, size_bytes, mime, created_at)",
+      "*, programme:programmes(title, level), intake:terms(session, name), reviewer:profiles!applications_reviewed_by_fkey(full_name), documents(id, kind, file_name, size_bytes, mime, created_at), student:students!students_application_id_fkey(matric_no, status, created_at, entry_term:terms(name, session))",
     )
     .eq("id", id)
     .maybeSingle();

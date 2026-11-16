@@ -12,9 +12,10 @@ export const ROLE_HOME: Record<AppRole, string> = {
 
 export const SIGN_IN_PATH = "/sign-in";
 
-/** Areas only one role may enter. `/portal` and `/teach` join in Stages 2 and 3. */
+/** Areas only one role may enter. `/teach` joins in Stage 3. */
 const ROLE_AREAS: { prefix: string; role: AppRole; except?: string[] }[] = [
   { prefix: "/apply", role: "applicant", except: ["/apply/register"] },
+  { prefix: "/portal", role: "student" },
   { prefix: "/admin", role: "admin" },
 ];
 

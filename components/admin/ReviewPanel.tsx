@@ -133,8 +133,8 @@ function ReviewPanel({
             : "Confirm decision"}
       </SubmitButton>
       <p className="text-xs text-secondary">
-        A decision is final here. Matric numbers are assigned when admitted applicants become
-        students (coming next stage).
+        A decision is final here. After admitting, enrol the applicant as a student (matric number
+        and entry term) in the panel that appears below.
       </p>
     </div>
   );

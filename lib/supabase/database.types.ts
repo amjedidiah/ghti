@@ -637,6 +637,29 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      enrol_student: {
+        Args: {
+          p_application_id: string
+          p_entry_term_id?: string
+          p_matric_no: string
+        }
+        Returns: {
+          application_id: string | null
+          created_at: string
+          entry_term_id: string
+          id: string
+          matric_no: string
+          programme_id: string
+          status: Database["public"]["Enums"]["student_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "students"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_admin: { Args: never; Returns: boolean }
       start_review: {
         Args: { p_application_id: string }

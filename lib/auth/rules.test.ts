@@ -26,6 +26,9 @@ describe("requiresSignIn", () => {
     ["/apply/status", true],
     ["/admin", true],
     ["/admin/applications/1", true],
+    ["/portal", true],
+    ["/portal/results", true],
+    ["/portals", false],
     ["/reset-password", true],
     ["/apply/register", false],
     ["/applying", false],
@@ -50,12 +53,15 @@ describe("guardRedirect", () => {
   test("lets each role into its own area", () => {
     expect(guardRedirect("/apply", "", "applicant")).toBeNull();
     expect(guardRedirect("/admin", "", "admin")).toBeNull();
+    expect(guardRedirect("/portal", "", "student")).toBeNull();
   });
 
   test("sends a role out of another role's area to its own home", () => {
     expect(guardRedirect("/admin", "", "applicant")).toBe("/apply");
     expect(guardRedirect("/apply", "", "admin")).toBe("/admin");
     expect(guardRedirect("/apply/status", "", "student")).toBe("/portal");
+    expect(guardRedirect("/portal", "", "applicant")).toBe("/apply");
+    expect(guardRedirect("/portal", "", "admin")).toBe("/admin");
   });
 
   test("keeps registration open to visitors", () => {

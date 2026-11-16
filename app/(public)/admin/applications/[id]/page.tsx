@@ -6,16 +6,20 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 
 import DocumentViewer from "@/components/admin/DocumentViewer";
+import EnrolPanel from "@/components/admin/EnrolPanel";
 import ReviewPanel from "@/components/admin/ReviewPanel";
+import { enrolStudent } from "@/lib/admin/actions";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { applicantName } from "@/lib/applications/labels";
 import { rowToValues } from "@/lib/applications/mapping";
 import { requireRole } from "@/lib/auth/session";
 import { LEVEL_LABELS } from "@/lib/programmes";
+import { listTermsForAdmin } from "@/lib/queries/admin-academics";
 import {
   getApplicationForReview,
   type ApplicationForReview,
 } from "@/lib/queries/admin-applications";
+import { termLabel } from "@/lib/validation/academics";
 import { formatPhone } from "@/lib/validation/application";
 
 // Generic title on purpose: applicant names never go in titles, URLs or analytics.
@@ -80,9 +84,39 @@ async function ReviewContent({ params }: Pick<PageProps<"/admin/applications/[id
           <Panel title="Decision">
             <Decision application={application} />
           </Panel>
+          {application.status === "admitted" && (
+            <Panel title="Student record">
+              <StudentRecord application={application} />
+            </Panel>
+          )}
         </div>
       </div>
     </>
+  );
+}
+
+/** After admission: the student record, or the form that creates it. */
+async function StudentRecord({ application }: { application: ApplicationForReview }) {
+  const student = application.student;
+  if (student) {
+    return (
+      <Rows
+        rows={[
+          ["Matric number", student.matric_no],
+          ["Entry term", student.entry_term ? termLabel(student.entry_term) : ""],
+          ["Status", student.status.charAt(0).toUpperCase() + student.status.slice(1)],
+          ["Enrolled", dateTimeFormat.format(new Date(student.created_at))],
+        ]}
+      />
+    );
+  }
+  const terms = await listTermsForAdmin();
+  return (
+    <EnrolPanel
+      action={enrolStudent.bind(null, application.id)}
+      terms={terms.map((term) => ({ id: term.id, label: termLabel(term) }))}
+      intakeTermId={application.intake_term_id}
+    />
   );
 }
 

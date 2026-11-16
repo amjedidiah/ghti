@@ -26,12 +26,12 @@ Everything we need from GHTI to keep building, in the order we need it. This is 
 
 ## By week 5: Stage 2 🛺 Records
 
-| #   | What we need                                                                                                        | Needed for                                    | Status  |
-| --- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------- |
-| 16  | **Courses** for each programme, by year and semester (code, title, credit units)                                    | Step 2.1 academic structure, programme pages  | Waiting |
-| 17  | **Grading scale** (e.g. 5-point CGPA), and whether scores split into continuous assessment + exam (open question 3) | Step 2.3 grades and GPA                       | Waiting |
-| 18  | **Matric number format** (e.g. `GHTI/2026/DIP/001`)                                                                 | Step 2.2 admitting applicants as students     | Waiting |
-| 19  | **How long to keep documents of rejected applicants** before they are deleted                                       | Step 2.6 scheduled clean-up (data protection) | Waiting |
+| #   | What we need                                                                                                        | Needed for                                    | Status                                                                                                                    |
+| --- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 16  | **Courses** for each programme, by year and semester (code, title, credit units)                                    | Step 2.1 academic structure, programme pages  | Waiting                                                                                                                   |
+| 17  | **Grading scale** (e.g. 5-point CGPA), and whether scores split into continuous assessment + exam (open question 3) | Step 2.3 grades and GPA                       | Waiting                                                                                                                   |
+| 18  | **Matric number format** (e.g. `GHTI/2026/DIP/001`)                                                                 | Step 2.2 admitting applicants as students     | Waiting. Enrolment is built; admins type any upper-case number with letters, digits, "/" and "-" until the format arrives |
+| 19  | **How long to keep documents of rejected applicants** before they are deleted                                       | Step 2.6 scheduled clean-up (data protection) | Waiting                                                                                                                   |
 
 ## By week 9: Stage 3 🚗 Full system
 

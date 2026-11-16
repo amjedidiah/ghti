@@ -169,9 +169,9 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 #### 2.2. From applicant to student
 
 - [x] `students` table + RLS + pgTAP tests (students read only their own record). _(Built with step 2.1, since registrations need it. Students cannot edit their record; `application_id` links back to the application they were admitted from.)_
-- [ ] Admit assigns a matric number and entry term, and changes the role to `student` on the same account.
+- [x] Admit assigns a matric number and entry term, and changes the role to `student` on the same account. _(Done 16 Nov 2026: `enrol_student()` (admin only, one transaction, pgTAP-tested) runs from a "Student record" panel on admitted applications. The entry term defaults to the applicant's intake. Matric numbers are free text (upper case, letters, digits, "/" and "-") until GHTI confirms its format, client input #18.)_
 - [ ] Welcome email on admission (matric number, how to sign in).
-- [ ] `proxy.ts` guards `/portal`.
+- [x] `proxy.ts` guards `/portal`. _(Students only; `/portal` shows the student's own record. Courses, results and history arrive in step 2.4.)_
 
 #### 2.3. Grades
 

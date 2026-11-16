@@ -5,6 +5,9 @@ import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import type { FormState } from "@/lib/validation/auth";
+import { enrolmentSchema } from "@/lib/validation/enrolment";
+import { parseFormData } from "@/lib/validation/form";
 import { decisionSchema, type DecisionValues } from "@/lib/validation/review";
 
 export type ReviewResult = { ok: true } | { ok: false; message: string };
@@ -56,4 +59,62 @@ export async function decideApplication(
   });
   revalidatePath(`/admin/applications/${applicationId}`);
   return result(error);
+}
+
+/**
+ * Enrol an admitted applicant as a student: matric number and entry term, and
+ * the account's role becomes `student` (enrol_student, one transaction).
+ */
+export async function enrolStudent(
+  applicationId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireRole("admin");
+  if (!id.safeParse(applicationId).success) {
+    return { status: "error", message: "Unknown application." };
+  }
+  const parsed = parseFormData(enrolmentSchema, formData);
+  if (!parsed.ok) return parsed.state;
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("enrol_student", {
+    p_application_id: applicationId,
+    p_matric_no: parsed.data.matricNo,
+    p_entry_term_id: parsed.data.entryTermId,
+  });
+  revalidatePath(`/admin/applications/${applicationId}`);
+
+  if (!error) {
+    return { status: "success", message: `Enrolled as ${parsed.data.matricNo}.` };
+  }
+  switch (error.code) {
+    case "23505":
+      return {
+        status: "error",
+        message: "Please fix the highlighted fields.",
+        fieldErrors: { matricNo: ["Another student already has this matric number."] },
+      };
+    case "23514":
+      return {
+        status: "error",
+        message: "Please fix the highlighted fields.",
+        fieldErrors: { matricNo: ['Use letters, numbers, "/" and "-" only (up to 40).'] },
+      };
+    case "23503":
+      return {
+        status: "error",
+        message: "Please fix the highlighted fields.",
+        fieldErrors: { entryTermId: ["That term no longer exists. Refresh and choose another."] },
+      };
+    case "42501":
+      return { status: "error", message: ERRORS["42501"] };
+    case "55000":
+      return {
+        status: "error",
+        message: "This applicant is already a student, or is no longer admitted. Refresh the page.",
+      };
+    default:
+      return { status: "error", message: "Something went wrong. Please try again." };
+  }
 }
