@@ -152,3 +152,18 @@ join public.courses c on c.id = o.course_id and c.programme_id = s.programme_id
 join public.terms t on t.id = o.term_id
 where s.matric_no in ('GHTI/2026/CERT/101', 'GHTI/2026/CERT/102')
   and t.session = '2026/2027' and t.name = 'First semester';
+
+-- Grades (FAKE): both first-semester results published for Chidi; Ngozi has
+-- one published and one draft (drafts never reach the portal).
+insert into public.grades (registration_id, ca_score, exam_score, status)
+select r.id, g.ca, g.exam, g.status::public.grade_status
+from (values
+  ('GHTI/2026/CERT/101', 'BIB 101', 28.0, 45.0, 'published'),
+  ('GHTI/2026/CERT/101', 'THE 101', 30.0, 32.0, 'published'),
+  ('GHTI/2026/CERT/102', 'BIB 101', 35.0, 50.0, 'published'),
+  ('GHTI/2026/CERT/102', 'THE 101', 20.0, null, 'draft')
+) as g (matric_no, code, ca, exam, status)
+join public.students s on s.matric_no = g.matric_no
+join public.registrations r on r.student_id = s.id
+join public.course_offerings o on o.id = r.offering_id
+join public.courses c on c.id = o.course_id and c.code = g.code;

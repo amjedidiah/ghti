@@ -1,23 +1,18 @@
+import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 
-import SignOutButton from "@/components/auth/SignOutButton";
+import StudentRecordCard from "@/components/portal/StudentRecordCard";
 import PageHeader from "@/components/shared/PageHeader";
 import { requireRole } from "@/lib/auth/session";
-import { LEVEL_LABELS } from "@/lib/programmes";
-import { getMyStudentRecord } from "@/lib/queries/student";
-import { termLabel } from "@/lib/validation/academics";
+import { formatGpa } from "@/lib/grades";
+import { getMyRegistrations, getMyStudentRecord } from "@/lib/queries/student";
+import { groupResults } from "@/lib/results";
 
 export const metadata: Metadata = { title: "Student portal", robots: { index: false } };
 
-const STATUS_LABELS = {
-  active: "Active",
-  deferred: "Deferred",
-  withdrawn: "Withdrawn",
-  graduated: "Graduated",
-} as const;
-
-/** Student portal home (Stage 2). Courses, results and history arrive in step 2.4. */
+/** Student portal home: record, CGPA at a glance, and the latest term's courses. */
 function PortalPage() {
   return (
     <Suspense fallback={<PageHeader eyebrow="Student portal" title="Welcome" />}>
@@ -28,77 +23,93 @@ function PortalPage() {
 
 async function PortalContent() {
   const user = await requireRole("student");
-  const record = await getMyStudentRecord(user.id);
+  const [record, registrations] = await Promise.all([
+    getMyStudentRecord(user.id),
+    getMyRegistrations(user.id),
+  ]);
+  const results = groupResults(registrations);
+  const latest = results.terms.at(-1) ?? null;
   const firstName = user.fullName.split(/\s+/)[0];
 
   return (
     <>
       <PageHeader eyebrow="Student portal" title={firstName ? `Welcome, ${firstName}` : "Welcome"}>
-        <p>Your student record at a glance. Your courses and results will appear here.</p>
+        <p>Your record, your courses and your results, in one place.</p>
       </PageHeader>
 
-      <div className="mx-auto w-full max-w-3xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-4xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
         {record ? (
-          <section
-            aria-labelledby="record-heading"
-            className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6"
-          >
-            <h2 id="record-heading" className="font-display text-xl font-bold text-primary">
-              Your record
-            </h2>
-            <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
-              <Item label="Matric number" value={record.matric_no} strong />
-              <Item label="Status" value={STATUS_LABELS[record.status]} />
-              <Item
-                label="Programme"
-                value={
-                  record.programme
-                    ? `${record.programme.title} (${LEVEL_LABELS[record.programme.level].singular})`
-                    : "Ask the registrar"
-                }
-              />
-              <Item
-                label="Entry term"
-                value={record.entry_term ? termLabel(record.entry_term) : "Ask the registrar"}
-              />
-            </dl>
-          </section>
+          <StudentRecordCard record={record} />
         ) : (
           <p className="rounded-xl border border-border bg-card p-6 text-secondary">
             We could not find your student record. Please contact the registrar.
           </p>
         )}
 
-        <p className="text-sm text-secondary">
-          Something wrong in your record? Contact the registrar to have it corrected.
-        </p>
+        <dl className="grid grid-cols-2 gap-4">
+          <Tile label="CGPA" value={formatGpa(results.cgpa)} href="/portal/results" />
+          <Tile
+            label={latest ? `GPA, ${latest.label}` : "Latest GPA"}
+            value={formatGpa(latest?.gpa ?? null)}
+            href="/portal/results"
+          />
+        </dl>
 
-        <SignOutButton />
+        <section aria-labelledby="courses-heading">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="courses-heading" className="font-display text-2xl font-bold text-primary">
+              {latest ? `Courses: ${latest.label}` : "Courses"}
+            </h2>
+            {latest && (
+              <p className="text-sm text-secondary tabular-nums">
+                {latest.unitsRegistered} credit units
+              </p>
+            )}
+          </div>
+          {latest ? (
+            <ul className="mt-4 divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
+              {latest.courses.map((course) => (
+                <li key={course.code} className="flex items-center justify-between gap-4 px-4 py-3">
+                  <span className="min-w-0">
+                    <span className="font-semibold text-primary tabular-nums">{course.code}</span>{" "}
+                    <span className="text-primary">{course.title}</span>
+                  </span>
+                  <span className="shrink-0 text-sm tabular-nums">
+                    {course.published ? (
+                      <span className="rounded bg-muted px-1.5 py-0.5 font-bold text-primary">
+                        {course.letter}
+                      </span>
+                    ) : (
+                      <span className="text-secondary">{course.creditUnits} CU</span>
+                    )}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 rounded-xl border border-dashed border-border bg-card p-6 text-center text-secondary">
+              You are not registered on any courses yet. The registrar registers you each term.
+            </p>
+          )}
+        </section>
       </div>
     </>
   );
 }
 
-function Item({
-  label,
-  value,
-  strong = false,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-}) {
+function Tile({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <div>
+    <div className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm">
       <dt className="text-sm font-semibold text-secondary">{label}</dt>
-      <dd
-        className={
-          strong
-            ? "mt-1 text-2xl font-bold tracking-tight break-all text-primary lining-nums tabular-nums"
-            : "mt-1 text-primary"
-        }
-      >
-        {value}
+      <dd className="mt-1 text-4xl font-bold text-primary lining-nums tabular-nums">{value}</dd>
+      <dd className="mt-auto pt-3">
+        <Link
+          href={href}
+          className="inline-flex items-center gap-1 text-sm font-semibold text-accent-strong hover:underline"
+        >
+          See results
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
       </dd>
     </div>
   );

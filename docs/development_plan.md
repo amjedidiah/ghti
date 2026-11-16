@@ -182,8 +182,8 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 2.4. Student portal
 
-- [ ] `/portal` dashboard, `/portal/record`, `/portal/results` (`GradeTable`: per-term results, GPA, CGPA), `/portal/history`, `/portal/account`.
-- [ ] Biodata is read-only for students.
+- [x] `/portal` dashboard, `/portal/record`, `/portal/results` (`GradeTable`: per-term results, GPA, CGPA), `/portal/history`, `/portal/account`. _(Done 16 Nov 2026. Overview: record, CGPA and latest GPA, the latest term's courses. Results: every term, oldest last, with term GPA and CGPA from published grades only (`lib/results.ts`, tested); unpublished courses show "Awaiting result". History: applied, admitted, enrolled, then each term. Account: name, email, change password, sign out. The portal and admin share an `AreaBar` with the current section highlighted.)_
+- [x] Biodata is read-only for students. _(`/portal/record` shows the application's details through the same `ApplicationDetails` panels admins see; there is no edit path, and corrections go through the registrar until step 3.5's "Request a change".)_
 
 #### 2.5. Records admin
 

@@ -2,30 +2,26 @@ import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
 import { Suspense } from "react";
 
 import DocumentViewer from "@/components/admin/DocumentViewer";
+import ApplicationDetails, { Panel, Rows } from "@/components/applications/ApplicationDetails";
 import EnrolPanel from "@/components/admin/EnrolPanel";
 import ReviewPanel from "@/components/admin/ReviewPanel";
 import { enrolStudent } from "@/lib/admin/actions";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { applicantName } from "@/lib/applications/labels";
-import { rowToValues } from "@/lib/applications/mapping";
 import { requireRole } from "@/lib/auth/session";
-import { LEVEL_LABELS } from "@/lib/programmes";
 import { listTermsForAdmin } from "@/lib/queries/admin-academics";
 import {
   getApplicationForReview,
   type ApplicationForReview,
 } from "@/lib/queries/admin-applications";
 import { termLabel } from "@/lib/validation/academics";
-import { formatPhone } from "@/lib/validation/application";
 
 // Generic title on purpose: applicant names never go in titles, URLs or analytics.
 export const metadata: Metadata = { title: "Review application", robots: { index: false } };
 
-const dateFormat = new Intl.DateTimeFormat("en-NG", { dateStyle: "long" });
 const dateTimeFormat = new Intl.DateTimeFormat("en-NG", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -74,7 +70,7 @@ async function ReviewContent({ params }: Pick<PageProps<"/admin/applications/[id
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-5 lg:px-8">
         <div className="space-y-6 lg:col-span-3">
-          <Details application={application} />
+          <ApplicationDetails application={application} />
         </div>
 
         <div className="space-y-6 lg:col-span-2">
@@ -144,118 +140,6 @@ function Decision({ application }: { application: ApplicationForReview }) {
         </blockquote>
       )}
     </div>
-  );
-}
-
-function Details({ application }: { application: ApplicationForReview }) {
-  const values = rowToValues(application);
-  const phone = (value: string) => (value ? formatPhone(value) : "");
-
-  return (
-    <>
-      <Panel title="Programme">
-        <Rows
-          rows={[
-            [
-              "Programme",
-              application.programme
-                ? `${application.programme.title} (${LEVEL_LABELS[application.programme.level].singular})`
-                : "",
-            ],
-            [
-              "Intake",
-              application.intake ? `${application.intake.name}, ${application.intake.session}` : "",
-            ],
-          ]}
-        />
-      </Panel>
-
-      <Panel title="Personal details">
-        <Rows
-          rows={[
-            ["Surname", values.surname],
-            ["First name", values.firstName],
-            ["Other names", values.otherNames],
-            [
-              "Date of birth",
-              values.dateOfBirth ? dateFormat.format(new Date(values.dateOfBirth)) : "",
-            ],
-            [
-              "Gender",
-              values.gender === "female" ? "Female" : values.gender === "male" ? "Male" : "",
-            ],
-            ["Phone", phone(values.phone)],
-            ["Email", values.email],
-            ["Address", values.address],
-            ["State of origin", values.stateOfOrigin],
-            ["Nationality", values.nationality],
-            ["CRM branch or church", values.crmBranch],
-          ]}
-        />
-      </Panel>
-
-      <Panel title="Education">
-        {values.education.length === 0 ? (
-          <p className="text-sm text-secondary">None given.</p>
-        ) : (
-          <ul className="divide-y divide-border text-sm">
-            {values.education.map((entry, index) => (
-              <li key={index} className="py-2">
-                <p className="font-semibold text-primary">{entry.institution}</p>
-                <p className="text-secondary">
-                  {entry.qualification}
-                  {entry.year && `, ${entry.year}`}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Panel>
-
-      <Panel title="Next of kin and referee">
-        <Rows
-          rows={[
-            ["Next of kin", values.nextOfKinName],
-            ["Relationship", values.nextOfKinRelationship],
-            ["Next of kin's phone", phone(values.nextOfKinPhone)],
-            ["Referee", values.refereeName],
-            ["Referee's position", values.refereePosition],
-            ["Referee's phone", phone(values.refereePhone)],
-            ["Referee's email", values.refereeEmail],
-          ]}
-        />
-      </Panel>
-
-      <Panel title="Declaration">
-        <p className="text-sm text-secondary">
-          {application.consent_given_at
-            ? `Consent given ${dateTimeFormat.format(new Date(application.consent_given_at))}.`
-            : "Consent not given yet."}
-        </p>
-      </Panel>
-    </>
-  );
-}
-
-function Panel({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
-      <h2 className="font-display text-xl font-bold text-primary">{title}</h2>
-      <div className="mt-4">{children}</div>
-    </section>
-  );
-}
-
-function Rows({ rows }: { rows: [string, string][] }) {
-  return (
-    <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-      {rows.map(([label, value]) => (
-        <div key={label}>
-          <dt className="font-semibold text-primary">{label}</dt>
-          <dd className="mt-0.5 break-words whitespace-pre-line text-secondary">{value || "—"}</dd>
-        </div>
-      ))}
-    </dl>
   );
 }
 
