@@ -1,6 +1,6 @@
 # Development Plan
 
-Website, admissions portal and student records system for **GHTI**, a CRM institution offering Certificate, Diploma and Degree programmes. It sits alongside the other CRM subdomains (`hymns.`, `cwl.`, `protection.crm-world.org.ng`).
+Website, admissions portal and student records system for **GHTI** (Great Harvest Theological Institute), a CRM institution offering a Certificate, an Ordinary Diploma and a Post Graduate Diploma in Theology. It sits alongside the other CRM subdomains (`hymns.`, `cwl.`, `protection.crm-world.org.ng`).
 
 This plan is designed for an **AI-Assisted Workflow** (Cursor IDE + Claude, or any other tools).  
 The AI handles the boilerplate and styling, while humans act as the **Architect and Reviewer**.
@@ -47,7 +47,7 @@ These change scope. Defaults below are what the plan assumes until answered. **N
 
 | #   | Question                                                                                                      | Assumed default                                                                                                   | Needed by |
 | --- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------- |
-| 1   | What is GHTI's full name? Is there a section 1 (or more) of the spec I haven't seen?                          | Plan built from section 2 only                                                                                    | Stage 1   |
+| 1   | What is GHTI's full name? Is there a section 1 (or more) of the spec I haven't seen?                          | Plan built from section 2 only. _Name answered 16 Nov 2026: Great Harvest Theological Institute._                 | Stage 1   |
 | 2   | Fees: is there an application fee or tuition to be paid online?                                               | **No online payments in v1.** Admins can mark fees as paid manually                                               | Stage 1   |
 | 3   | Grading: which scale (e.g. 5-point CGPA), and is a score split into continuous assessment + exam?             | Configurable scale table; CA + exam scores                                                                        | Stage 2   |
 | 4   | Which biodata fields? Is there an existing paper application form?                                            | Common fields (see Stage 1, step 1.3); confirm against their form                                                 | Stage 1   |
@@ -279,26 +279,26 @@ Migrations live in `supabase/migrations/` (versioned in Git, never edited in the
 
 **Academics:**
 
-| Table               | Key fields                                                                                            | Notes                                           | Stage |
-| ------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ----- |
-| `programmes`        | `id`, `slug`, `title`, `level`, `duration`, `description`, `requirements`, `status`                   | `level`: `certificate` \| `diploma` \| `degree` | 1     |
-| `terms`             | `id`, `session` (e.g. `2026/2027`), `name`, `starts_on`, `ends_on`                                    | Semesters or terms; also used as intakes        | 1     |
-| `courses`           | `id`, `programme_id`, `code`, `title`, `credit_units`, `year`, `semester`                             |                                                 | 2     |
-| `course_offerings`  | `id`, `course_id`, `term_id`, `lecturer_id`                                                           | A course taught in a given term                 | 2     |
-| `registrations`     | `id`, `student_id`, `offering_id`                                                                     | Student takes an offering                       | 2     |
-| `grades`            | `registration_id`, `ca_score`, `exam_score`, `total`, `letter`, `grade_point`, `status`, `entered_by` | `status`: `draft` \| `submitted` \| `published` | 2     |
-| `grade_changes`     | `id`, `grade_id`, `old_values`, `new_values`, `changed_by`, `reason`, `changed_at`                    | Written by trigger; never edited                | 2     |
-| `grading_scale`     | `min_score`, `max_score`, `letter`, `grade_point`                                                     | Configurable by admins                          | 2     |
-| `lecture_schedules` | `id`, `programme_id`, `term_id`, `title`, `drive_file_id`                                             | Downloadable schedules (spec item 2)            | 3     |
+| Table               | Key fields                                                                                            | Notes                                                                                          | Stage |
+| ------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
+| `programmes`        | `id`, `slug`, `title`, `level`, `duration`, `description`, `requirements`, `status`                   | `level`: `certificate` \| `diploma` \| `postgraduate_diploma` (was `degree` until 16 Nov 2026) | 1     |
+| `terms`             | `id`, `session` (e.g. `2026/2027`), `name`, `starts_on`, `ends_on`                                    | Semesters or terms; also used as intakes                                                       | 1     |
+| `courses`           | `id`, `programme_id`, `code`, `title`, `credit_units`, `year`, `semester`                             |                                                                                                | 2     |
+| `course_offerings`  | `id`, `course_id`, `term_id`, `lecturer_id`                                                           | A course taught in a given term                                                                | 2     |
+| `registrations`     | `id`, `student_id`, `offering_id`                                                                     | Student takes an offering                                                                      | 2     |
+| `grades`            | `registration_id`, `ca_score`, `exam_score`, `total`, `letter`, `grade_point`, `status`, `entered_by` | `status`: `draft` \| `submitted` \| `published`                                                | 2     |
+| `grade_changes`     | `id`, `grade_id`, `old_values`, `new_values`, `changed_by`, `reason`, `changed_at`                    | Written by trigger; never edited                                                               | 2     |
+| `grading_scale`     | `min_score`, `max_score`, `letter`, `grade_point`                                                     | Configurable by admins                                                                         | 2     |
+| `lecture_schedules` | `id`, `programme_id`, `term_id`, `title`, `drive_file_id`                                             | Downloadable schedules (spec item 2)                                                           | 3     |
 
 **Learning content and awards:**
 
-| Table          | Key fields                                                                                           | Notes                                                | Stage |
-| -------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----- |
-| `lessons`      | `id`, `course_id`, `title`, `body`, `youtube_id`, `position`                                         | Store the **video ID**, not the raw URL              | 3     |
-| `materials`    | `id`, `course_id`, `lesson_id?`, `title`, `kind`, `drive_file_id`                                    | Slides, PDFs, handouts                               | 3     |
-| `awards`       | `id` (uuid), `serial`, `student_id`, `programme_id`, `kind`, `issued_at`, `issued_by`, `revoked_at?` | Certificate, Diploma or Degree awarded               | 3     |
-| `site_content` | `key`, `title`, `body_md`, `updated_by`                                                              | Vision, history, Statement of Faith, contact details | 3     |
+| Table          | Key fields                                                                                           | Notes                                                 | Stage |
+| -------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----- |
+| `lessons`      | `id`, `course_id`, `title`, `body`, `youtube_id`, `position`                                         | Store the **video ID**, not the raw URL               | 3     |
+| `materials`    | `id`, `course_id`, `lesson_id?`, `title`, `kind`, `drive_file_id`                                    | Slides, PDFs, handouts                                | 3     |
+| `awards`       | `id` (uuid), `serial`, `student_id`, `programme_id`, `kind`, `issued_at`, `issued_by`, `revoked_at?` | Certificate, Diploma or Post Graduate Diploma awarded | 3     |
+| `site_content` | `key`, `title`, `body_md`, `updated_by`                                                              | Vision, history, Statement of Faith, contact details  | 3     |
 
 ### Row-Level Security (the real access control)
 
@@ -324,7 +324,7 @@ RLS is enabled on every table and the storage bucket; no table is reachable with
 | 1   | Home                 | `/` (welcome banner, vision, history summary, Statement of Faith teaser)                  | 1                            |
 | 2   | About                | `/about` (vision, full history)                                                           | 1                            |
 | 3   | Statement of Faith   | `/statement-of-faith`                                                                     | 1                            |
-| 4   | Academics            | `/academics` (programmes grouped by Certificate, Diploma, Degree)                         | 1                            |
+| 4   | Academics            | `/academics` (programmes grouped by Certificate, Diploma, Post Graduate Diploma)          | 1                            |
 | 5   | Programme detail     | `/academics/[slug]` (overview, requirements, courses by year/semester, lecture schedules) | 1 (courses: 2, schedules: 3) |
 | 6   | Admissions           | `/admissions` (requirements, how to apply, key dates, "Start application")                | 1                            |
 | 7   | Contact & Directions | `/contact`                                                                                | 1 (form: 2)                  |

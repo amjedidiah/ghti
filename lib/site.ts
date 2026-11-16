@@ -4,12 +4,12 @@
 
 export const site = {
   name: "GHTI",
-  /** Full institutional name: open question 1. */
-  fullName: null as string | null,
+  /** Full institutional name (client input #2, received 16 Nov 2026). */
+  fullName: "Great Harvest Theological Institute" as string | null,
   ministry: "Charismatic Renewal Ministries",
   ministryUrl: "https://crm-world.org.ng",
   description:
-    "Certificate, Diploma and Degree programmes of Charismatic Renewal Ministries. Apply online, follow your studies and see your results in one place.",
+    "Certificate, Ordinary Diploma and Post Graduate Diploma in Theology at Great Harvest Theological Institute, a Charismatic Renewal Ministries institution. Apply online, follow your studies and see your results, all in one place.",
   contact: {
     address: null as string | null,
     phone: null as string | null,

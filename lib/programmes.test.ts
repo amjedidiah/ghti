@@ -7,13 +7,17 @@ function programme(slug: string, level: ProgrammeLevel) {
 }
 
 describe("groupProgrammesByLevel", () => {
-  test("orders groups certificate, diploma, degree regardless of input order", () => {
+  test("orders groups certificate, diploma, postgraduate diploma regardless of input order", () => {
     const groups = groupProgrammesByLevel([
-      programme("b-th", "degree"),
+      programme("pgd", "postgraduate_diploma"),
       programme("cert", "certificate"),
       programme("dip", "diploma"),
     ]);
-    expect(groups.map((group) => group.level)).toEqual(["certificate", "diploma", "degree"]);
+    expect(groups.map((group) => group.level)).toEqual([
+      "certificate",
+      "diploma",
+      "postgraduate_diploma",
+    ]);
   });
 
   test("leaves out levels with no programmes", () => {

@@ -7,8 +7,8 @@ import { content } from "@/lib/content";
 import { getPublishedProgrammes } from "@/lib/queries/programmes";
 import { site } from "@/lib/site";
 
-// Welcome banner copy is a placeholder until the client's banner text and
-// images arrive (client input #9). Vision and faith come from lib/content.ts.
+// Welcome text, vision and faith come from lib/content.ts (client input #9).
+// Banner images are still to come.
 
 async function HomePage() {
   const programmes = await getPublishedProgrammes();
@@ -21,11 +21,16 @@ async function HomePage() {
             A {site.ministry} institution
           </p>
           <h1 className="mt-4 max-w-3xl font-display text-4xl leading-tight font-bold tracking-tight text-primary sm:text-5xl lg:text-6xl">
-            Welcome to {site.name}
+            {site.fullName ?? `Welcome to ${site.name}`}
           </h1>
           <div aria-hidden className="mt-6 h-1 w-16 rounded-full bg-accent" />
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-secondary">
-            {site.description}
+          {content.welcome ? (
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-primary">{content.welcome}</p>
+          ) : (
+            <Placeholder what="the welcome banner text." input={9} className="mt-6 max-w-2xl" />
+          )}
+          <p className="mt-4 max-w-2xl leading-relaxed text-secondary">
+            Apply online, follow your studies and see your results, all in one place.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
@@ -81,8 +86,8 @@ async function HomePage() {
                   Our programmes
                 </h2>
                 <p className="mt-2 text-secondary">
-                  Certificate, Diploma and Degree, taught in person with recorded lectures and
-                  materials online.
+                  Certificate, Ordinary Diploma and Post Graduate Diploma in Theology, taught in
+                  person with recorded lectures and materials online.
                 </p>
               </div>
               <Link

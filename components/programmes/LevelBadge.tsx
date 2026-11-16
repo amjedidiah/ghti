@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 const styles: Record<ProgrammeLevel, string> = {
   certificate: "bg-muted text-secondary ring-border",
   diploma: "bg-accent-soft/40 text-accent-strong ring-accent/40",
-  degree: "bg-brand text-on-brand ring-brand",
+  postgraduate_diploma: "bg-brand text-on-brand ring-brand",
 };
 
 function LevelBadge({ level, className }: { level: ProgrammeLevel; className?: string }) {

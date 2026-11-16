@@ -7,7 +7,7 @@ import { getPublishedProgrammes } from "@/lib/queries/programmes";
 
 export const metadata: Metadata = {
   title: "Academics",
-  description: "Certificate, Diploma and Degree programmes at GHTI.",
+  description: "Certificate, Ordinary Diploma and Post Graduate Diploma in Theology at GHTI.",
 };
 
 async function AcademicsPage() {
@@ -17,8 +17,8 @@ async function AcademicsPage() {
     <>
       <PageHeader eyebrow="Academics" title="Our programmes">
         <p>
-          Choose the level that fits where you are: a Certificate to build foundations, a Diploma to
-          go deeper, or a Degree for full theological training.
+          Choose the level that fits where you are: a Certificate to build foundations, an Ordinary
+          Diploma to go deeper, or a Post Graduate Diploma if you already hold a degree.
         </p>
       </PageHeader>
 

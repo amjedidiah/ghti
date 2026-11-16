@@ -1,11 +1,12 @@
--- Local development seed. ALL DATA HERE IS FAKE: placeholder programmes until
--- the client supplies the real list. Never put real applicant or student data
--- in this file.
+-- Local development seed. ALL DATA HERE IS FAKE except the three published
+-- programme titles (client input #7, 16 Nov 2026); their durations,
+-- descriptions and requirements are placeholders until GHTI supplies them.
+-- Never put real applicant or student data in this file.
 
 insert into public.programmes (slug, title, level, duration, description, requirements, status, position) values
   (
-    'certificate-in-biblical-studies',
-    'Certificate in Biblical Studies',
+    'certificate-in-theology',
+    'Certificate in Theology',
     'certificate',
     '1 year (2 semesters)',
     'A foundation in the Scriptures, Christian doctrine and the life of prayer, for believers who want to grow in their faith and serve in their local church.',
@@ -14,8 +15,8 @@ insert into public.programmes (slug, title, level, duration, description, requir
     1
   ),
   (
-    'diploma-in-theology',
-    'Diploma in Theology',
+    'ordinary-diploma-in-theology',
+    'Ordinary Diploma in Theology',
     'diploma',
     '2 years (4 semesters)',
     'Deeper study of the Old and New Testaments, church history, pastoral care and preaching, preparing students for ministry leadership.',
@@ -24,12 +25,12 @@ insert into public.programmes (slug, title, level, duration, description, requir
     1
   ),
   (
-    'bachelor-of-theology',
-    'Bachelor of Theology',
-    'degree',
-    '4 years (8 semesters)',
-    'A full theological education combining biblical languages, systematic theology, missions and supervised ministry practice.',
-    'Five credits at O level including English and Literature, or a GHTI Diploma. A letter of recommendation and an interview.',
+    'post-graduate-diploma-in-theology',
+    'Post Graduate Diploma in Theology',
+    'postgraduate_diploma',
+    '1 year (2 semesters)',
+    'Theological training for graduates of other disciplines: biblical studies, systematic theology, missions and supervised ministry practice.',
+    'A first degree or HND in any discipline. A letter of recommendation and an interview.',
     'published',
     1
   ),

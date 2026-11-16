@@ -6,8 +6,14 @@
 export type FaithArticle = { title: string; body: string };
 
 export const content = {
-  /** Client input #9. One or two sentences. */
-  vision: null as string | null,
+  /** Client input #9. Home page welcome banner (received 16 Nov 2026). */
+  welcome:
+    "We train pastors, church workers, market men and women, born again Christians in every sphere of life. Join us now." as
+      string | null,
+  /** Client input #9. One or two sentences (received 16 Nov 2026). */
+  vision:
+    "To equip leaders with relevant training to love God and love people to Christ, live a Christ-like life and serve as agents of transformation in the society." as
+      string | null,
   /** Client input #9. */
   mission: null as string | null,
   /** Client input #9. Paragraphs, oldest first. */

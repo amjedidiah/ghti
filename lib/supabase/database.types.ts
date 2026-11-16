@@ -505,7 +505,7 @@ export type Database = {
         | "rejected"
         | "withdrawn"
       document_kind: "transcript" | "id_card" | "photo" | "other"
-      programme_level: "certificate" | "diploma" | "degree"
+      programme_level: "certificate" | "diploma" | "postgraduate_diploma"
       programme_status: "draft" | "published" | "archived"
     }
     CompositeTypes: {
@@ -647,7 +647,7 @@ export const Constants = {
         "withdrawn",
       ],
       document_kind: ["transcript", "id_card", "photo", "other"],
-      programme_level: ["certificate", "diploma", "degree"],
+      programme_level: ["certificate", "diploma", "postgraduate_diploma"],
       programme_status: ["draft", "published", "archived"],
     },
   },

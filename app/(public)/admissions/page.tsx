@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 const STEPS = [
   {
     title: "Choose a programme",
-    body: "Read about our Certificate, Diploma and Degree programmes and check their entry requirements.",
+    body: "Read about our Certificate, Ordinary Diploma and Post Graduate Diploma programmes and check their entry requirements.",
     link: { href: "/academics", label: "See programmes" },
   },
   {

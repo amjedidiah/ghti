@@ -4,7 +4,7 @@ Guidance for AI coding agents (Claude Code, Cursor, Codex) working in this repos
 
 ## Project Overview
 
-GHTI website, admissions portal and student records system for a Charismatic Renewal Ministries (CRM) institution offering Certificate, Diploma and Degree programmes. It will live at `ghti.crm-world.org.ng` (subdomain to be confirmed), alongside the other CRM subdomains (`hymns.`, `cwl.`, `protection.`).
+GHTI (Great Harvest Theological Institute) website, admissions portal and student records system for a Charismatic Renewal Ministries (CRM) institution offering a Certificate, an Ordinary Diploma and a Post Graduate Diploma in Theology. It will live at `ghti.crm-world.org.ng` (subdomain to be confirmed), alongside the other CRM subdomains (`hymns.`, `cwl.`, `protection.`).
 
 This is an **app**, not a content site: applications, logins, four roles, academic records and grades. Data modelling and access control come first; visuals second.
 
@@ -147,6 +147,7 @@ An admitted applicant becomes a `student` on the same account. Staff accounts ar
 ## Design System
 
 - **GHTI's header comes first** (decision 15 Nov 2026, differs from `cwl` and `protection`). The header is GHTI's own: the GHTI wordmark with "Charismatic Renewal Ministries" beneath it, then About, Academics, Admissions, Contact and the account button. The six CRM navigation links are not shown; the footer's copyright line links "Charismatic Renewal Ministries" to crm-world.org.ng, beside the CRM social links. `public/brand/crm-logo.png` is kept for award certificates (step 3.4).
+- **GHTI logo** (redrawn from GHTI's crest, approved 16 Nov 2026): `public/brand/ghti-mark.svg` (shield, descending dove, white light, open Bible; no text) sits beside the header wordmark and is the source of `app/icon.svg`, `app/icon.png` and `app/apple-icon.png`. `public/brand/ghti-crest.svg` is the full crest with the name arc and "GHTI", for the About page and certificates; its lettering is live text (Inter, Playfair Display), so convert it to outlines before using it as an `<img>` or in a PDF. The dove is gold, not a flame.
 - **Brand:** CRM navy and gold (as on `protection`), cream ground. Playfair Display for headings, Inter for body, loaded with `next/font/google`.
 - **Tailwind v4:** theme defined with `@theme` in `globals.css`, no config file. Components use **semantic tokens** (`bg`, `bg-card`, `text-primary`, `text-secondary`, `accent`, `border`, …), not raw palette values, so dark mode can be added later.
 - **Simplicity and ease of use first.** Many users are on phones: every screen must work at 375px width. Forms show clear, specific errors.

@@ -10,7 +10,7 @@ select plan(18);
 insert into public.programmes (slug, title, level, duration, status) values
   ('test-published-cert', 'Test Published Certificate', 'certificate', '1 year', 'published'),
   ('test-draft-diploma', 'Test Draft Diploma', 'diploma', '2 years', 'draft'),
-  ('test-archived-degree', 'Test Archived Degree', 'degree', '4 years', 'archived');
+  ('test-archived-pgd', 'Test Archived PGD', 'postgraduate_diploma', '4 years', 'archived');
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('00000000-0000-0000-0000-0000000000a1', 'applicant@example.test', '{"full_name": "Applicant"}'),
@@ -105,7 +105,7 @@ select set_config('request.jwt.claims',
 
 select results_eq(
   $$ select slug from public.programmes where slug like 'test-%' order by slug $$,
-  $$ values ('test-archived-degree'::text), ('test-draft-diploma'), ('test-published-cert') $$,
+  $$ values ('test-archived-pgd'::text), ('test-draft-diploma'), ('test-published-cert') $$,
   'an admin sees programmes in every status'
 );
 
@@ -116,7 +116,7 @@ select lives_ok(
 );
 
 update public.programmes set status = 'published' where slug = 'test-draft-diploma';
-delete from public.programmes where slug = 'test-archived-degree';
+delete from public.programmes where slug = 'test-archived-pgd';
 
 reset role;
 
@@ -127,7 +127,7 @@ select is(
 );
 
 select is(
-  (select count(*) from public.programmes where slug = 'test-archived-degree'),
+  (select count(*) from public.programmes where slug = 'test-archived-pgd'),
   0::bigint,
   'an admin can delete programmes'
 );

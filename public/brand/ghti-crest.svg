@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" role="img" aria-labelledby="t">
+  <title id="t">Great Harvest Theological Institute crest</title>
+  <defs>
+    <path id="shield" d="M50,40 H350 Q362,40 362,52 V250 C362,352 292,410 200,446 C108,410 38,352 38,250 V52 Q38,40 50,40 Z"/>
+    <path id="arc" d="M98,296 A130,130 0 1 1 302,296"/>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.35"/>
+    </linearGradient>
+    <radialGradient id="doveFill" cx="0.34" cy="0.33" r="0.8">
+      <stop offset="0" stop-color="#fff8d6"/>
+      <stop offset="0.25" stop-color="#f6dc2a"/>
+      <stop offset="0.6" stop-color="#f5b12c"/>
+      <stop offset="1" stop-color="#f28a4e"/>
+    </radialGradient>
+    <!-- The descending dove, traced from the original crest: two wings and a
+         tail as three tongues, green slits between them, the neck pointing
+         down to the Bible. Drawn in its own grid; the transform puts the
+         neck tip at (200, 214). -->
+    <path id="dove" transform="translate(200 214) scale(0.233) translate(-268 -582)"
+          d="M108,158 C80,195 58,250 60,315 C62,385 110,435 170,460 C195,470 205,480 208,500 C212,530 225,565 268,582
+             C262,545 270,505 300,480 C330,455 380,440 420,400 C460,360 470,290 460,220 C450,160 410,95 355,62
+             C380,120 395,200 370,270 C355,305 335,325 312,340
+             C330,280 345,200 340,140 C335,90 320,50 305,25
+             C285,65 250,110 205,130 C180,142 155,160 135,180
+             C175,220 215,290 232,362 C200,345 160,300 135,250 C120,220 113,190 108,158 Z"/>
+  </defs>
+
+  <!-- Shield: navy rim, cream keyline, green field -->
+  <use href="#shield" fill="#1a365d" stroke="#1a365d" stroke-width="44" stroke-linejoin="round"/>
+  <use href="#shield" fill="none" stroke="#f5e6c8" stroke-width="16" stroke-linejoin="round"/>
+  <use href="#shield" fill="#13703f"/>
+
+  <!-- Name on the arc -->
+  <text font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="700" letter-spacing="2.2" fill="#f5e6c8">
+    <textPath href="#arc" startOffset="50%" text-anchor="middle">GREAT HARVEST THEOLOGICAL INSTITUTE</textPath>
+  </text>
+
+  <!-- White light from the dove onto the open Bible -->
+  <path d="M200,212 L128,266 H272 Z" fill="url(#beam)"/>
+
+  <use href="#dove" fill="url(#doveFill)"/>
+
+  <!-- Open Bible -->
+  <path fill="#7a4a1c" d="M200,318 C176,306 146,302 112,306 L118,262 C150,258 178,262 200,274 C222,262 250,258 282,262 L288,306 C254,302 224,306 200,318 Z"/>
+  <path fill="#ffffff" d="M200,308 C178,296 150,292 120,296 L126,256 C154,252 180,256 200,268 Z"/>
+  <path fill="#f7efdf" d="M200,308 C222,296 250,292 280,296 L274,256 C246,252 220,256 200,268 Z"/>
+  <path fill="none" stroke="#7a4a1c" stroke-width="1.6" stroke-linecap="round" opacity="0.5"
+        d="M138,268 C158,266 176,270 190,276 M137,277 C157,275 175,279 190,285 M136,286 C156,284 174,288 190,294
+           M262,268 C242,266 224,270 210,276 M263,277 C243,275 225,279 210,285 M264,286 C244,284 226,288 210,294"/>
+  <path fill="none" stroke="#7a4a1c" stroke-width="2" d="M200,268 V308"/>
+
+  <!-- GHTI -->
+  <text x="200" y="382" text-anchor="middle" font-family="'Playfair Display', Georgia, serif" font-size="60" font-weight="700" letter-spacing="4" fill="#f2b632">GHTI</text>
+</svg>

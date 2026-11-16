@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -14,12 +15,22 @@ function Header() {
   return (
     <header className="relative z-40 bg-brand text-on-brand">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
-        <Link href="/" className="flex min-w-0 flex-col leading-none">
-          <span className="font-display text-2xl font-bold tracking-wide lg:text-3xl">
-            {site.name}
-          </span>
-          <span className="mt-1 truncate text-[0.7rem] font-medium tracking-wide text-on-brand-muted lg:text-xs">
-            {site.ministry}
+        <Link href="/" className="flex min-w-0 items-center gap-3">
+          <Image
+            src="/brand/ghti-mark.svg"
+            alt=""
+            width={40}
+            height={48}
+            preload
+            className="h-10 w-auto shrink-0 lg:h-12"
+          />
+          <span className="flex min-w-0 flex-col leading-none">
+            <span className="font-display text-2xl font-bold tracking-wide lg:text-3xl">
+              {site.name}
+            </span>
+            <span className="mt-1 truncate text-[0.7rem] font-medium tracking-wide text-on-brand-muted lg:text-xs">
+              {site.ministry}
+            </span>
           </span>
         </Link>
 

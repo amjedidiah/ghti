@@ -14,13 +14,16 @@ export type Programme = ProgrammeSummary &
 export const PROGRAMME_LEVELS = [
   "certificate",
   "diploma",
-  "degree",
+  "postgraduate_diploma",
 ] as const satisfies readonly ProgrammeLevel[];
 
 export const LEVEL_LABELS: Record<ProgrammeLevel, { singular: string; plural: string }> = {
   certificate: { singular: "Certificate", plural: "Certificate programmes" },
   diploma: { singular: "Diploma", plural: "Diploma programmes" },
-  degree: { singular: "Degree", plural: "Degree programmes" },
+  postgraduate_diploma: {
+    singular: "Post Graduate Diploma",
+    plural: "Post Graduate Diploma programmes",
+  },
 };
 
 /**
