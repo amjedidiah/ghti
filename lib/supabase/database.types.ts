@@ -165,6 +165,21 @@ export type Database = {
           },
         ]
       }
+      contact_sends: {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+        }
+        Update: {
+          created_at?: string
+          id?: never
+        }
+        Relationships: []
+      }
       course_offerings: {
         Row: {
           course_id: string
@@ -827,6 +842,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      claim_contact_send: { Args: { p_daily_limit: number }; Returns: boolean }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]

@@ -6,6 +6,10 @@
     {
       "path": "/api/cron/keep-alive",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-documents",
+      "schedule": "30 5 * * *"
     }
   ]
 }

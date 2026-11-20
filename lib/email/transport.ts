@@ -13,6 +13,8 @@ export type EmailMessage = {
   subject: string;
   html: string;
   text: string;
+  /** Overrides EMAIL_REPLY_TO, e.g. the sender of a contact-form message. */
+  replyTo?: string;
 };
 
 export type SendOutcome = {
@@ -49,6 +51,7 @@ async function sendThroughMailpit(baseUrl: string, messages: EmailMessage[]): Pr
           body: JSON.stringify({
             From: fromField,
             To: [{ Email: message.to }],
+            ...(message.replyTo ? { ReplyTo: [{ Email: message.replyTo }] } : {}),
             Subject: message.subject,
             HTML: message.html,
             Text: message.text,
@@ -76,7 +79,7 @@ async function sendThroughResend(apiKey: string, messages: EmailMessage[]): Prom
     const payload = chunk.map((message) => ({
       from: from(),
       to: message.to,
-      replyTo: replyTo(),
+      replyTo: message.replyTo ?? replyTo(),
       subject: message.subject,
       html: message.html,
       text: message.text,

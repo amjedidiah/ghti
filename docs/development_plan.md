@@ -191,8 +191,8 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 2.6. Finishing the tricycle
 
-- [ ] Contact form on `/contact`: Server Action + Zod; sends to the office inbox and a confirmation to the sender; rate limited.
-- [ ] Scheduled job: delete documents of rejected applicants after the agreed period.
+- [x] Contact form on `/contact`: Server Action + Zod; sends to the office inbox and a confirmation to the sender; rate limited. _(Done 20 Nov 2026. Goes to `EMAIL_TO`, the developer's inbox until GHTI names the office address (client input #10); replies go straight to the sender. The sender's confirmation repeats none of their text, so the form cannot be used to send our emails with someone else's words. A honeypot field turns away simple bots. Rate limits: Vercel Hobby allows only one rate-limit rule, so `/contact` joins the auth forms' rule (30 POSTs a minute per IP), and `claim_contact_send()` caps the form at 30 messages a UTC day in total (`CONTACT_DAILY_LIMIT`), so spam can never use up the Resend quota that sign-up emails need.)_
+- [x] Scheduled job: delete documents of rejected applicants after the agreed period. _(Built 20 Nov 2026, switched off: `/api/cron/cleanup-documents` runs daily at 05:30 UTC and deletes the files and rows of documents on applications rejected more than `REJECTED_DOCUMENTS_KEEP_DAYS` ago (`lib/retention.ts`), up to 100 a run; the application stays. The period is `null` until GHTI decides (client input #19), and while it is null the job deletes nothing. Tested end to end on the local stack. Uses `SUPABASE_SECRET_KEY`, now in Vercel (Production only).)_
 - [x] Seed script covers the whole stage: one programme of each level, a term, two courses, an admin, two students with grades. _(Plus notes on both students' files, 20 Nov 2026.)_
 - [ ] **Milestone: one term's results published** to students online (pilot).
 

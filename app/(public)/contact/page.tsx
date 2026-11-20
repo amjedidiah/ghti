@@ -1,6 +1,7 @@
 import { Clock, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import type { Metadata } from "next";
 
+import ContactForm from "@/components/contact/ContactForm";
 import PageHeader from "@/components/shared/PageHeader";
 import Placeholder from "@/components/shared/Placeholder";
 import { content } from "@/lib/content";
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   description: `Phone numbers, address and directions to ${site.name}.`,
 };
 
-// The contact form arrives in step 2.6. Details come from client input #10.
+// Details come from client input #10. The form sends to EMAIL_TO (step 2.6).
 
 function ContactPage() {
   const { address, phone, email } = site.contact;
@@ -20,7 +21,7 @@ function ContactPage() {
   return (
     <>
       <PageHeader eyebrow="Contact" title="Contact & directions">
-        <p>Call, email or visit the GHTI office.</p>
+        <p>Call, email or visit the GHTI office, or send us a message below.</p>
       </PageHeader>
 
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8">
@@ -89,6 +90,21 @@ function ContactPage() {
           )}
         </div>
       </div>
+
+      <section
+        aria-labelledby="message-heading"
+        className="mx-auto w-full max-w-7xl px-4 pb-16 sm:px-6 lg:px-8"
+      >
+        <div className="relative max-w-2xl rounded-xl border border-border bg-card p-5 shadow-sm sm:p-8">
+          <h2 id="message-heading" className="font-display text-2xl font-bold text-primary">
+            Send us a message
+          </h2>
+          <p className="mt-2 mb-6 text-secondary">
+            Questions about programmes, admissions or your studies. We reply by email.
+          </p>
+          <ContactForm />
+        </div>
+      </section>
     </>
   );
 }

@@ -3,6 +3,8 @@ import { describe, expect, test } from "bun:test";
 
 import ApplicationDecision, { applicationDecisionSubject } from "@/emails/ApplicationDecision";
 import ApplicationSubmitted from "@/emails/ApplicationSubmitted";
+import ContactMessage from "@/emails/ContactMessage";
+import ContactReceipt from "@/emails/ContactReceipt";
 import ResultsPublished, { resultsPublishedSubject } from "@/emails/ResultsPublished";
 import StudentWelcome from "@/emails/StudentWelcome";
 
@@ -61,5 +63,26 @@ describe("email templates", () => {
   test("a missing name falls back to a greeting", async () => {
     const { text: plain } = await text(<ResultsPublished name="" term="Term" siteUrl={siteUrl} />);
     expect(plain).toContain("Dear student");
+  });
+
+  test("the office copy carries the whole message and how to reach the sender", async () => {
+    const { text: plain } = await text(
+      <ContactMessage
+        name="Ada Obi"
+        email="ada@example.test"
+        phone="0803 123 4567"
+        message="When does the next intake start?"
+      />,
+    );
+    expect(plain).toContain("Ada Obi");
+    expect(plain).toContain("ada@example.test");
+    expect(plain).toContain("0803 123 4567");
+    expect(plain).toContain("When does the next intake start?");
+  });
+
+  test("the sender's receipt never repeats what they wrote", async () => {
+    const { text: plain } = await text(<ContactReceipt name="Ada" siteUrl={siteUrl} />);
+    expect(plain).toContain("Dear Ada");
+    expect(plain).not.toContain("intake");
   });
 });
