@@ -46,7 +46,7 @@ async function AdminOverview() {
             : `${waiting} application${waiting === 1 ? " is" : "s are"} waiting for review.`}
         </p>
       </PageHeader>
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {tiles.map((tile) => (
             <li key={tile.label}>

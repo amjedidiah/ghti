@@ -18,7 +18,7 @@ function AboutPage() {
         <p>{site.fullName ?? `A ${site.ministry} institution.`}</p>
       </PageHeader>
 
-      <div className="mx-auto max-w-3xl space-y-12 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl space-y-12 px-4 py-12 sm:px-6 lg:px-8">
         <Section title="Our vision">
           {content.vision ? (
             <p className="font-display text-2xl leading-snug text-primary">{content.vision}</p>

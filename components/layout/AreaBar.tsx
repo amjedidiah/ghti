@@ -15,7 +15,7 @@ function AreaBar({
 }) {
   return (
     <div className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         {/* The current path is request data: the plain links show until it is known. */}
         <Suspense fallback={<AreaNavLinks label={label} links={links} active={null} />}>
           <AreaNav label={label} root={root} links={links} />

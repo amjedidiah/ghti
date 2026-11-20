@@ -23,7 +23,7 @@ function ContactPage() {
         <p>Call, email or visit the GHTI office.</p>
       </PageHeader>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8">
         <div className="space-y-4">
           <Detail icon={MapPin} label="Address">
             {address ? (

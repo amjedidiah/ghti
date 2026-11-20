@@ -12,7 +12,7 @@ function PageHeader({
 }) {
   return (
     <div className="border-b border-border bg-muted">
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         {eyebrow && (
           <p className="text-xs font-semibold tracking-widest text-accent-strong uppercase">
             {eyebrow}

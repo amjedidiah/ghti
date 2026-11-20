@@ -24,7 +24,7 @@ function Footer() {
   return (
     <footer>
       <section className="surface-dark border-t-[3px] border-accent bg-band text-on-brand">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:px-8">
+        <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:px-8">
           <div>
             <p className="font-display text-3xl font-bold tracking-tight">{site.name}</p>
             <p className="mt-2 text-sm text-on-band-muted">
@@ -77,7 +77,7 @@ function Footer() {
       </section>
 
       <div className="border-t border-border bg-bg">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-8 sm:px-6 md:flex-row lg:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-6 px-4 py-8 sm:px-6 md:flex-row lg:px-8">
           <p className="text-center text-sm text-secondary md:text-left">
             &copy; <CurrentYear />{" "}
             <a href={site.ministryUrl} className="font-medium text-ministry hover:underline">

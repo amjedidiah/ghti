@@ -22,7 +22,7 @@ async function AcademicsPage() {
         </p>
       </PageHeader>
 
-      <div className="mx-auto max-w-7xl space-y-14 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl space-y-14 px-4 py-12 sm:px-6 lg:px-8">
         {groups.length === 0 ? (
           <p className="rounded-xl border border-border bg-card p-8 text-center text-secondary">
             Programmes will be listed here soon.

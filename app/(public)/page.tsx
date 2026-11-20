@@ -16,7 +16,7 @@ async function HomePage() {
   return (
     <>
       <section className="border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
           <p className="text-xs font-semibold tracking-widest text-accent-strong uppercase">
             A {site.ministry} institution
           </p>
@@ -54,7 +54,7 @@ async function HomePage() {
         <h2 id="faith-heading" className="sr-only">
           Vision and faith
         </h2>
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-14 sm:px-6 md:grid-cols-2 lg:px-8">
+        <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-14 sm:px-6 md:grid-cols-2 lg:px-8">
           <Pillar title="Our vision" href="/about" linkLabel="About GHTI">
             {content.vision ? (
               <p className="font-display text-xl leading-snug text-primary">{content.vision}</p>
@@ -76,7 +76,7 @@ async function HomePage() {
 
       {programmes.length > 0 && (
         <section aria-labelledby="programmes-heading" className="bg-muted">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <div>
                 <h2
@@ -111,7 +111,7 @@ async function HomePage() {
 
       {/* Dove gold, so the green header and green footer never stack. */}
       <section aria-labelledby="apply-heading" className="bg-accent-soft text-primary">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center lg:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center lg:px-8">
           <div>
             <h2 id="apply-heading" className="font-display text-3xl font-bold tracking-tight">
               Ready to apply?

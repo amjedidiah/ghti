@@ -30,7 +30,9 @@ const dateTimeFormat = new Intl.DateTimeFormat("en-NG", {
 function ReviewPage({ params }: PageProps<"/admin/applications/[id]">) {
   return (
     <Suspense
-      fallback={<p className="mx-auto max-w-7xl px-4 py-10 text-secondary">Loading application…</p>}
+      fallback={
+        <p className="mx-auto w-full max-w-7xl px-4 py-10 text-secondary">Loading application…</p>
+      }
     >
       <ReviewContent params={params} />
     </Suspense>
@@ -48,7 +50,7 @@ async function ReviewContent({ params }: Pick<PageProps<"/admin/applications/[id
   return (
     <>
       <div className="border-b border-border bg-muted">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <Link
             href="/admin/applications"
             className="inline-flex items-center gap-1 text-sm font-semibold text-secondary hover:text-primary"
@@ -68,7 +70,7 @@ async function ReviewContent({ params }: Pick<PageProps<"/admin/applications/[id
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-5 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-5 lg:px-8">
         <div className="space-y-6 lg:col-span-3">
           <ApplicationDetails application={application} />
         </div>

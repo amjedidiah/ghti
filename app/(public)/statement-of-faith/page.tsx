@@ -19,7 +19,7 @@ function StatementOfFaithPage() {
         <p>The beliefs that shape our teaching and our life together.</p>
       </PageHeader>
 
-      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         {articles ? (
           <ol className="space-y-8">
             {articles.map((article, index) => (

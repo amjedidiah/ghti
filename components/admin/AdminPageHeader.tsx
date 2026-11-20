@@ -16,7 +16,7 @@ function AdminPageHeader({
 }) {
   return (
     <div className="border-b border-border bg-muted">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href={back.href}
           className="inline-flex items-center gap-1 text-sm font-semibold text-secondary hover:text-primary"

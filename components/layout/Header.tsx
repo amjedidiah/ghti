@@ -14,7 +14,7 @@ import { ghtiNavLinks, site } from "@/lib/site";
 function Header() {
   return (
     <header className="surface-dark relative z-40 bg-brand text-on-brand">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <Image
             src="/brand/ghti-mark.svg"

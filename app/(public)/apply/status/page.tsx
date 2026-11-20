@@ -48,7 +48,7 @@ async function StatusContent() {
       <PageHeader eyebrow="Applicant" title="Your application">
         <StatusBadge status={application.status} />
       </PageHeader>
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <p className="rounded-xl border border-border bg-card p-5 leading-relaxed text-primary shadow-sm">
           {NEXT_STEPS[application.status]}
           {application.decision_note && (

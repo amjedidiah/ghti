@@ -28,7 +28,7 @@ function PrivacyPage() {
         </p>
       </PageHeader>
 
-      <div className="mx-auto max-w-3xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
         {!controller && (
           <Placeholder
             what="review of this draft notice, the data controller's legal name and a contact for data requests."

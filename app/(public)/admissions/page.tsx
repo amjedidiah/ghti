@@ -44,7 +44,7 @@ async function AdmissionsPage() {
         <p>Applying to GHTI is done online, and works well on a phone.</p>
       </PageHeader>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
         <ol className="space-y-6 lg:col-span-2">
           {STEPS.map((step, index) => (
             <li key={step.title} className="flex gap-4">

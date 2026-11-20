@@ -48,7 +48,7 @@ async function ApplyContent() {
           back at any time.
         </p>
       </PageHeader>
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <ApplicationForm
           applicationId={application.id}
           ownerId={user.id}
@@ -72,7 +72,7 @@ function StartApplication({ name, email }: { name: string; email: string }) {
       <PageHeader eyebrow="Applicant" title={`Welcome, ${name || "applicant"}`}>
         <p>Your account is ready. When you are ready, start your application.</p>
       </PageHeader>
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm sm:p-8">
           <h2 className="font-display text-2xl font-bold text-primary">Before you start</h2>
           <ul className="mt-4 space-y-3 text-secondary">
