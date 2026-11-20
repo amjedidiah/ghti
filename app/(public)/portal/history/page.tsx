@@ -1,3 +1,4 @@
+import { FileDown } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -80,22 +81,53 @@ async function History() {
     return <p className="text-secondary">Nothing to show yet.</p>;
   }
 
+  const anyPublished = terms.some((term) => term.courses.some((course) => course.published));
+
   return (
-    <ol className="relative space-y-6 border-l-2 border-border pl-6">
-      {events.map((event, index) => (
-        <li key={`${event.title}-${index}`} className="relative">
-          <span
-            aria-hidden
-            className="absolute top-1.5 -left-[1.95rem] size-3 rounded-full bg-accent ring-4 ring-bg"
-          />
-          {event.date && (
-            <p className="text-sm text-secondary">{dateFormat.format(new Date(event.date))}</p>
-          )}
-          <p className="font-semibold text-primary">{event.title}</p>
-          {event.detail && <p className="text-sm text-secondary">{event.detail}</p>}
-        </li>
-      ))}
-    </ol>
+    <>
+      <section
+        aria-labelledby="transcript-heading"
+        className="mb-10 rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6"
+      >
+        <h2 id="transcript-heading" className="font-display text-xl font-bold text-primary">
+          Unofficial transcript
+        </h2>
+        <p className="mt-2 text-secondary">
+          A PDF of your published results, term by term, with your GPA and CGPA. It is for your own
+          use: for an official transcript, contact the registrar.
+        </p>
+        {anyPublished ? (
+          // A plain link: the PDF is a download, not a page to prefetch.
+          <a
+            href="/portal/transcript"
+            download
+            className="mt-4 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-3 font-semibold text-on-brand hover:bg-brand-deep"
+          >
+            <FileDown className="size-5" aria-hidden />
+            Download PDF
+          </a>
+        ) : (
+          <p className="mt-4 text-sm font-semibold text-secondary">
+            Available once your first results are published.
+          </p>
+        )}
+      </section>
+      <ol className="relative space-y-6 border-l-2 border-border pl-6">
+        {events.map((event, index) => (
+          <li key={`${event.title}-${index}`} className="relative">
+            <span
+              aria-hidden
+              className="absolute top-1.5 -left-[1.95rem] size-3 rounded-full bg-accent ring-4 ring-bg"
+            />
+            {event.date && (
+              <p className="text-sm text-secondary">{dateFormat.format(new Date(event.date))}</p>
+            )}
+            <p className="font-semibold text-primary">{event.title}</p>
+            {event.detail && <p className="text-sm text-secondary">{event.detail}</p>}
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }
 
