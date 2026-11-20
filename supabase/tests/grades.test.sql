@@ -47,7 +47,9 @@ select ok(
 );
 select policies_are('public', 'grades', array[
   'Students read their own published grades', 'Admins read all grades', 'Admins enter grades',
-  'Admins update grades', 'Admins delete unpublished grades'
+  'Admins update grades', 'Admins delete unpublished grades',
+  'Lecturers read their classes'' grades', 'Lecturers enter draft or submitted grades',
+  'Lecturers update their draft grades', 'Lecturers delete their draft grades'
 ], 'grades has only the expected policies');
 select policies_are('public', 'grade_changes', array['Admins read the grade change log'],
   'grade_changes has only the expected policy');

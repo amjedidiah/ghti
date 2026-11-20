@@ -16,6 +16,8 @@ export type OfferingCourse = {
   creditUnits: number;
   /** Registered students, or null when the course is not offered this term. */
   registrations: number | null;
+  /** Who teaches it this term, when offered and assigned. */
+  lecturer?: string | null;
 };
 
 export type OfferingProgramme = {
@@ -181,7 +183,14 @@ function CourseGroup({
                 <span className="w-20 shrink-0 font-semibold text-primary tabular-nums">
                   {course.code}
                 </span>
-                <span className="min-w-0 flex-1 text-primary">{course.title}</span>
+                <span className="min-w-0 flex-1 text-primary">
+                  {course.title}
+                  {course.registrations !== null && (
+                    <span className="block text-sm text-secondary">
+                      {course.lecturer ? `Lecturer: ${course.lecturer}` : "No lecturer yet"}
+                    </span>
+                  )}
+                </span>
                 {locked ? (
                   <span className="inline-flex shrink-0 items-center gap-1 text-sm text-secondary tabular-nums">
                     <Lock className="size-3.5" aria-hidden />

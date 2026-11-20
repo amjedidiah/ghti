@@ -8,7 +8,7 @@ import StaffRoleForm from "@/components/admin/StaffRoleForm";
 import PageHeader from "@/components/shared/PageHeader";
 import { changeStaffRole } from "@/lib/admin/users";
 import { requireRole } from "@/lib/auth/session";
-import { createClient } from "@/lib/supabase/server";
+import { listStaff } from "@/lib/queries/admin-staff";
 import { cn } from "@/lib/utils";
 import { STAFF_ROLE_LABELS, staffStatus, type StaffRole } from "@/lib/validation/staff";
 
@@ -36,9 +36,7 @@ function UsersPage() {
 
 async function UsersContent() {
   const me = await requireRole("admin");
-  const supabase = await createClient();
-  const { data: staff, error } = await supabase.rpc("staff_accounts");
-  if (error) throw new Error(`Could not load staff: ${error.message}`);
+  const staff = await listStaff();
 
   return (
     <>

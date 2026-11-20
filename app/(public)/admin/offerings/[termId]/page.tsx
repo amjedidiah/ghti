@@ -77,7 +77,7 @@ async function TermOfferingsContent({
 }
 
 /** Group each programme's courses by year and semester for the form. */
-function toFormProgrammes({ programmes, offered }: TermOfferings): OfferingProgramme[] {
+function toFormProgrammes({ programmes, offered, lecturers }: TermOfferings): OfferingProgramme[] {
   return programmes.map((programme) => {
     const groups = new Map<string, OfferingProgramme["groups"][number]>();
     for (const course of programme.courses) {
@@ -89,6 +89,7 @@ function toFormProgrammes({ programmes, offered }: TermOfferings): OfferingProgr
         title: course.title,
         creditUnits: course.credit_units,
         registrations: offered.get(course.id) ?? null,
+        lecturer: lecturers.get(course.id) ?? null,
       });
       groups.set(label, group);
     }

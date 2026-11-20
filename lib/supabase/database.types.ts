@@ -886,6 +886,15 @@ export type Database = {
         }
       }
       claim_contact_send: { Args: { p_daily_limit: number }; Returns: boolean }
+      class_list: {
+        Args: { p_offering_id: string }
+        Returns: {
+          full_name: string
+          grade_status: Database["public"]["Enums"]["grade_status"]
+          matric_no: string
+          registration_id: string
+        }[]
+      }
       current_app_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]

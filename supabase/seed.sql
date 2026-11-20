@@ -86,6 +86,7 @@ where c.year = 1 and c.semester = 1
 --               (password local-applicant-pass-123)
 --   students:   chidi.student@example.test, ngozi.student@example.test
 --               (password local-student-pass-123)
+--   lecturer:   lecturer@example.test / local-lecturer-pass-123
 insert into auth.users (
   instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
   raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
@@ -101,7 +102,8 @@ from (values
   ('00000000-0000-0000-0000-00000000a701'::uuid, 'amaka.admitted@example.test', 'local-applicant-pass-123', 'Amaka Okafor'),
   ('00000000-0000-0000-0000-00000000a702'::uuid, 'tunde.submitted@example.test', 'local-applicant-pass-123', 'Tunde Bello'),
   ('00000000-0000-0000-0000-0000000005a1'::uuid, 'chidi.student@example.test', 'local-student-pass-123', 'Chidi Eze'),
-  ('00000000-0000-0000-0000-0000000005a2'::uuid, 'ngozi.student@example.test', 'local-student-pass-123', 'Ngozi Adeyemi')
+  ('00000000-0000-0000-0000-0000000005a2'::uuid, 'ngozi.student@example.test', 'local-student-pass-123', 'Ngozi Adeyemi'),
+  ('00000000-0000-0000-0000-00000000ec01'::uuid, 'lecturer@example.test', 'local-lecturer-pass-123', 'Rev. Local Lecturer')
 ) as u (id, email, password, full_name);
 
 insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
@@ -112,6 +114,7 @@ from auth.users u
 where u.email like '%@example.test';
 
 update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-00000000ad01';
+update public.profiles set role = 'lecturer' where id = '00000000-0000-0000-0000-00000000ec01';
 
 -- Two applications: one admitted (ready to enrol as a student), one submitted.
 insert into public.applications (
@@ -177,3 +180,10 @@ from (values
   ('GHTI/2026/CERT/102', 'note', 'Asked about moving to the Diploma next session. Told to apply when the intake opens.', '2026-11-17 14:30+01')
 ) as n (matric_no, kind, body, at)
 join public.students s on s.matric_no = n.matric_no;
+
+-- The local lecturer (FAKE) teaches BIB 101 in the first semester.
+update public.course_offerings o
+set lecturer_id = '00000000-0000-0000-0000-00000000ec01'
+from public.courses c, public.terms t
+where c.id = o.course_id and t.id = o.term_id
+  and c.code = 'BIB 101' and t.session = '2026/2027' and t.name = 'First semester';

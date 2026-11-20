@@ -2,9 +2,11 @@
 
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/session";
+import { sendLecturerAssigned } from "@/lib/email/send";
 import { describeChanges, diffOfferings } from "@/lib/offerings";
 import { TERMS_TAG } from "@/lib/queries/applications";
 import { PROGRAMMES_TAG } from "@/lib/queries/programmes";
@@ -290,4 +292,71 @@ export async function saveOfferings(
       ? ` ${changes.kept.length} course${changes.kept.length === 1 ? " has" : "s have"} registered students, so ${changes.kept.length === 1 ? "it stays" : "they stay"}.`
       : "";
   return { status: "success", message: describeChanges(changes) + kept };
+}
+
+// Lecturers ------------------------------------------------------------------------------
+
+const lecturerChoice = z.object({
+  lecturerId: z.union([z.guid(), z.literal("")]).transform((value) => value || null),
+});
+
+/**
+ * Assign a lecturer to one offering, or none. The database accepts only
+ * lecturer accounts; a newly assigned lecturer gets an email.
+ */
+export async function assignLecturer(
+  offeringId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireRole("admin");
+  if (!z.guid().safeParse(offeringId).success) return UNKNOWN;
+  const parsed = parseFormData(lecturerChoice, formData);
+  if (!parsed.ok) return parsed.state;
+  const { lecturerId } = parsed.data;
+
+  const supabase = await createClient();
+  const { data: before } = await supabase
+    .from("course_offerings")
+    .select("lecturer_id")
+    .eq("id", offeringId)
+    .maybeSingle();
+  if (!before) return UNKNOWN;
+  if (before.lecturer_id === lecturerId) return { status: "success", message: "No change." };
+
+  const { data: offering, error } = await supabase
+    .from("course_offerings")
+    .update({ lecturer_id: lecturerId })
+    .eq("id", offeringId)
+    .select("term:terms(id, name, session), course:courses(code, title)")
+    .maybeSingle();
+  if (error?.code === "23514") {
+    return {
+      status: "error",
+      message: "Please fix the highlighted fields.",
+      fieldErrors: { lecturerId: ["Only a lecturer can be assigned. Refresh the list."] },
+    };
+  }
+  if (error || !offering) return error ? GENERIC : UNKNOWN;
+
+  revalidatePath("/admin/offerings", "layout");
+  revalidatePath("/teach", "layout");
+  if (lecturerId && offering.course && offering.term) {
+    const course = `${offering.course.code}: ${offering.course.title}`;
+    const term = `${offering.term.name}, ${offering.term.session}`;
+    after(async () => {
+      // A fresh client, as in the other after() emails: the request's may be gone.
+      const client = await createClient();
+      const [{ data: emails }, { data: profile }] = await Promise.all([
+        client.rpc("account_emails", { p_user_ids: [lecturerId] }),
+        client.from("profiles").select("full_name").eq("id", lecturerId).maybeSingle(),
+      ]);
+      const to = emails?.[0]?.email;
+      if (to) await sendLecturerAssigned({ to, name: profile?.full_name ?? "", course, term });
+    });
+  }
+  return {
+    status: "success",
+    message: lecturerId ? "Lecturer assigned. They have been emailed." : "Lecturer removed.",
+  };
 }

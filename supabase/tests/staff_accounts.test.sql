@@ -48,7 +48,7 @@ select set_config('request.jwt.claims',
 
 select results_eq(
   $$ select email, role::text, confirmed_at is not null, invited_at is not null
-     from public.staff_accounts() order by email $$,
+     from public.staff_accounts() where email like 'staff-%' order by email $$,
   $$ values ('staff-admin-a@example.test'::text, 'admin'::text, true, false),
             ('staff-lecturer@example.test', 'lecturer', false, true) $$,
   'staff_accounts lists lecturers and admins with email and invitation state, not students'

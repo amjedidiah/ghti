@@ -77,17 +77,20 @@ select policies_are('public', 'students', array[
 
 select policies_are('public', 'courses', array[
   'Courses of published programmes are public', 'Students read the courses they are registered on',
-  'Admins read all courses', 'Admins create courses', 'Admins update courses', 'Admins delete courses'
+  'Admins read all courses', 'Admins create courses', 'Admins update courses', 'Admins delete courses',
+  'Lecturers read the courses they teach'
 ], 'courses has only the expected policies');
 
 select policies_are('public', 'course_offerings', array[
   'Students read the offerings they are registered on', 'Admins read all offerings',
-  'Admins create offerings', 'Admins update offerings', 'Admins delete offerings'
+  'Admins create offerings', 'Admins update offerings', 'Admins delete offerings',
+  'Lecturers read their own offerings'
 ], 'course_offerings has only the expected policies');
 
 select policies_are('public', 'registrations', array[
   'Students read their own registrations', 'Admins read all registrations',
-  'Admins register students', 'Admins remove registrations'
+  'Admins register students', 'Admins remove registrations',
+  'Lecturers read their classes'' registrations'
 ], 'registrations has only the expected policies');
 
 select policies_are('public', 'grading_scale', array[

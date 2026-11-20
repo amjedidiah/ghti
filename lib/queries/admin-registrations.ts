@@ -106,7 +106,7 @@ export async function getOfferingClassList(offeringId: string) {
   const { data, error } = await supabase
     .from("course_offerings")
     .select(
-      "id, term:terms(id, session, name), course:courses(code, title, credit_units, programme:programmes(title)), registrations(id, created_at, student:students(matric_no, status, profile:profiles(full_name)))",
+      "id, lecturer_id, lecturer:profiles!course_offerings_lecturer_id_fkey(full_name), term:terms(id, session, name), course:courses(code, title, credit_units, programme:programmes(title)), registrations(id, created_at, student:students(matric_no, status, profile:profiles(full_name)))",
     )
     .eq("id", offeringId)
     .maybeSingle();

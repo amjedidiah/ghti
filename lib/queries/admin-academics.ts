@@ -87,9 +87,7 @@ export async function getTermForAdmin(id: string) {
 }
 
 /** True when `value` looks like a database id; anything else is a 404. */
-export function isUuid(value: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(value);
-}
+export { isUuid } from "@/lib/utils";
 
 // Offerings ------------------------------------------------------------------------
 
@@ -130,7 +128,9 @@ export async function getTermOfferingsForAdmin(termId: string) {
       .order("code", { referencedTable: "courses" }),
     supabase
       .from("course_offerings")
-      .select("id, course_id, registrations(count)")
+      .select(
+        "id, course_id, registrations(count), lecturer:profiles!course_offerings_lecturer_id_fkey(full_name)",
+      )
       .eq("term_id", termId),
   ]);
 
@@ -143,9 +143,14 @@ export async function getTermOfferingsForAdmin(termId: string) {
     offerings.data.map((offering) => [offering.course_id, offering.registrations[0]?.count ?? 0]),
   );
 
+  const lecturerByCourse = new Map(
+    offerings.data.map((offering) => [offering.course_id, offering.lecturer?.full_name ?? null]),
+  );
+
   return {
     term: term.data,
     offered: registrationsByCourse,
+    lecturers: lecturerByCourse,
     programmes: programmes.data.filter(
       (programme) =>
         programme.courses.length > 0 &&

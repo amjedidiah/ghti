@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 import ApplicationDecision, { applicationDecisionSubject } from "@/emails/ApplicationDecision";
 import ApplicationSubmitted, { applicationSubmittedSubject } from "@/emails/ApplicationSubmitted";
 import ContactMessage, { contactMessageSubject } from "@/emails/ContactMessage";
+import LecturerAssigned, { lecturerAssignedSubject } from "@/emails/LecturerAssigned";
 import ContactReceipt, { contactReceiptSubject } from "@/emails/ContactReceipt";
 import ResultsPublished, { resultsPublishedSubject } from "@/emails/ResultsPublished";
 import StudentWelcome, { studentWelcomeSubject } from "@/emails/StudentWelcome";
@@ -115,6 +116,23 @@ export async function sendContactReceipt(input: {
       input.to,
       contactReceiptSubject,
       <ContactReceipt name={input.name} siteUrl={siteUrl()} />,
+    ),
+  ]);
+}
+
+/** "You are teaching BIB 101" to a newly assigned lecturer. */
+export async function sendLecturerAssigned(input: {
+  to: string;
+  name: string;
+  course: string;
+  term: string;
+}): Promise<SendOutcome> {
+  const { to, ...props } = input;
+  return sendEmails("lecturer-assigned", [
+    await message(
+      to,
+      lecturerAssignedSubject(props.course),
+      <LecturerAssigned {...props} siteUrl={siteUrl()} />,
     ),
   ]);
 }
