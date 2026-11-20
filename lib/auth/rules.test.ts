@@ -29,6 +29,9 @@ describe("requiresSignIn", () => {
     ["/portal", true],
     ["/portal/results", true],
     ["/portals", false],
+    ["/teach", true],
+    ["/teach/offering/1", true],
+    ["/teacher", false],
     ["/reset-password", true],
     ["/apply/register", false],
     ["/applying", false],
@@ -77,5 +80,17 @@ describe("guardRedirect", () => {
   test("lets any signed-in role reset their password", () => {
     expect(guardRedirect("/reset-password", "", "lecturer")).toBeNull();
     expect(guardRedirect("/reset-password", "", null)).toBe("/sign-in?next=%2Freset-password");
+  });
+});
+
+describe("the lecturer area", () => {
+  test("lecturers may enter /teach; other roles go to their own home", () => {
+    expect(guardRedirect("/teach", "", "lecturer")).toBeNull();
+    expect(guardRedirect("/teach", "", "student")).toBe("/portal");
+    expect(guardRedirect("/teach", "", "admin")).toBe("/admin");
+  });
+
+  test("signed-out visitors are sent to sign in, then back", () => {
+    expect(guardRedirect("/teach", "", null)).toBe("/sign-in?next=%2Fteach");
   });
 });

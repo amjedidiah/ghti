@@ -8,6 +8,7 @@ const ADMIN_LINKS = [
   { href: "/admin/offerings", label: "Offerings" },
   { href: "/admin/grades", label: "Grades" },
   { href: "/admin/exports", label: "Exports" },
+  { href: "/admin/users", label: "Staff" },
 ] as const;
 
 /** Admin area chrome: a sub-navigation bar under the site header. Access is checked per page. */

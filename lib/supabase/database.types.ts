@@ -840,6 +840,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_by_email: {
+        Args: { p_email: string }
+        Returns: {
+          confirmed: boolean
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
       account_emails: {
         Args: { p_user_ids: string[] }
         Returns: {
@@ -974,6 +982,26 @@ export type Database = {
           total_count: number
         }[]
       }
+      set_staff_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: {
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_student_status: {
         Args: {
           p_note?: string
@@ -996,6 +1024,18 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      staff_accounts: {
+        Args: never
+        Returns: {
+          confirmed_at: string
+          email: string
+          full_name: string
+          id: string
+          invited_at: string
+          last_sign_in_at: string
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
       }
       start_review: {
         Args: { p_application_id: string }
