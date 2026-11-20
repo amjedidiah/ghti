@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/session";
+import { sendApplicationDecision, sendStudentWelcome } from "@/lib/email/send";
 import { createClient } from "@/lib/supabase/server";
 import type { FormState } from "@/lib/validation/auth";
 import { enrolmentSchema } from "@/lib/validation/enrolment";
@@ -26,6 +28,32 @@ function result(error: { code?: string } | null): ReviewResult {
   return {
     ok: false,
     message: ERRORS[error.code ?? ""] ?? "Something went wrong. Please try again.",
+  };
+}
+
+/**
+ * The applicant's name, sign-in email and programme, for the decision and
+ * welcome emails. Null when any of them is missing (nothing is sent).
+ */
+async function applicantContact(applicationId: string) {
+  const supabase = await createClient();
+  const { data: application } = await supabase
+    .from("applications")
+    .select("applicant_id, programme:programmes(title), applicant:profiles!applicant_id(full_name)")
+    .eq("id", applicationId)
+    .maybeSingle();
+  if (!application) return null;
+
+  const { data: emails } = await supabase.rpc("account_emails", {
+    p_user_ids: [application.applicant_id],
+  });
+  const to = emails?.[0]?.email;
+  if (!to) return null;
+
+  return {
+    to,
+    name: application.applicant?.full_name ?? "",
+    programme: application.programme?.title ?? "your programme",
   };
 }
 
@@ -58,6 +86,14 @@ export async function decideApplication(
     p_note: parsed.data.note,
   });
   revalidatePath(`/admin/applications/${applicationId}`);
+
+  if (!error) {
+    const decision = parsed.data.decision;
+    after(async () => {
+      const contact = await applicantContact(applicationId);
+      if (contact) await sendApplicationDecision({ ...contact, decision });
+    });
+  }
   return result(error);
 }
 
@@ -78,7 +114,7 @@ export async function enrolStudent(
   if (!parsed.ok) return parsed.state;
 
   const supabase = await createClient();
-  const { error } = await supabase.rpc("enrol_student", {
+  const { data: enrolled, error } = await supabase.rpc("enrol_student", {
     p_application_id: applicationId,
     p_matric_no: parsed.data.matricNo,
     p_entry_term_id: parsed.data.entryTermId,
@@ -86,7 +122,12 @@ export async function enrolStudent(
   revalidatePath(`/admin/applications/${applicationId}`);
 
   if (!error) {
-    return { status: "success", message: `Enrolled as ${parsed.data.matricNo}.` };
+    const matricNo = enrolled?.matric_no ?? parsed.data.matricNo;
+    after(async () => {
+      const contact = await applicantContact(applicationId);
+      if (contact) await sendStudentWelcome({ ...contact, matricNo });
+    });
+    return { status: "success", message: `Enrolled as ${matricNo}.` };
   }
   switch (error.code) {
     case "23505":

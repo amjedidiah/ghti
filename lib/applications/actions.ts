@@ -1,12 +1,15 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { splitFullName, valuesToUpdate } from "@/lib/applications/mapping";
 import { requireRole } from "@/lib/auth/session";
+import { sendApplicationSubmitted } from "@/lib/email/send";
 import { isAllowedMimeType, isDocumentPathFor, MAX_UPLOAD_BYTES } from "@/lib/files";
 import { createClient } from "@/lib/supabase/server";
+import { termLabel } from "@/lib/validation/academics";
 import {
   applicationDraftSchema,
   applicationSubmitSchema,
@@ -107,7 +110,7 @@ export async function submitApplication(
   applicationId: string,
   values: ApplicationValues,
 ): Promise<ApplicationActionResult> {
-  await requireRole("applicant");
+  const user = await requireRole("applicant");
   const parsed = applicationSubmitSchema.safeParse(values);
   if (!parsed.success) {
     return {
@@ -138,6 +141,23 @@ export async function submitApplication(
   }
   if (error && error.code !== "55000") {
     return { status: "error", message: GENERIC_ERROR, savedAt: saved.savedAt };
+  }
+
+  // Confirmation email, only for a fresh submission (55000: already submitted).
+  if (!error) {
+    after(async () => {
+      const { data } = await supabase
+        .from("applications")
+        .select("programme:programmes(title), intake:terms(name, session)")
+        .eq("id", applicationId)
+        .maybeSingle();
+      await sendApplicationSubmitted({
+        to: user.email,
+        name: user.fullName,
+        programme: data?.programme?.title ?? "your chosen programme",
+        intake: data?.intake ? termLabel(data.intake) : null,
+      });
+    });
   }
 
   // Submitted (or already submitted in another tab).

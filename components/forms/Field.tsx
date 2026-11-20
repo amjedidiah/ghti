@@ -25,15 +25,18 @@ function Field({
   hint,
   error,
   children,
+  className,
 }: {
   id: string;
   label: string;
   hint?: ReactNode;
   error?: string;
   children: ReactNode;
+  /** Layout classes for the wrapper (e.g. grid spans). */
+  className?: string;
 }) {
   return (
-    <div>
+    <div className={className}>
       <label htmlFor={id} className="block text-sm font-semibold text-primary">
         {label}
       </label>

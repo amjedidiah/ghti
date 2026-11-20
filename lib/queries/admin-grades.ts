@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { GradeBand } from "@/lib/grades";
+import { planResultNotices } from "@/lib/result-notices";
 import { createClient } from "@/lib/supabase/server";
 
 // Admin reads for grades (Stage 2, step 2.3). Run as the signed-in admin;
@@ -96,3 +97,35 @@ export async function getGradeSheet(offeringId: string) {
 }
 
 export type GradeSheet = NonNullable<Awaited<ReturnType<typeof getGradeSheet>>>;
+
+/**
+ * Who has published results in a term and who has already had the "results
+ * are out" email (result_notices). Names come along for the email itself.
+ */
+export async function getResultNotices(termId: string) {
+  const supabase = await createClient();
+  const [published, notices] = await Promise.all([
+    supabase
+      .from("registrations")
+      .select(
+        "student_id, student:students(profile:profiles(full_name)), offering:course_offerings!inner(term_id), grade:grades!inner(status)",
+      )
+      .eq("offering.term_id", termId)
+      .eq("grade.status", "published"),
+    supabase.from("result_notices").select("student_id").eq("term_id", termId),
+  ]);
+  if (published.error) throw new Error(`Could not load results: ${published.error.message}`);
+  if (notices.error) throw new Error(`Could not load notices: ${notices.error.message}`);
+
+  const names = new Map<string, string>();
+  for (const row of published.data) {
+    names.set(row.student_id, row.student?.profile?.full_name ?? "");
+  }
+  return {
+    plan: planResultNotices(
+      published.data.map((row) => row.student_id),
+      notices.data.map((row) => row.student_id),
+    ),
+    names,
+  };
+}

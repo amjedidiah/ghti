@@ -4,8 +4,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireRole } from "@/lib/auth/session";
+import { sendResultsPublished } from "@/lib/email/send";
 import { describeSheetSave, planGradeSheet, type TypedScores } from "@/lib/grade-sheet";
+import { getResultNotices } from "@/lib/queries/admin-grades";
+import { describeNoticeRun } from "@/lib/result-notices";
 import { createClient } from "@/lib/supabase/server";
+import { termLabel } from "@/lib/validation/academics";
 import type { FormState } from "@/lib/validation/auth";
 
 // Grade entry (Stage 2, step 2.3). The action re-checks the role and re-reads
@@ -118,4 +122,74 @@ export async function saveGradeSheet(
 
   revalidatePath("/admin/grades", "layout");
   return { status: "success", message: describeSheetSave(plan, publish) };
+}
+
+/**
+ * Email "your results are out" to the term's students who have a published
+ * grade and have not had this email yet, up to RESULT_NOTICES_PER_RUN at a
+ * time. Each student emailed is recorded in result_notices, so a run cut
+ * short (Resend's daily limit) carries on where it stopped.
+ */
+export async function emailResultNotices(termId: string): Promise<FormState> {
+  await requireRole("admin");
+  if (!id.safeParse(termId).success) {
+    return { status: "error", message: "Unknown term. Refresh the page." };
+  }
+
+  const supabase = await createClient();
+  const { data: term } = await supabase
+    .from("terms")
+    .select("name, session")
+    .eq("id", termId)
+    .maybeSingle();
+  if (!term) return { status: "error", message: "Unknown term. Refresh the page." };
+
+  const { plan, names } = await getResultNotices(termId);
+  if (plan.toSend.length === 0) {
+    return {
+      status: "error",
+      message:
+        plan.withResults === 0
+          ? "No results are published in this term yet."
+          : "Every student with results has already been emailed.",
+    };
+  }
+
+  const { data: emails, error } = await supabase.rpc("account_emails", {
+    p_user_ids: plan.toSend,
+  });
+  if (error) return { status: "error", message: GENERIC };
+  const emailOf = new Map(emails.map((row) => [row.user_id, row.email]));
+  const recipients = plan.toSend.flatMap((studentId) => {
+    const to = emailOf.get(studentId);
+    return to ? [{ studentId, to, name: names.get(studentId) ?? "" }] : [];
+  });
+
+  const outcome = await sendResultsPublished(termLabel(term), recipients);
+  const sentIds = recipients
+    .filter((_, index) => outcome.sent[index])
+    .map((recipient) => recipient.studentId);
+
+  if (sentIds.length > 0) {
+    const { error: recordError } = await supabase.from("result_notices").upsert(
+      sentIds.map((studentId) => ({ student_id: studentId, term_id: termId })),
+      { onConflict: "student_id,term_id", ignoreDuplicates: true },
+    );
+    if (recordError) {
+      revalidatePath("/admin/grades");
+      return {
+        status: "error",
+        message: `${sentIds.length} emailed, but we could not record it. Do not press again; refresh first.`,
+      };
+    }
+  }
+
+  revalidatePath("/admin/grades");
+  const failed = plan.toSend.length - sentIds.length;
+  return describeNoticeRun({
+    sent: sentIds.length,
+    failed,
+    left: plan.pending.length - sentIds.length,
+    quotaReached: outcome.quotaReached,
+  });
 }

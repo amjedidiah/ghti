@@ -17,7 +17,7 @@ This is an **app**, not a content site: applications, logins, four roles, academ
 
 ## Project Status
 
-Stage 1 🚲 Bicycle in progress. Steps 1.1 to 1.4 are done and live (CRM chrome, programmes, accounts and roles, online applications, admin review). Step 1.5 (ready for real applicants) is under way: public pages with placeholders, privacy notice draft and the keep-alive cron are built; backups, rate limiting, DNS and real content remain. Custom SMTP (Resend) must land before applications open.
+Stage 1 🚲 Bicycle: built and live except real content. Step 1.5's remaining items wait on GHTI (real intake, admins, content; see `docs/client_inputs.md`) and the "applications open" milestone. Stage 2 🛺 Tricycle: steps 2.1 to 2.5 built (academics, enrolment, grades, student portal, records admin, transactional emails); 2.6 has the contact form and the rejected-documents clean-up left.
 
 ### Supabase environments
 
@@ -95,9 +95,12 @@ Single Next.js app at the repository root (no separate backend). Exists today: `
 - `scripts/create-admin.ts`: `bun run admin:create --email … --name …` invites or promotes an admin
 - `scripts/push-auth-config.ts`: `bun run auth:push --site-url <url> [--apply]` sets the cloud project's auth settings (site URL, redirect allow list, password length) and, once custom SMTP exists, the branded email templates. Dry run by default; rerun when the domain changes
 - `lib/links.ts`: YouTube and Google Drive URL parsers
+- Records admin (step 2.5): `supabase/migrations/20261120012918_records_admin.sql` (`record_notes`, append-only; `set_student_status()`; `search_students()` with `pg_trgm`). `/admin/students` (`components/admin/StudentSearch.tsx`, search through `searchStudentsAction` so names never reach URLs) and `/admin/students/[id]` (`RecordNoteForm`, `StudentStatusForm`, `lib/student-file.ts`); `lib/admin/students.ts`, `lib/queries/admin-students.ts`, `lib/validation/students.ts`. `components/shared/DataTable.tsx`: sortable, paged table that becomes cards on phones
+- Transactional emails: templates in `emails/` (React Email, tested in `emails/templates.test.tsx`); `lib/email/send.tsx` (one function per email; call inside `after()`), `lib/email/transport.ts` (Resend when `RESEND_API_KEY` is set, else Mailpit at `MAILPIT_URL`, else skipped). `account_emails()` (admin only) returns sign-in emails. Results emails go by an "Email students" button on `/admin/grades`, tracked in `result_notices` (one per student and term, up to 80 a click: Resend's 100 a day is shared with auth emails)
+- PostgREST embeds: a table with a composite primary key of two foreign keys reads as a many-to-many link and makes existing embeds between those tables ambiguous. Give such tables a surrogate `id` primary key and a unique constraint instead (as `result_notices` does)
 - `lib/grades.ts`: score → letter → grade point, GPA and CGPA, and `GRADE_SPLIT` (CA/exam maximums, the one place to change when GHTI confirms its split); `lib/grade-sheet.ts` plans a grade sheet save (pure, tested). Grade entry: `/admin/grades` (`components/admin/GradeSheetForm.tsx`, `lib/admin/grades.ts`, `lib/queries/admin-grades.ts`)
 - `supabase/migrations/`, `supabase/seed.sql`, `supabase/tests/`
-- `emails/`: React Email templates
+- `emails/`: React Email templates (`EmailLayout`, application submitted, decision, welcome, results published)
 - `proxy.ts`: session refresh and role guards for `/apply`, `/portal`, `/teach`, `/admin`
 
 ## Roles
@@ -162,7 +165,8 @@ Keep `.env.example` up to date. For local development, copy it to `.env.local` a
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: client and server.
 - `SUPABASE_SECRET_KEY`: server only (`lib/supabase/admin.ts`).
 - `NEXT_PUBLIC_SITE_URL`: canonical URL for SEO, emails and QR codes.
-- `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TO`: transactional email and contact-form inbox.
+- `RESEND_API_KEY`, `EMAIL_FROM` (default `GHTI <no-reply@ghti.crm-world.org.ng>`), `EMAIL_REPLY_TO` (once GHTI names an admissions address), `EMAIL_TO`: transactional email and contact-form inbox.
+- `MAILPIT_URL`: local only (`http://127.0.0.1:54324`); app emails go to the local Mailpit inbox when `RESEND_API_KEY` is unset.
 - `CRON_SECRET`: protects the Supabase keep-alive and cleanup cron routes.
 
 ## Git

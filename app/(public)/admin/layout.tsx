@@ -3,6 +3,7 @@ import AreaBar from "@/components/layout/AreaBar";
 const ADMIN_LINKS = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/applications", label: "Applications" },
+  { href: "/admin/students", label: "Students" },
   { href: "/admin/academics", label: "Academics" },
   { href: "/admin/offerings", label: "Offerings" },
   { href: "/admin/grades", label: "Grades" },

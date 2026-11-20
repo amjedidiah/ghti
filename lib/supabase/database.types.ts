@@ -556,6 +556,48 @@ export type Database = {
         }
         Relationships: []
       }
+      record_notes: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["record_note_kind"]
+          student_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["record_note_kind"]
+          student_id: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["record_note_kind"]
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "record_notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "record_notes_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       registrations: {
         Row: {
           created_at: string
@@ -598,6 +640,52 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      result_notices: {
+        Row: {
+          id: number
+          sent_at: string
+          sent_by: string | null
+          student_id: string
+          term_id: string
+        }
+        Insert: {
+          id?: never
+          sent_at?: string
+          sent_by?: string | null
+          student_id: string
+          term_id: string
+        }
+        Update: {
+          id?: never
+          sent_at?: string
+          sent_by?: string | null
+          student_id?: string
+          term_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "result_notices_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_notices_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "result_notices_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
             referencedColumns: ["id"]
           },
         ]
@@ -702,6 +790,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      account_emails: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       change_published_grade: {
         Args: {
           p_ca_score: number
@@ -806,6 +901,51 @@ export type Database = {
         }
       }
       is_admin: { Args: never; Returns: boolean }
+      search_students: {
+        Args: {
+          p_entry_term_id?: string
+          p_limit?: number
+          p_offset?: number
+          p_programme_id?: string
+          p_query?: string
+          p_sort?: string
+          p_status?: Database["public"]["Enums"]["student_status"]
+        }
+        Returns: {
+          created_at: string
+          entry_term_name: string
+          entry_term_session: string
+          full_name: string
+          id: string
+          matric_no: string
+          programme_title: string
+          status: Database["public"]["Enums"]["student_status"]
+          total_count: number
+        }[]
+      }
+      set_student_status: {
+        Args: {
+          p_note?: string
+          p_status: Database["public"]["Enums"]["student_status"]
+          p_student_id: string
+        }
+        Returns: {
+          application_id: string | null
+          created_at: string
+          entry_term_id: string
+          id: string
+          matric_no: string
+          programme_id: string
+          status: Database["public"]["Enums"]["student_status"]
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "students"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       start_review: {
         Args: { p_application_id: string }
         Returns: {
@@ -904,6 +1044,7 @@ export type Database = {
       grade_status: "draft" | "submitted" | "published"
       programme_level: "certificate" | "diploma" | "postgraduate_diploma"
       programme_status: "draft" | "published" | "archived"
+      record_note_kind: "note" | "status_change"
       student_status: "active" | "deferred" | "withdrawn" | "graduated"
     }
     CompositeTypes: {
@@ -1048,6 +1189,7 @@ export const Constants = {
       grade_status: ["draft", "submitted", "published"],
       programme_level: ["certificate", "diploma", "postgraduate_diploma"],
       programme_status: ["draft", "published", "archived"],
+      record_note_kind: ["note", "status_change"],
       student_status: ["active", "deferred", "withdrawn", "graduated"],
     },
   },

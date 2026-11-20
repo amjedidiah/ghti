@@ -167,3 +167,13 @@ join public.students s on s.matric_no = g.matric_no
 join public.registrations r on r.student_id = s.id
 join public.course_offerings o on o.id = r.offering_id
 join public.courses c on c.id = o.course_id and c.code = g.code;
+
+-- Notes on the students' files (FAKE), written by the local admin. The
+-- "results are out" email has not gone yet, so /admin/grades offers it.
+insert into public.record_notes (student_id, author_id, kind, body, created_at)
+select s.id, '00000000-0000-0000-0000-00000000ad01', n.kind::public.record_note_kind, n.body, n.at::timestamptz
+from (values
+  ('GHTI/2026/CERT/101', 'note', 'Brought original WAEC certificate for sighting. Copy matches the upload.', '2026-11-16 10:00+01'),
+  ('GHTI/2026/CERT/102', 'note', 'Asked about moving to the Diploma next session. Told to apply when the intake opens.', '2026-11-17 14:30+01')
+) as n (matric_no, kind, body, at)
+join public.students s on s.matric_no = n.matric_no;

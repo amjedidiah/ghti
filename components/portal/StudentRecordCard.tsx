@@ -1,16 +1,10 @@
 import { LEVEL_LABELS, type ProgrammeLevel } from "@/lib/programmes";
 import { termLabel } from "@/lib/validation/academics";
-
-export const STUDENT_STATUS_LABELS = {
-  active: "Active",
-  deferred: "Deferred",
-  withdrawn: "Withdrawn",
-  graduated: "Graduated",
-} as const;
+import { STUDENT_STATUS_LABELS, type StudentStatus } from "@/lib/validation/students";
 
 export type StudentRecord = {
   matric_no: string;
-  status: keyof typeof STUDENT_STATUS_LABELS;
+  status: StudentStatus;
   programme: { title: string; level: ProgrammeLevel } | null;
   entry_term: { name: string; session: string } | null;
 };

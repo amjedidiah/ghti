@@ -131,7 +131,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 - [x] Form fields reused from `cwl/components/FormFields.tsx` where possible.
 - [x] **Single-page application form** in sections: programme and intake; personal details (full name, date of birth, gender, phone, email, address, state of origin, nationality, CRM branch/church; confirm against the client's paper form); education; referees / next of kin; documents (transcript required; ID and passport photo per client); data-protection consent; submit. "Save draft" button so applicants can return later. _(Field list and required documents are placeholders until client inputs #4 and #5.)_
 - [x] `/apply/status`: read-only view of the submitted application and its live status (`StatusBadge`).
-- [ ] Emails (React Email + Resend): application submitted; decision made. _(Blocked on Resend; see step 1.2. The status page shows every decision meanwhile.)_
+- [x] Emails (React Email + Resend): application submitted; decision made. _(Done 20 Nov 2026: templates in `emails/`, sent by `lib/email/send.tsx` from Server Actions inside `after()`, so an email never slows or breaks the action. Recipients are the account's sign-in email, looked up by the admin-only `account_emails()`. Without `RESEND_API_KEY`, local emails go to Mailpit (`MAILPIT_URL`). Replies have nowhere to go until GHTI names an admissions address (client input #12, `EMAIL_REPLY_TO`).)_
 - [x] `/admissions` page: requirements, how to apply, key dates, "Start application". _(Steps and open intakes are live; requirements and key dates wait for client input #6.)_
 
 #### 1.4. Review
@@ -149,7 +149,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 - [x] **Supabase keep-alive:** free projects pause after 7 days without activity. A daily Vercel Cron hit to a lightweight query prevents this. _(`/api/cron/keep-alive`, daily at 05:00 UTC; `CRON_SECRET` set in Vercel production.)_
 - [x] **Backups:** the free tier has no downloadable backups. A weekly GitHub Action runs `pg_dump` (database) and copies the storage bucket to ministry-owned storage. With applicant records at stake, this is **not optional**. _(Stopgap until GHTI names ministry storage (client input #26): private repo `amjedidiah/ghti-backups` runs weekly, dumps roles, schema and data, downloads the `documents` bucket with `scripts/backup-storage.ts`, encrypts with age and keeps 5 weekly copies (35 days, within the free 500 MB). The age private key is in the developer's keychain (`ghti-backup-age-key`) and must also be handed to GHTI. File backups need the `SUPABASE_SECRET_KEY` secret set in that repo.)_
 - [x] DNS: point the chosen subdomain at Vercel; production environment variables. When the domain changes from `ghti-nine.vercel.app`: update `NEXT_PUBLIC_SITE_URL` in Vercel and rerun `bun run auth:push --site-url https://<new domain> --apply`. _(Done 16 Nov 2026: `ghti.crm-world.org.ng` verified on Vercel (TXT `_vercel`) and pointed with an A record to `216.198.79.1` at QServers; HTTPS live; `NEXT_PUBLIC_SITE_URL` updated and production redeployed; Supabase site URL and redirect allow list updated.)_
-- [ ] **Quality check:** walk the whole applicant and admin journey at 375px.
+- [x] **Quality check:** walk the whole applicant and admin journey at 375px. _(Done 20 Nov 2026 in a 375px browser: register, confirm, apply with errors then complete, submit, review, admit, enrol, grades, results email, student portal, every public page. Fixed: page wrappers with `mx-auto` but no `w-full` shrank to their content inside the flex-column `main`, so the status chips made `/admin/applications` 526px wide. Known, minor: an application-form error stays on screen after the answer is fixed until the field loses focus.)_
 - [ ] **Milestone: applications open** for a real (pilot) intake.
 
 ## Stage 2 — 🛺 Tricycle: Records
@@ -161,13 +161,13 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 - [x] `courses`, `course_offerings` (lecturer optional until Stage 3), `registrations`, `grading_scale` tables + RLS + pgTAP tests. _(Migration `20261116090000_academic_records.sql`, tests in `supabase/tests/academic_records.test.sql`. The public reads the courses of published programmes; students read only their own registrations, offerings and courses; admins write. Lecturer policies arrive in Stage 3. Local seed has a fake 5-point scale and fake courses until client inputs #16 and #17.)_
 - [x] `/admin/academics`: programmes, courses, terms. `/admin/offerings`: offerings per term. _(Done 16 Nov 2026. `/admin/academics`: create and edit programmes (status, web address, description, entry requirements), add, edit and delete courses (the database keeps courses that have been offered), create and edit terms (open for applications or not); saving refreshes the public programme pages and the application form's intakes at once. `/admin/offerings`: per term, tick the courses that run, by programme, year and semester; a course with registered students stays offered (`lib/offerings.ts`). Lecturers are assigned to offerings in Stage 3.)_
 - [x] **Registrations:** register students on a term's offerings in bulk. _(Done 16 Nov 2026: `/admin/offerings/[termId]/register`: choose a programme, tick its active students and this term's courses, and every ticked student is registered on every ticked course; existing registrations are skipped (`lib/registrations.ts`, tested). Each offering has a class list (`/admin/offerings/[termId]/[offeringId]`) with a two-step remove; once grades exist, a registration with grades cannot be removed.)_
-- [ ] Programme pages list courses by year and semester.
+- [x] Programme pages list courses by year and semester. _(Done 20 Nov 2026: "Courses" section with each semester's credit units (`groupCoursesByTerm` in `lib/programmes.ts`, tested); hidden while a programme has no courses, as in the cloud until client input #16.)_
 
 #### 2.2. From applicant to student
 
 - [x] `students` table + RLS + pgTAP tests (students read only their own record). _(Built with step 2.1, since registrations need it. Students cannot edit their record; `application_id` links back to the application they were admitted from.)_
 - [x] Admit assigns a matric number and entry term, and changes the role to `student` on the same account. _(Done 16 Nov 2026: `enrol_student()` (admin only, one transaction, pgTAP-tested) runs from a "Student record" panel on admitted applications. The entry term defaults to the applicant's intake. Matric numbers are free text (upper case, letters, digits, "/" and "-") until GHTI confirms its format, client input #18.)_
-- [ ] Welcome email on admission (matric number, how to sign in).
+- [x] Welcome email on admission (matric number, how to sign in). _(Sent on enrolment, 20 Nov 2026.)_
 - [x] `proxy.ts` guards `/portal`. _(Students only; `/portal` shows the student's own record. Courses, results and history arrive in step 2.4.)_
 
 #### 2.3. Grades
@@ -175,7 +175,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 - [x] `grades` and `grade_changes` tables + RLS + pgTAP tests. Students see `published` grades only. Changing a published grade requires a reason and is written to `grade_changes` by a trigger. _(Done 16 Nov 2026, `20261116140000_grades.sql`: total, letter and grade point are worked out by trigger and stored (a later scale change never rewrites old results); a published grade changes only through `change_published_grade()` with a reason, is logged with old and new values, and can never be deleted; a registration with a grade cannot be removed. 34 pgTAP tests.)_
 - [x] `lib/grades.ts`: score → letter → grade point, GPA and CGPA, with Bun tests. _(Plus `GRADE_SPLIT`, CA 40 / exam 60, the plan's default until client input #17; `lib/grade-sheet.ts` plans each sheet save.)_
 - [x] `/admin/grades`: admins enter CA and exam scores per offering and publish. (Lecturer entry with admin approval arrives in step 3.3.) _(Done 16 Nov 2026: per term, each course's progress (graded, published); the grade sheet previews total and letter as you type, saves drafts, publishes complete grades, and asks for a reason before changing a published one. Unpublishing is possible in the database (`change_published_grade` with status `draft`) but has no button yet.)_
-- [ ] "Results published" email to students.
+- [x] "Results published" email to students. _(Done 20 Nov 2026: an "Email students" button per term on `/admin/grades`, not an automatic send, because Resend's free tier allows 100 emails a day, shared with sign-in emails. One email per student per term (`result_notices`), up to 80 a click (`lib/result-notices.ts`, tested); a run cut short by the daily limit carries on next time. The email carries no grades.)_
 
 #### 2.4. Student portal
 
@@ -184,16 +184,16 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 2.5. Records admin
 
-- [ ] `record_notes` table + RLS + pgTAP tests.
-- [ ] Trigram index (`pg_trgm`) on student name and `matric_no`.
-- [ ] `/admin/students`: search by name, matric number, programme, intake, status; results in under a second (`DataTable`: sort, filter, search, paginate).
-- [ ] `/admin/students/[id]`: student file on one page: biodata, documents, registrations, grades; dated notes (the "log"); update status.
+- [x] `record_notes` table + RLS + pgTAP tests. _(Done 20 Nov 2026, `20261120012918_records_admin.sql`: admins only, append-only (no edit or delete), author is always the signed-in admin; `set_student_status()` changes a status and logs it with the reason in one transaction. 26 pgTAP tests.)_
+- [x] Trigram index (`pg_trgm`) on student name and `matric_no`. _(On `profiles.full_name` and `students.matric_no`; `search_students()` (admin only) does contains-matching on either, with filters, sort and paging.)_
+- [x] `/admin/students`: search by name, matric number, programme, intake, status; results in under a second (`DataTable`: sort, filter, search, paginate). _(Done 20 Nov 2026. The search runs through a Server Action, so names and matric numbers never reach URLs; the tab remembers the last search (sessionStorage) for "back" from a file. `components/shared/DataTable.tsx` is a table on wider screens and cards on phones.)_
+- [x] `/admin/students/[id]`: student file on one page: biodata, documents, registrations, grades; dated notes (the "log"); update status. _(Done 20 Nov 2026. Grades show every status for admins, while GPA and CGPA count published grades only, as the student sees them (`lib/student-file.ts`, tested).)_
 
 #### 2.6. Finishing the tricycle
 
 - [ ] Contact form on `/contact`: Server Action + Zod; sends to the office inbox and a confirmation to the sender; rate limited.
 - [ ] Scheduled job: delete documents of rejected applicants after the agreed period.
-- [ ] Seed script covers the whole stage: one programme of each level, a term, two courses, an admin, two students with grades.
+- [x] Seed script covers the whole stage: one programme of each level, a term, two courses, an admin, two students with grades. _(Plus notes on both students' files, 20 Nov 2026.)_
 - [ ] **Milestone: one term's results published** to students online (pilot).
 
 ## Stage 3 — 🚗 Car: Full System

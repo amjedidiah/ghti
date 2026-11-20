@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import ResultNoticesButton from "@/components/admin/ResultNoticesButton";
 import PageHeader from "@/components/shared/PageHeader";
 import { requireRole } from "@/lib/auth/session";
 import { isUuid } from "@/lib/queries/admin-academics";
-import { getGradeProgress } from "@/lib/queries/admin-grades";
+import { getGradeProgress, getResultNotices } from "@/lib/queries/admin-grades";
 import { cn } from "@/lib/utils";
 import { termLabel } from "@/lib/validation/academics";
 
@@ -119,7 +120,31 @@ async function GradesContent({ searchParams }: Pick<PageProps<"/admin/grades">, 
           })}
         </ul>
       )}
+
+      {progress.termId && progress.offerings.some((offering) => offering.published > 0) && (
+        <ResultNotices termId={progress.termId} />
+      )}
     </>
+  );
+}
+
+async function ResultNotices({ termId }: { termId: string }) {
+  const { plan } = await getResultNotices(termId);
+  return (
+    <section
+      aria-labelledby="result-notices"
+      className="space-y-3 rounded-xl border border-border bg-card p-5"
+    >
+      <h2 id="result-notices" className="font-display text-xl font-bold text-primary">
+        Tell students their results are out
+      </h2>
+      <p className="text-secondary">
+        Emailed so far: {plan.notified} of {plan.withResults} with published results. Each student
+        gets this email once per term, so publish every course first. The email says only that
+        results are out; grades stay in the portal.
+      </p>
+      <ResultNoticesButton termId={termId} pending={plan.pending.length} />
+    </section>
   );
 }
 
