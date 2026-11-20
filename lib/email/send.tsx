@@ -10,14 +10,11 @@ import ContactReceipt, { contactReceiptSubject } from "@/emails/ContactReceipt";
 import ResultsPublished, { resultsPublishedSubject } from "@/emails/ResultsPublished";
 import StudentWelcome, { studentWelcomeSubject } from "@/emails/StudentWelcome";
 import { sendEmails, type EmailMessage, type SendOutcome } from "@/lib/email/transport";
+import { siteUrl } from "@/lib/site";
 
 // One function per transactional email (development plan, "Email
 // Notifications"). Call them from Server Actions inside `after()` so the
 // action never waits on, or fails because of, an email.
-
-export function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-}
 
 async function message(
   to: string,

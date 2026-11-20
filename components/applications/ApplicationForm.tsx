@@ -87,6 +87,26 @@ function ApplicationForm({
   const busy = saving || submitting;
   const savedAt = result?.savedAt;
 
+  // Errors from Submit (set with setError) are not re-checked until the field
+  // loses focus, so they lingered after the answer was fixed. Clear a field's
+  // submit error as soon as its value changes; an edit to any education row
+  // also clears the "add at least one school" message.
+  useEffect(
+    () =>
+      form.subscribe({
+        formState: { values: true },
+        callback: ({ name, type }) => {
+          if (!name || type !== "change") return;
+          const fields = [name as Path<ApplicationValues>];
+          if (name.startsWith("education.")) fields.push("education");
+          for (const field of fields) {
+            if (form.getFieldState(field).error?.type === "server") form.clearErrors(field);
+          }
+        },
+      }),
+    [form],
+  );
+
   // Warn before leaving with unsaved answers.
   const isDirty = form.formState.isDirty;
   useEffect(() => {

@@ -40,3 +40,15 @@ export const socialLinks = [
 ] as const;
 
 export type SocialName = (typeof socialLinks)[number]["name"];
+
+/**
+ * Canonical site URL, without a trailing slash: NEXT_PUBLIC_SITE_URL in
+ * production, the deployment's own URL on Vercel previews, localhost in
+ * development. Used for metadata, emails, the sitemap and robots.txt.
+ */
+export function siteUrl(): string {
+  const url =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  return url.replace(/\/$/, "");
+}
