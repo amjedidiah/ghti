@@ -1,15 +1,14 @@
 "use client";
 
 import { FileText, LoaderCircle, Trash2, Upload } from "lucide-react";
-import { useId, useRef, useState, type DragEvent } from "react";
+import { useId, useRef, useState, type DragEvent, type ReactNode } from "react";
 
 import { errorId, hintId } from "@/components/forms/Field";
 import { recordDocument, removeDocument, type RecordedDocument } from "@/lib/applications/actions";
+import type { ApplicationDocumentKind } from "@/lib/applications/documents";
 import { documentPath, fileProblem, formatBytes, isAllowedMimeType } from "@/lib/files";
 import { compressImage, UploadError, uploadWithProgress } from "@/lib/upload-browser";
 import { cn } from "@/lib/utils";
-
-type Kind = "transcript" | "id_card" | "photo";
 
 type State =
   | { step: "idle" }
@@ -18,8 +17,10 @@ type State =
   | { step: "saving" };
 
 /**
- * Upload one document (FileDrop): choose or drop a file, check type and size,
- * compress photos, upload with progress, record it, and allow removal.
+ * Upload documents into one slot (FileDrop): choose or drop a file, check type
+ * and size, compress photos, upload with progress, record it, and allow
+ * removal. A slot holds up to `max` files; with 1, a new file replaces the
+ * old one. The parent keeps the list, so it survives moving between steps.
  */
 function DocumentUpload({
   applicationId,
@@ -28,27 +29,32 @@ function DocumentUpload({
   label,
   hint,
   required,
-  initial,
+  max = 1,
+  documents,
+  onChange,
   error: externalError,
 }: {
   applicationId: string;
   ownerId: string;
-  kind: Kind;
+  kind: ApplicationDocumentKind;
   label: string;
-  hint: string;
+  hint: ReactNode;
   required?: boolean;
-  initial: RecordedDocument | null;
+  max?: number;
+  documents: RecordedDocument[];
+  onChange: (documents: RecordedDocument[]) => void;
   error?: string;
 }) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [document, setDocument] = useState<RecordedDocument | null>(initial);
   const [state, setState] = useState<State>({ step: "idle" });
+  const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
-  const busy = state.step !== "idle";
-  const shownError = error ?? (document ? null : externalError);
+  const busy = state.step !== "idle" || removing !== null;
+  const room = documents.length < max;
+  const shownError = error ?? (documents.length > 0 ? null : externalError);
 
   async function handleFile(original: File) {
     setError(null);
@@ -80,7 +86,7 @@ function DocumentUpload({
         mime: file.type,
       });
       if (!result.ok) throw new UploadError(result.message);
-      setDocument(result.document);
+      onChange(max === 1 ? [result.document] : [...documents, result.document]);
     } catch (caught) {
       setError(
         caught instanceof UploadError
@@ -93,13 +99,12 @@ function DocumentUpload({
     }
   }
 
-  async function handleRemove() {
-    if (!document) return;
+  async function handleRemove(document: RecordedDocument) {
     setError(null);
-    setState({ step: "saving" });
+    setRemoving(document.id);
     const result = await removeDocument(document.id);
-    setState({ step: "idle" });
-    if (result.ok) setDocument(null);
+    setRemoving(null);
+    if (result.ok) onChange(documents.filter((doc) => doc.id !== document.id));
     else setError("We could not remove that file. Refresh the page and try again.");
   }
 
@@ -114,34 +119,48 @@ function DocumentUpload({
     <div>
       <p id={`${inputId}-label`} className="block text-sm font-semibold text-primary">
         {label}{" "}
-        <span className="font-normal text-secondary">{required ? "(required)" : "(optional)"}</span>
+        <span className="font-normal text-secondary">
+          {required ? "(required)" : "(optional)"}
+          {max > 1 && `, up to ${max} files`}
+        </span>
       </p>
-      <p id={hintId(inputId)} className="mt-1 text-sm text-secondary">
+      <div id={hintId(inputId)} className="mt-1 text-sm text-secondary">
         {hint}
-      </p>
+      </div>
 
-      {document ? (
-        <div className="mt-2 flex items-center gap-3 rounded-md border border-border bg-muted p-3">
-          <FileText className="size-6 shrink-0 text-brand" aria-hidden />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-primary">{document.fileName}</p>
-            <p className="text-xs text-secondary">{formatBytes(document.sizeBytes)} · Uploaded</p>
-          </div>
-          <button
-            type="button"
-            onClick={handleRemove}
-            disabled={busy}
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-secondary hover:bg-card hover:text-danger disabled:opacity-50"
-            aria-label={`Remove ${document.fileName}`}
-          >
-            {busy ? (
-              <LoaderCircle className="size-5 animate-spin" aria-hidden />
-            ) : (
-              <Trash2 className="size-5" aria-hidden />
-            )}
-          </button>
-        </div>
-      ) : (
+      {documents.length > 0 && (
+        <ul className="mt-2 space-y-2">
+          {documents.map((document) => (
+            <li
+              key={document.id}
+              className="flex items-center gap-3 rounded-md border border-border bg-muted p-3"
+            >
+              <FileText className="size-6 shrink-0 text-brand" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-primary">{document.fileName}</p>
+                <p className="text-xs text-secondary">
+                  {formatBytes(document.sizeBytes)} · Uploaded
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemove(document)}
+                disabled={busy}
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-secondary hover:bg-card hover:text-danger disabled:opacity-50"
+                aria-label={`Remove ${document.fileName}`}
+              >
+                {removing === document.id ? (
+                  <LoaderCircle className="size-5 animate-spin" aria-hidden />
+                ) : (
+                  <Trash2 className="size-5" aria-hidden />
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {room && (
         <div
           onDragOver={(event) => {
             event.preventDefault();
@@ -172,7 +191,7 @@ function DocumentUpload({
               if (file) void handleFile(file);
             }}
           />
-          {busy ? (
+          {state.step !== "idle" ? (
             <div role="status" className="space-y-2">
               <p className="text-sm font-medium text-primary">
                 {state.step === "preparing" && "Preparing your file…"}
@@ -192,7 +211,7 @@ function DocumentUpload({
             <label htmlFor={inputId} className="flex cursor-pointer flex-col items-center gap-2">
               <Upload className="size-6 text-secondary" aria-hidden />
               <span className="inline-flex items-center rounded-md border border-border bg-card px-4 py-2.5 text-sm font-semibold text-primary hover:bg-muted">
-                Choose file or take a photo
+                {documents.length > 0 ? "Add another file" : "Choose file or take a photo"}
               </span>
               <span className="text-xs text-secondary">PDF, JPG or PNG, up to 5 MB</span>
             </label>

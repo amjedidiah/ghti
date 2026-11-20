@@ -101,6 +101,7 @@ from (values
   ('00000000-0000-0000-0000-00000000ad01'::uuid, 'local-admin@example.test', 'local-admin-pass-123', 'Local Admin'),
   ('00000000-0000-0000-0000-00000000a701'::uuid, 'amaka.admitted@example.test', 'local-applicant-pass-123', 'Amaka Okafor'),
   ('00000000-0000-0000-0000-00000000a702'::uuid, 'tunde.submitted@example.test', 'local-applicant-pass-123', 'Tunde Bello'),
+  ('00000000-0000-0000-0000-00000000a703'::uuid, 'ada.draft@example.test', 'local-applicant-pass-123', 'Ada Nwosu'),
   ('00000000-0000-0000-0000-0000000005a1'::uuid, 'chidi.student@example.test', 'local-student-pass-123', 'Chidi Eze'),
   ('00000000-0000-0000-0000-0000000005a2'::uuid, 'ngozi.student@example.test', 'local-student-pass-123', 'Ngozi Adeyemi'),
   ('00000000-0000-0000-0000-00000000ec01'::uuid, 'lecturer@example.test', 'local-lecturer-pass-123', 'Rev. Local Lecturer')
@@ -130,6 +131,25 @@ from (values
 cross join public.programmes p
 cross join public.terms t
 where p.slug = 'certificate-in-theology' and t.session = '2026/2027' and t.name = 'Second semester';
+
+-- The paper form's other answers for both (FAKE).
+update public.applications set
+  title = case when first_name = 'Amaka' then 'Mrs' else 'Mr' end,
+  date_of_birth = '1992-03-14', gender = case when first_name = 'Amaka' then 'female' else 'male' end,
+  nationality = 'Nigerian', marital_status = 'married', phone = '+2348030000101',
+  address = 'P.O. Box 100, Owerri', permanent_address = '12 Fake Street, Owerri, Imo State',
+  next_of_kin_name = 'Ngozi Fake', next_of_kin_relationship = 'Sister', next_of_kin_phone = '+2348030000102',
+  occupation = 'Teacher', born_again = true, born_again_when = '2008',
+  church = 'Fake Grace Assembly, Owerri', church_membership = '10 years', church_duties = 'Choir member',
+  pastor_name = 'Pastor Fake Okoro', pastor_phone = '+2348030000103',
+  education = '[{"institution": "Fake Secondary School, Owerri", "certificate": "WASSCE", "from": 2004, "to": 2010}]',
+  referees = '[{"name": "Rev. Fake One", "phone": "+2348030000104", "occupation": "Pastor"}, {"name": "Mrs Fake Two", "phone": "+2348030000105", "occupation": "Deaconess"}]',
+  pledge_given_at = now() - interval '3 days', consent_given_at = now() - interval '3 days'
+where applicant_id in ('00000000-0000-0000-0000-00000000a701', '00000000-0000-0000-0000-00000000a702');
+
+-- A draft (FAKE) with only a name, for trying the form and the e2e tests.
+insert into public.applications (applicant_id, surname, first_name, email)
+values ('00000000-0000-0000-0000-00000000a703', 'Nwosu', 'Ada', 'ada.draft@example.test');
 
 -- Two enrolled students on the Certificate, starting in the first semester
 -- (FAKE matric numbers until GHTI's format arrives, client input #18).

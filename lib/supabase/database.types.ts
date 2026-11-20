@@ -38,100 +38,136 @@ export type Database = {
         Row: {
           address: string | null
           applicant_id: string
+          born_again: boolean | null
+          born_again_when: string | null
+          church: string | null
+          church_duties: string | null
+          church_membership: string | null
           consent_given_at: string | null
           created_at: string
-          crm_branch: string | null
           date_of_birth: string | null
           decided_at: string | null
           decision_note: string | null
           education: Json
           email: string | null
+          employer: string | null
           first_name: string | null
           gender: string | null
           id: string
           intake_term_id: string | null
+          marital_status: Database["public"]["Enums"]["marital_status"] | null
           nationality: string | null
+          nature_of_work: string | null
+          next_of_kin_address: string | null
+          next_of_kin_email: string | null
           next_of_kin_name: string | null
+          next_of_kin_occupation: string | null
           next_of_kin_phone: string | null
           next_of_kin_relationship: string | null
+          occupation: string | null
           other_names: string | null
+          pastor_name: string | null
+          pastor_phone: string | null
+          permanent_address: string | null
           phone: string | null
+          pledge_given_at: string | null
           programme_id: string | null
-          referee_email: string | null
-          referee_name: string | null
-          referee_phone: string | null
-          referee_position: string | null
+          referees: Json
           reviewed_by: string | null
-          state_of_origin: string | null
           status: Database["public"]["Enums"]["application_status"]
           submitted_at: string | null
           surname: string | null
+          title: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           applicant_id?: string
+          born_again?: boolean | null
+          born_again_when?: string | null
+          church?: string | null
+          church_duties?: string | null
+          church_membership?: string | null
           consent_given_at?: string | null
           created_at?: string
-          crm_branch?: string | null
           date_of_birth?: string | null
           decided_at?: string | null
           decision_note?: string | null
           education?: Json
           email?: string | null
+          employer?: string | null
           first_name?: string | null
           gender?: string | null
           id?: string
           intake_term_id?: string | null
+          marital_status?: Database["public"]["Enums"]["marital_status"] | null
           nationality?: string | null
+          nature_of_work?: string | null
+          next_of_kin_address?: string | null
+          next_of_kin_email?: string | null
           next_of_kin_name?: string | null
+          next_of_kin_occupation?: string | null
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
+          occupation?: string | null
           other_names?: string | null
+          pastor_name?: string | null
+          pastor_phone?: string | null
+          permanent_address?: string | null
           phone?: string | null
+          pledge_given_at?: string | null
           programme_id?: string | null
-          referee_email?: string | null
-          referee_name?: string | null
-          referee_phone?: string | null
-          referee_position?: string | null
+          referees?: Json
           reviewed_by?: string | null
-          state_of_origin?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           submitted_at?: string | null
           surname?: string | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           applicant_id?: string
+          born_again?: boolean | null
+          born_again_when?: string | null
+          church?: string | null
+          church_duties?: string | null
+          church_membership?: string | null
           consent_given_at?: string | null
           created_at?: string
-          crm_branch?: string | null
           date_of_birth?: string | null
           decided_at?: string | null
           decision_note?: string | null
           education?: Json
           email?: string | null
+          employer?: string | null
           first_name?: string | null
           gender?: string | null
           id?: string
           intake_term_id?: string | null
+          marital_status?: Database["public"]["Enums"]["marital_status"] | null
           nationality?: string | null
+          nature_of_work?: string | null
+          next_of_kin_address?: string | null
+          next_of_kin_email?: string | null
           next_of_kin_name?: string | null
+          next_of_kin_occupation?: string | null
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
+          occupation?: string | null
           other_names?: string | null
+          pastor_name?: string | null
+          pastor_phone?: string | null
+          permanent_address?: string | null
           phone?: string | null
+          pledge_given_at?: string | null
           programme_id?: string | null
-          referee_email?: string | null
-          referee_name?: string | null
-          referee_phone?: string | null
-          referee_position?: string | null
+          referees?: Json
           reviewed_by?: string | null
-          state_of_origin?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           submitted_at?: string | null
           surname?: string | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1120,34 +1156,46 @@ export type Database = {
         Returns: {
           address: string | null
           applicant_id: string
+          born_again: boolean | null
+          born_again_when: string | null
+          church: string | null
+          church_duties: string | null
+          church_membership: string | null
           consent_given_at: string | null
           created_at: string
-          crm_branch: string | null
           date_of_birth: string | null
           decided_at: string | null
           decision_note: string | null
           education: Json
           email: string | null
+          employer: string | null
           first_name: string | null
           gender: string | null
           id: string
           intake_term_id: string | null
+          marital_status: Database["public"]["Enums"]["marital_status"] | null
           nationality: string | null
+          nature_of_work: string | null
+          next_of_kin_address: string | null
+          next_of_kin_email: string | null
           next_of_kin_name: string | null
+          next_of_kin_occupation: string | null
           next_of_kin_phone: string | null
           next_of_kin_relationship: string | null
+          occupation: string | null
           other_names: string | null
+          pastor_name: string | null
+          pastor_phone: string | null
+          permanent_address: string | null
           phone: string | null
+          pledge_given_at: string | null
           programme_id: string | null
-          referee_email: string | null
-          referee_name: string | null
-          referee_phone: string | null
-          referee_position: string | null
+          referees: Json
           reviewed_by: string | null
-          state_of_origin: string | null
           status: Database["public"]["Enums"]["application_status"]
           submitted_at: string | null
           surname: string | null
+          title: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1267,34 +1315,46 @@ export type Database = {
         Returns: {
           address: string | null
           applicant_id: string
+          born_again: boolean | null
+          born_again_when: string | null
+          church: string | null
+          church_duties: string | null
+          church_membership: string | null
           consent_given_at: string | null
           created_at: string
-          crm_branch: string | null
           date_of_birth: string | null
           decided_at: string | null
           decision_note: string | null
           education: Json
           email: string | null
+          employer: string | null
           first_name: string | null
           gender: string | null
           id: string
           intake_term_id: string | null
+          marital_status: Database["public"]["Enums"]["marital_status"] | null
           nationality: string | null
+          nature_of_work: string | null
+          next_of_kin_address: string | null
+          next_of_kin_email: string | null
           next_of_kin_name: string | null
+          next_of_kin_occupation: string | null
           next_of_kin_phone: string | null
           next_of_kin_relationship: string | null
+          occupation: string | null
           other_names: string | null
+          pastor_name: string | null
+          pastor_phone: string | null
+          permanent_address: string | null
           phone: string | null
+          pledge_given_at: string | null
           programme_id: string | null
-          referee_email: string | null
-          referee_name: string | null
-          referee_phone: string | null
-          referee_position: string | null
+          referees: Json
           reviewed_by: string | null
-          state_of_origin: string | null
           status: Database["public"]["Enums"]["application_status"]
           submitted_at: string | null
           surname: string | null
+          title: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1309,34 +1369,46 @@ export type Database = {
         Returns: {
           address: string | null
           applicant_id: string
+          born_again: boolean | null
+          born_again_when: string | null
+          church: string | null
+          church_duties: string | null
+          church_membership: string | null
           consent_given_at: string | null
           created_at: string
-          crm_branch: string | null
           date_of_birth: string | null
           decided_at: string | null
           decision_note: string | null
           education: Json
           email: string | null
+          employer: string | null
           first_name: string | null
           gender: string | null
           id: string
           intake_term_id: string | null
+          marital_status: Database["public"]["Enums"]["marital_status"] | null
           nationality: string | null
+          nature_of_work: string | null
+          next_of_kin_address: string | null
+          next_of_kin_email: string | null
           next_of_kin_name: string | null
+          next_of_kin_occupation: string | null
           next_of_kin_phone: string | null
           next_of_kin_relationship: string | null
+          occupation: string | null
           other_names: string | null
+          pastor_name: string | null
+          pastor_phone: string | null
+          permanent_address: string | null
           phone: string | null
+          pledge_given_at: string | null
           programme_id: string | null
-          referee_email: string | null
-          referee_name: string | null
-          referee_phone: string | null
-          referee_position: string | null
+          referees: Json
           reviewed_by: string | null
-          state_of_origin: string | null
           status: Database["public"]["Enums"]["application_status"]
           submitted_at: string | null
           surname: string | null
+          title: string | null
           updated_at: string
         }
         SetofOptions: {
@@ -1356,10 +1428,22 @@ export type Database = {
         | "admitted"
         | "rejected"
         | "withdrawn"
-      document_kind: "transcript" | "id_card" | "photo" | "other"
+      document_kind:
+        | "transcript"
+        | "id_card"
+        | "photo"
+        | "other"
+        | "endorsement"
+        | "payment_proof"
       drive_kind: "file" | "document" | "presentation" | "spreadsheet"
       export_kind: "applications" | "students" | "results"
       grade_status: "draft" | "submitted" | "published"
+      marital_status:
+        | "unmarried"
+        | "married"
+        | "divorced"
+        | "separated"
+        | "widowed"
       programme_level: "certificate" | "diploma" | "postgraduate_diploma"
       programme_status: "draft" | "published" | "archived"
       record_note_kind: "note" | "status_change"
@@ -1503,10 +1587,24 @@ export const Constants = {
         "rejected",
         "withdrawn",
       ],
-      document_kind: ["transcript", "id_card", "photo", "other"],
+      document_kind: [
+        "transcript",
+        "id_card",
+        "photo",
+        "other",
+        "endorsement",
+        "payment_proof",
+      ],
       drive_kind: ["file", "document", "presentation", "spreadsheet"],
       export_kind: ["applications", "students", "results"],
       grade_status: ["draft", "submitted", "published"],
+      marital_status: [
+        "unmarried",
+        "married",
+        "divorced",
+        "separated",
+        "widowed",
+      ],
       programme_level: ["certificate", "diploma", "postgraduate_diploma"],
       programme_status: ["draft", "published", "archived"],
       record_note_kind: ["note", "status_change"],

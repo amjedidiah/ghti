@@ -2,6 +2,7 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { z } from "zod";
 
 import { rowToValues } from "@/lib/applications/mapping";
+import { MARITAL_STATUS_LABELS } from "@/lib/validation/application";
 import type { CsvValue } from "@/lib/csv";
 import type { Database } from "@/lib/supabase/database.types";
 import { STUDENT_STATUS_LABELS, STUDENT_STATUSES } from "@/lib/validation/students";
@@ -95,25 +96,37 @@ export const APPLICATION_HEADERS = [
   "Decided",
   "Programme",
   "Intake",
+  "Title",
   "Surname",
   "First name",
   "Other names",
-  "Email",
-  "Phone",
   "Date of birth",
-  "Gender",
-  "State of origin",
+  "Sex",
   "Nationality",
-  "Address",
-  "CRM branch or church",
-  "Education",
+  "Marital status",
+  "Phone",
+  "Email",
+  "Current postal address",
+  "Permanent home address",
   "Next of kin",
   "Relationship",
   "Next of kin phone",
-  "Referee",
-  "Referee position",
-  "Referee phone",
-  "Referee email",
+  "Next of kin email",
+  "Next of kin occupation",
+  "Next of kin address",
+  "Occupation",
+  "Employer",
+  "Nature of work",
+  "Born again",
+  "Born again when",
+  "Church",
+  "Member for",
+  "Church duties",
+  "Pastor",
+  "Pastor phone",
+  "Education",
+  "Referee 1",
+  "Referee 2",
   "Decision note",
 ] as const;
 
@@ -121,6 +134,8 @@ export type ApplicationExportRow = Tables["applications"]["Row"] & {
   programme: { title: string } | null;
   intake: { name: string; session: string } | null;
 };
+
+const joined = (parts: string[]) => parts.filter(Boolean).join(", ");
 
 export function applicationRow(row: ApplicationExportRow): CsvValue[] {
   const values = rowToValues(row);
@@ -130,29 +145,53 @@ export function applicationRow(row: ApplicationExportRow): CsvValue[] {
     date(row.decided_at),
     row.programme?.title ?? "",
     row.intake ? `${row.intake.name}, ${row.intake.session}` : "",
+    row.title,
     row.surname,
     row.first_name,
     row.other_names,
-    row.email,
-    phoneForExport(row.phone),
     row.date_of_birth,
     row.gender === "male" ? "Male" : row.gender === "female" ? "Female" : "",
-    row.state_of_origin,
     row.nationality,
+    values.maritalStatus ? MARITAL_STATUS_LABELS[values.maritalStatus] : "",
+    phoneForExport(row.phone),
+    row.email,
     row.address,
-    row.crm_branch,
-    values.education
-      .map((entry) =>
-        [entry.qualification, entry.institution, entry.year].filter(Boolean).join(", "),
-      )
-      .join("; "),
+    row.permanent_address,
     row.next_of_kin_name,
     row.next_of_kin_relationship,
     phoneForExport(row.next_of_kin_phone),
-    row.referee_name,
-    row.referee_position,
-    phoneForExport(row.referee_phone),
-    row.referee_email,
+    row.next_of_kin_email,
+    row.next_of_kin_occupation,
+    row.next_of_kin_address,
+    row.occupation,
+    row.employer,
+    row.nature_of_work,
+    row.born_again === null ? "" : row.born_again ? "Yes" : "No",
+    row.born_again_when,
+    row.church,
+    row.church_membership,
+    row.church_duties,
+    row.pastor_name,
+    phoneForExport(row.pastor_phone),
+    values.education
+      .map((entry) =>
+        joined([
+          entry.certificate,
+          entry.institution,
+          entry.from || entry.to ? `${entry.from || "?"}-${entry.to || "?"}` : "",
+          entry.address,
+        ]),
+      )
+      .join("; "),
+    ...values.referees.map((referee) =>
+      joined([
+        referee.name,
+        phoneForExport(referee.phone || null),
+        referee.email,
+        referee.occupation,
+        referee.address,
+      ]),
+    ),
     row.decision_note,
   ];
 }

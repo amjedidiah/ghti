@@ -7,7 +7,11 @@ import { Suspense } from "react";
 import DocumentViewer from "@/components/admin/DocumentViewer";
 import RecordNoteForm from "@/components/admin/RecordNoteForm";
 import StudentStatusForm from "@/components/admin/StudentStatusForm";
-import ApplicationDetails, { Panel, Rows } from "@/components/applications/ApplicationDetails";
+import ApplicationDetails, {
+  detailsOf,
+  Panel,
+  Rows,
+} from "@/components/applications/ApplicationDetails";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { addRecordNote, changeStudentStatus } from "@/lib/admin/students";
 import { requireRole } from "@/lib/auth/session";
@@ -116,7 +120,7 @@ async function StudentFileContent({ params }: Pick<PageProps<"/admin/students/[i
           </Panel>
 
           {application ? (
-            <ApplicationDetails application={application} />
+            <ApplicationDetails {...detailsOf(application)} />
           ) : (
             <Panel title="Biodata">
               <Rows rows={[["Phone", student.profile?.phone ?? ""]]} />

@@ -1,13 +1,12 @@
-import type { Database } from "@/lib/supabase/database.types";
+import { APPLICATION_DOCUMENTS, type DocumentKind } from "@/lib/applications/documents";
 
-type DocumentKind = Database["public"]["Enums"]["document_kind"];
-
-export const DOCUMENT_LABELS: Record<DocumentKind, string> = {
-  transcript: "Transcript or result",
-  id_card: "Means of identification",
-  photo: "Passport photograph",
+export const DOCUMENT_LABELS = {
+  ...(Object.fromEntries(APPLICATION_DOCUMENTS.map((slot) => [slot.kind, slot.label])) as Record<
+    Exclude<DocumentKind, "other">,
+    string
+  >),
   other: "Other document",
-};
+} satisfies Record<DocumentKind, string>;
 
 /** Applicant's name as written on the form: first, other names, surname. */
 export function applicantName(row: {

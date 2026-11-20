@@ -8,7 +8,12 @@ import { ACCOUNTS, authFile, type Role } from "./support/accounts";
 // saved session younger than 45 minutes is reused (tokens last an hour), which
 // also keeps repeated runs under Supabase's sign-in rate limit.
 
-const HOME: Record<Role, RegExp> = { admin: /\/admin/, lecturer: /\/teach/, student: /\/portal/ };
+const HOME: Record<Role, RegExp> = {
+  admin: /\/admin/,
+  lecturer: /\/teach/,
+  student: /\/portal/,
+  applicant: /\/apply/,
+};
 const REUSE_FOR_MS = 45 * 60 * 1000;
 
 function fresh(path: string): boolean {

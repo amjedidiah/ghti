@@ -5,7 +5,11 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import DocumentViewer from "@/components/admin/DocumentViewer";
-import ApplicationDetails, { Panel, Rows } from "@/components/applications/ApplicationDetails";
+import ApplicationDetails, {
+  detailsOf,
+  Panel,
+  Rows,
+} from "@/components/applications/ApplicationDetails";
 import EnrolPanel from "@/components/admin/EnrolPanel";
 import ReviewPanel from "@/components/admin/ReviewPanel";
 import { enrolStudent } from "@/lib/admin/actions";
@@ -72,7 +76,7 @@ async function ReviewContent({ params }: Pick<PageProps<"/admin/applications/[id
 
       <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-5 lg:px-8">
         <div className="space-y-6 lg:col-span-3">
-          <ApplicationDetails application={application} />
+          <ApplicationDetails {...detailsOf(application)} />
         </div>
 
         <div className="space-y-6 lg:col-span-2">

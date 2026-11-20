@@ -19,9 +19,11 @@ function FormSection({
       aria-labelledby={`${id}-heading`}
       className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-8"
     >
+      {/* Focusable from script only (tabIndex -1): a form in steps moves focus here. */}
       <h2
         id={`${id}-heading`}
-        className="flex items-baseline gap-3 font-display text-xl font-bold text-primary sm:text-2xl"
+        tabIndex={-1}
+        className="flex items-baseline gap-3 font-display text-xl font-bold text-primary focus:outline-none sm:text-2xl"
       >
         <span
           aria-hidden

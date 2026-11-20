@@ -30,4 +30,6 @@ export const content = {
   dataController: null as string | null,
   /** Client input #13. Where people send data-protection requests. */
   privacyEmail: null as string | null,
+  /** Client input (new, 20 Nov 2026). The application fee and how to pay it, e.g. bank details. */
+  applicationFee: null as string | null,
 };

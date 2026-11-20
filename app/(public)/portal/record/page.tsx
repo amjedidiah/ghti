@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import ApplicationDetails from "@/components/applications/ApplicationDetails";
+import ApplicationDetails, { detailsOf } from "@/components/applications/ApplicationDetails";
 import StudentRecordCard from "@/components/portal/StudentRecordCard";
 import PageHeader from "@/components/shared/PageHeader";
 import { requireRole } from "@/lib/auth/session";
@@ -46,7 +46,7 @@ async function Record() {
         </p>
       )}
       {application ? (
-        <ApplicationDetails application={application} />
+        <ApplicationDetails {...detailsOf(application)} />
       ) : (
         <p className="rounded-xl border border-dashed border-border bg-card p-6 text-center text-secondary">
           Your personal details were not entered through an online application. The registrar holds

@@ -1,10 +1,11 @@
 -- RLS, grants, submission and storage tests for terms, applications and
--- documents (Stage 1, step 1.3). Run with: supabase test db
+-- documents (Stage 1, step 1.3; the paper form's questions from step 3.5).
+-- Run with: supabase test db
 begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(37);
+select plan(40);
 
 -- Fixtures ---------------------------------------------------------------------------
 
@@ -23,6 +24,21 @@ insert into public.programmes (id, slug, title, level, duration, status) values
 insert into public.terms (id, session, name, accepting_applications) values
   ('00000000-0000-0000-0000-0000000000e1', '2099/2100', 'Test open intake', true),
   ('00000000-0000-0000-0000-0000000000e2', '2099/2100', 'Test closed intake', false);
+
+-- What submit_application() reports as missing (its error DETAIL), or '' once
+-- it submits. Runs as the caller.
+create function pg_temp.missing(p_application_id uuid) returns text
+language plpgsql as $$
+declare
+  detail text;
+begin
+  perform public.submit_application(p_application_id);
+  return '';
+exception when check_violation then
+  get stacked diagnostics detail = pg_exception_detail;
+  return detail;
+end;
+$$;
 
 -- Structure ---------------------------------------------------------------------------
 
@@ -133,6 +149,20 @@ select throws_ok(
   '23514', 'Application incomplete', 'an incomplete application cannot be submitted'
 );
 
+select is(
+  pg_temp.missing('00000000-0000-0000-0000-0000000000f1'),
+  'programme_id,intake_term_id,date_of_birth,gender,nationality,marital_status,phone,email,address,'
+    || 'permanent_address,next_of_kin_name,next_of_kin_relationship,next_of_kin_phone,born_again,'
+    || 'church,pastor_name,pastor_phone,education,referees,transcript,photo,pledge,consent',
+  'submitting reports every missing answer of the paper form, in step order'
+);
+
+select throws_ok(
+  $$ update public.applications set referees = '[{}, {}, {}]'
+     where id = '00000000-0000-0000-0000-0000000000f1' $$,
+  '23514', null, 'an application holds at most two referees'
+);
+
 -- Storage: upload into own draft folder, not anyone else's.
 select lives_ok(
   $$ insert into storage.objects (bucket_id, name)
@@ -154,15 +184,34 @@ select lives_ok(
   'an applicant can record a document on their own draft'
 );
 
+-- The applicant answers everything, but names only one complete referee.
 update public.applications set
   programme_id = '00000000-0000-0000-0000-0000000000a9',
   intake_term_id = '00000000-0000-0000-0000-0000000000e1',
-  date_of_birth = '2000-01-01', gender = 'female', phone = '+2348012345678',
-  email = 'a@example.test', address = '1 Test Street', state_of_origin = 'Lagos',
-  nationality = 'Nigerian',
-  education = '[{"institution": "Test School", "qualification": "WASSCE", "year": 2018}]',
+  title = 'Mrs', date_of_birth = '2000-01-01', gender = 'female', marital_status = 'married',
+  nationality = 'Nigerian', phone = '+2348012345678', email = 'a@example.test',
+  address = '1 Test Street', permanent_address = '2 Home Street',
   next_of_kin_name = 'Kin', next_of_kin_relationship = 'Mother', next_of_kin_phone = '+2348000000000',
-  consent_given_at = now()
+  occupation = 'Teacher', born_again = true, born_again_when = '2010',
+  church = 'Test Church, Owerri', pastor_name = 'Pastor P', pastor_phone = '+2348000000002',
+  education = '[{"institution": "Test School", "certificate": "WASSCE", "to": 2018}]',
+  referees = '[{"name": "Ref One", "phone": "+2348000000003"}, {"name": "Ref Two"}]',
+  pledge_given_at = now(), consent_given_at = now()
+where id = '00000000-0000-0000-0000-0000000000f1';
+
+insert into public.documents (application_id, kind, storage_path, file_name, size_bytes, mime)
+values ('00000000-0000-0000-0000-0000000000f1', 'photo',
+        '00000000-0000-0000-0000-0000000000a1/00000000-0000-0000-0000-0000000000f1/photo.jpg',
+        'photo.jpg', 1000, 'image/jpeg');
+
+select is(
+  pg_temp.missing('00000000-0000-0000-0000-0000000000f1'),
+  'referees',
+  'both referees need a name and a phone number'
+);
+
+update public.applications
+set referees = '[{"name": "Ref One", "phone": "+2348000000003"}, {"name": "Ref Two", "phone": "+2348000000004"}]'
 where id = '00000000-0000-0000-0000-0000000000f1';
 
 select is(
@@ -190,7 +239,7 @@ select is(
 
 select is(
   (select count(*) from public.documents where application_id = '00000000-0000-0000-0000-0000000000f1'),
-  1::bigint,
+  2::bigint,
   'documents on a submitted application can no longer be removed by the applicant'
 );
 
@@ -237,8 +286,8 @@ update public.applications set
   programme_id = '00000000-0000-0000-0000-0000000000a9',
   surname = 'B', first_name = 'Bee', date_of_birth = '2000-01-01', gender = 'male',
   phone = '+2348012345679', email = 'b@example.test', address = '2 Test Street',
-  state_of_origin = 'Enugu', nationality = 'Nigerian',
-  education = '[{"institution": "Test School", "qualification": "WASSCE", "year": 2018}]',
+  nationality = 'Nigerian',
+  education = '[{"institution": "Test School", "certificate": "WASSCE", "to": 2018}]',
   next_of_kin_name = 'Kin', next_of_kin_relationship = 'Father', next_of_kin_phone = '+2348000000001',
   consent_given_at = now()
 where id = '00000000-0000-0000-0000-0000000000f3';
@@ -288,7 +337,7 @@ select is(
 select is(
   (select count(*) from public.documents
    where application_id in ('00000000-0000-0000-0000-0000000000f1', '00000000-0000-0000-0000-0000000000f3')),
-  2::bigint,
+  3::bigint,
   'an admin sees every document'
 );
 

@@ -50,13 +50,20 @@ function PrivacyPage() {
               password (stored only in scrambled form).
             </li>
             <li>
-              <strong className="text-primary">Your application:</strong> personal details (name,
-              date of birth, gender, phone, email, address, state of origin, nationality, church),
-              your education, and the name and phone number of your next of kin and referee.
+              <strong className="text-primary">Your application:</strong> personal details (title,
+              name, date of birth, sex, nationality, marital status, phone, email, addresses), your
+              work, your faith and church, and your education.
             </li>
             <li>
-              <strong className="text-primary">Your documents:</strong> the transcript, identity
-              document and photograph you upload.
+              <strong className="text-primary">Other people&apos;s details you give us:</strong> the
+              name, relationship and contact details of your next of kin, your pastor and two
+              referees. We use them only to consider your application, and may contact them about
+              it, so please let them know.
+            </li>
+            <li>
+              <strong className="text-primary">Your documents:</strong> the certificates, results,
+              photograph, identity document, pastor&apos;s endorsement and proof of payment you
+              upload.
             </li>
             <li>
               <strong className="text-primary">If you are admitted:</strong> your student record,

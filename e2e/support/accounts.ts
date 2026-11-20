@@ -4,6 +4,7 @@ export const ACCOUNTS = {
   admin: { email: "local-admin@example.test", password: "local-admin-pass-123" },
   lecturer: { email: "lecturer@example.test", password: "local-lecturer-pass-123" },
   student: { email: "chidi.student@example.test", password: "local-student-pass-123" },
+  applicant: { email: "ada.draft@example.test", password: "local-applicant-pass-123" },
 } as const;
 
 export type Role = keyof typeof ACCOUNTS;

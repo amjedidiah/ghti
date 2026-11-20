@@ -4,26 +4,31 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import ApplicationForm from "@/components/applications/ApplicationForm";
+import type { DocumentsByKind } from "@/components/applications/steps/DocumentsStep";
 import SignOutButton from "@/components/auth/SignOutButton";
 import SubmitButton from "@/components/forms/SubmitButton";
 import PageHeader from "@/components/shared/PageHeader";
-import { startApplication, type RecordedDocument } from "@/lib/applications/actions";
+import Placeholder from "@/components/shared/Placeholder";
+import { saveApplication, startApplication, submitApplication } from "@/lib/applications/actions";
+import { APPLICATION_DOCUMENTS } from "@/lib/applications/documents";
 import { rowToValues } from "@/lib/applications/mapping";
+import { parseStep } from "@/lib/applications/steps";
 import { requireRole } from "@/lib/auth/session";
 import { getMyApplication, getOpenIntakes } from "@/lib/queries/applications";
+import { content } from "@/lib/content";
 import { getPublishedProgrammes } from "@/lib/queries/programmes";
 
 export const metadata: Metadata = { title: "My application", robots: { index: false } };
 
-function ApplyPage() {
+function ApplyPage({ searchParams }: PageProps<"/apply">) {
   return (
     <Suspense fallback={<PageHeader eyebrow="Applicant" title="My application" />}>
-      <ApplyContent />
+      <ApplyContent searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function ApplyContent() {
+async function ApplyContent({ searchParams }: Pick<PageProps<"/apply">, "searchParams">) {
   const user = await requireRole("applicant");
   const application = await getMyApplication(user.id);
 
@@ -32,20 +37,32 @@ async function ApplyContent() {
   }
   if (application.status !== "draft") redirect("/apply/status");
 
-  const [programmes, intakes] = await Promise.all([getPublishedProgrammes(), getOpenIntakes()]);
-  const documentOf = (kind: string): RecordedDocument | null => {
-    const doc = application.documents.find((d) => d.kind === kind);
-    return doc
-      ? { id: doc.id, kind: doc.kind, fileName: doc.file_name, sizeBytes: doc.size_bytes }
-      : null;
-  };
+  const [programmes, intakes, { step }] = await Promise.all([
+    getPublishedProgrammes(),
+    getOpenIntakes(),
+    searchParams,
+  ]);
+  const documents = Object.fromEntries(
+    APPLICATION_DOCUMENTS.map((slot) => [
+      slot.kind,
+      application.documents
+        .filter((doc) => doc.kind === slot.kind)
+        .sort((a, b) => a.created_at.localeCompare(b.created_at))
+        .map((doc) => ({
+          id: doc.id,
+          kind: doc.kind,
+          fileName: doc.file_name,
+          sizeBytes: doc.size_bytes,
+        })),
+    ]),
+  ) as DocumentsByKind;
 
   return (
     <>
       <PageHeader eyebrow="Applicant" title="Your application">
         <p>
-          Fill in each section, upload your transcript, then submit. You can save a draft and come
-          back at any time.
+          The questions of GHTI&apos;s application form, step by step. Your answers are saved as you
+          go, so you can stop and come back at any time.
         </p>
       </PageHeader>
       <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -53,13 +70,17 @@ async function ApplyContent() {
           applicationId={application.id}
           ownerId={user.id}
           initialValues={rowToValues(application)}
+          initialStep={parseStep(step)}
+          initialDocuments={documents}
           programmes={programmes.map(({ id, title, level }) => ({ id, title, level }))}
           intakes={intakes}
-          documents={{
-            transcript: documentOf("transcript"),
-            id_card: documentOf("id_card"),
-            photo: documentOf("photo"),
-          }}
+          fee={
+            content.applicationFee ?? (
+              <Placeholder what="the application fee and how to pay it." input={29} />
+            )
+          }
+          save={saveApplication.bind(null, application.id)}
+          submit={submitApplication.bind(null, application.id)}
         />
       </div>
     </>
@@ -77,9 +98,9 @@ function StartApplication({ name, email }: { name: string; email: string }) {
           <h2 className="font-display text-2xl font-bold text-primary">Before you start</h2>
           <ul className="mt-4 space-y-3 text-secondary">
             {[
-              "It takes about 15 minutes. You can save and come back later.",
-              "Have your transcript or result ready: a PDF, or a clear photo taken with your phone.",
-              "You will need the name and phone number of your next of kin.",
+              "It takes about 20 minutes, in short steps. Your answers are saved as you go.",
+              "Have your certificates or results and a passport photograph ready: a PDF, or a clear photo taken with your phone.",
+              "You will need the names and phone numbers of your next of kin, your pastor and two referees.",
             ].map((item) => (
               <li key={item} className="flex gap-3">
                 <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" aria-hidden />

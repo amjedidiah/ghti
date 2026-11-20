@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { z } from "zod";
 
+import { APPLICATION_DOCUMENT_KINDS, documentSlot } from "@/lib/applications/documents";
 import { splitFullName, valuesToUpdate } from "@/lib/applications/mapping";
 import { requireRole } from "@/lib/auth/session";
 import { sendApplicationSubmitted } from "@/lib/email/send";
@@ -70,7 +71,7 @@ async function loadDraft(applicationId: string, userId: string) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("applications")
-    .select("id, status, consent_given_at")
+    .select("id, status, consent_given_at, pledge_given_at")
     .eq("id", applicationId)
     .eq("applicant_id", userId)
     .maybeSingle();
@@ -98,7 +99,12 @@ export async function saveApplication(
 
   const { error } = await supabase
     .from("applications")
-    .update(valuesToUpdate(parsed.data, draft.consent_given_at))
+    .update(
+      valuesToUpdate(parsed.data, {
+        consentGivenAt: draft.consent_given_at,
+        pledgeGivenAt: draft.pledge_given_at,
+      }),
+    )
     .eq("id", applicationId);
   if (error) return { status: "error", message: GENERIC_ERROR };
 
@@ -166,7 +172,7 @@ export async function submitApplication(
 
 const documentInput = z.object({
   applicationId: z.uuid(),
-  kind: z.enum(["transcript", "id_card", "photo"]),
+  kind: z.enum(APPLICATION_DOCUMENT_KINDS),
   path: z.string().max(200),
   fileName: z.string().trim().min(1).max(200),
   sizeBytes: z.number().int().min(1).max(MAX_UPLOAD_BYTES),
@@ -176,8 +182,9 @@ const documentInput = z.object({
 export type RecordedDocument = { id: string; kind: string; fileName: string; sizeBytes: number };
 
 /**
- * Record a file the browser has just uploaded to the `documents` bucket.
- * Replaces any earlier file of the same kind on this application.
+ * Record a file the browser has just uploaded to the `documents` bucket. A
+ * slot that holds one file (lib/applications/documents.ts) replaces the
+ * earlier one; a slot that holds several refuses a file beyond its limit.
  */
 export async function recordDocument(
   input: z.input<typeof documentInput>,
@@ -199,6 +206,14 @@ export async function recordDocument(
     .select("id, storage_path")
     .eq("application_id", applicationId)
     .eq("kind", kind);
+  const max = documentSlot(kind)?.max ?? 1;
+  if (max > 1 && (previous?.length ?? 0) >= max) {
+    await bucket.remove([path]);
+    return {
+      ok: false,
+      message: `You can upload up to ${max} files here. Remove one to add another.`,
+    };
+  }
 
   const { data: created, error } = await supabase
     .from("documents")
@@ -224,7 +239,7 @@ export async function recordDocument(
     };
   }
 
-  if (previous && previous.length > 0) {
+  if (max === 1 && previous && previous.length > 0) {
     await supabase
       .from("documents")
       .delete()

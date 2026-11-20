@@ -3,12 +3,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import PageHeader from "@/components/shared/PageHeader";
+import Placeholder from "@/components/shared/Placeholder";
+import { content } from "@/lib/content";
 import { getOpenIntakes } from "@/lib/queries/applications";
 
 export const metadata: Metadata = {
   title: "Admissions",
   description:
-    "How to apply to GHTI online: create an account, fill in the form, upload your transcript.",
+    "How to apply to GHTI online: create an account, answer the application step by step, upload your certificates and photo.",
 };
 
 // Requirements and key dates beyond the open intakes come from the client
@@ -27,11 +29,11 @@ const STEPS = [
   },
   {
     title: "Fill in the application",
-    body: "Your details, education and next of kin. Save a draft and come back whenever you like.",
+    body: "About you, your next of kin, work, faith and church, education and two referees. Your answers are saved as you go, so you can come back whenever you like.",
   },
   {
     title: "Upload your documents and submit",
-    body: "Your transcript or result is required: a PDF or a clear phone photo. Then submit and follow your application's status online.",
+    body: "Your certificates or results and a passport photograph are required: PDFs or clear phone photos. You can add your pastor's endorsement and proof of the application fee. Then submit and follow your application's status online.",
   },
 ];
 
@@ -72,6 +74,14 @@ async function AdmissionsPage() {
         </ol>
 
         <aside className="space-y-4">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <h2 className="font-display text-xl font-bold text-primary">Application fee</h2>
+            <div className="mt-3 text-secondary">
+              {content.applicationFee ?? (
+                <Placeholder what="the application fee and how to pay it." input={29} />
+              )}
+            </div>
+          </div>
           <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <h2 className="font-display text-xl font-bold text-primary">Open intakes</h2>
             {intakes.length > 0 ? (

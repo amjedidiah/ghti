@@ -117,8 +117,8 @@ async function HomePage() {
               Ready to apply?
             </h2>
             <p className="mt-2 max-w-xl text-secondary">
-              Create an account, fill in your application and upload your transcript, all from your
-              phone.
+              Create an account, answer the application step by step and upload your certificates,
+              all from your phone.
             </p>
           </div>
           <Link

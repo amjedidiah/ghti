@@ -8,28 +8,42 @@ import {
   type ApplicationValues,
 } from "@/lib/validation/application";
 
+const noReferee = { name: "", address: "", occupation: "", email: "", phone: "" };
+
 const empty: ApplicationValues = {
   programmeId: "",
   intakeTermId: "",
+  title: "",
   surname: "",
   firstName: "",
   otherNames: "",
   dateOfBirth: "",
   gender: "",
+  nationality: "",
+  maritalStatus: "",
   phone: "",
   email: "",
   address: "",
-  stateOfOrigin: "",
-  nationality: "",
-  crmBranch: "",
-  education: [],
+  permanentAddress: "",
   nextOfKinName: "",
   nextOfKinRelationship: "",
   nextOfKinPhone: "",
-  refereeName: "",
-  refereePosition: "",
-  refereePhone: "",
-  refereeEmail: "",
+  nextOfKinEmail: "",
+  nextOfKinOccupation: "",
+  nextOfKinAddress: "",
+  occupation: "",
+  employer: "",
+  natureOfWork: "",
+  bornAgain: "",
+  bornAgainWhen: "",
+  church: "",
+  churchMembership: "",
+  churchDuties: "",
+  pastorName: "",
+  pastorPhone: "",
+  education: [],
+  referees: [noReferee, noReferee],
+  pledge: false,
   consent: false,
 };
 
@@ -41,15 +55,33 @@ const complete: ApplicationValues = {
   firstName: "Ada",
   dateOfBirth: "2000-05-17",
   gender: "female",
+  nationality: "Nigerian",
+  maritalStatus: "married",
   phone: "0803 123 4567",
   email: "ada@example.com",
-  address: "12 Church Road, Enugu",
-  stateOfOrigin: "Enugu",
-  nationality: "Nigerian",
-  education: [{ institution: "Federal Girls College", qualification: "WASSCE", year: "2017" }],
+  address: "PO Box 12, Owerri",
+  permanentAddress: "12 Church Road, Enugu",
   nextOfKinName: "Ngozi Obi",
   nextOfKinRelationship: "Mother",
   nextOfKinPhone: "+234 805 000 0000",
+  bornAgain: "yes",
+  church: "Grace Chapel, Owerri",
+  pastorName: "Pastor John Eze",
+  pastorPhone: "0803 000 0001",
+  education: [
+    {
+      institution: "Federal Girls College",
+      address: "",
+      from: "2011",
+      to: "2017",
+      certificate: "WASSCE",
+    },
+  ],
+  referees: [
+    { ...noReferee, name: "Rev. Uche Okeke", phone: "0803 000 0002" },
+    { ...noReferee, name: "Mrs Ifeoma Nwosu", phone: "0803 000 0003" },
+  ],
+  pledge: true,
   consent: true,
 };
 
@@ -113,6 +145,8 @@ describe("applicationSubmitSchema", () => {
     expect(Object.keys(found).sort()).toEqual(
       [
         "address",
+        "bornAgain",
+        "church",
         "consent",
         "dateOfBirth",
         "education",
@@ -120,13 +154,21 @@ describe("applicationSubmitSchema", () => {
         "firstName",
         "gender",
         "intakeTermId",
+        "maritalStatus",
         "nationality",
         "nextOfKinName",
         "nextOfKinPhone",
         "nextOfKinRelationship",
+        "pastorName",
+        "pastorPhone",
+        "permanentAddress",
         "phone",
+        "pledge",
         "programmeId",
-        "stateOfOrigin",
+        "referees.0.name",
+        "referees.0.phone",
+        "referees.1.name",
+        "referees.1.phone",
         "surname",
       ].sort(),
     );
@@ -137,12 +179,29 @@ describe("applicationSubmitSchema", () => {
       ...complete,
       education: [
         ...complete.education,
-        { institution: "Another School", qualification: "", year: "" },
+        { institution: "Another School", address: "", from: "", to: "", certificate: "" },
       ],
     });
     expect(messages(result)).toEqual({
-      "education.1.qualification": "Enter the qualification.",
-      "education.1.year": "Enter the year.",
+      "education.1.certificate": "Enter the certificate obtained.",
     });
+  });
+
+  test("the year left cannot come before the year started", () => {
+    const result = applicationDraftSchema.safeParse({
+      ...complete,
+      education: [{ ...complete.education[0], from: "2017", to: "2011" }],
+    });
+    expect(messages(result)).toEqual({
+      "education.0.to": "The year you left cannot be before the year you started.",
+    });
+  });
+
+  test("a referee needs a name and a phone number; the rest is optional", () => {
+    const result = applicationSubmitSchema.safeParse({
+      ...complete,
+      referees: [complete.referees[0], { ...noReferee, name: "Only a name" }],
+    });
+    expect(messages(result)).toEqual({ "referees.1.phone": "Enter the referee's phone number." });
   });
 });

@@ -10,7 +10,6 @@ import {
   sortResults,
   STUDENT_HEADERS,
   studentRow,
-  type ApplicationExportRow,
   type ResultExportRow,
 } from "@/lib/exports";
 
@@ -65,25 +64,37 @@ describe("rows", () => {
       applicant_id: "u",
       programme_id: "p",
       intake_term_id: "t",
+      title: "Mrs",
       surname: "Obi",
       first_name: "Ada",
       other_names: null,
       date_of_birth: "1990-05-14",
       gender: "female",
+      nationality: "Nigerian",
+      marital_status: "married",
       phone: "+2348031234567",
       email: "ada@example.test",
-      address: "1 Road",
-      state_of_origin: "Lagos",
-      nationality: "Nigerian",
-      crm_branch: null,
-      education: [{ institution: "Fake College", qualification: "WAEC", year: 2007 }],
+      address: "PO Box 1, Owerri",
+      permanent_address: "1 Road",
       next_of_kin_name: "Femi",
       next_of_kin_relationship: "Brother",
       next_of_kin_phone: "+2348039876543",
-      referee_name: null,
-      referee_position: null,
-      referee_phone: null,
-      referee_email: null,
+      next_of_kin_email: null,
+      next_of_kin_occupation: null,
+      next_of_kin_address: null,
+      occupation: "Teacher",
+      employer: null,
+      nature_of_work: null,
+      born_again: true,
+      born_again_when: "2005",
+      church: "Grace Chapel, Owerri",
+      church_membership: null,
+      church_duties: null,
+      pastor_name: "Pastor Eze",
+      pastor_phone: "+2348030000001",
+      education: [{ institution: "Fake College", certificate: "WAEC", from: 2001, to: 2007 }],
+      referees: [{ name: "Rev. Okeke", phone: "+2348030000002" }],
+      pledge_given_at: null,
       consent_given_at: null,
       status: "under_review",
       submitted_at: "2026-11-20T01:22:03Z",
@@ -94,7 +105,7 @@ describe("rows", () => {
       updated_at: "2026-11-20T01:00:00Z",
       programme: { title: "Certificate in Theology" },
       intake: { name: "Second semester", session: "2026/2027" },
-    } as ApplicationExportRow);
+    });
     expect(row).toHaveLength(APPLICATION_HEADERS.length);
     expect(row.slice(0, 5)).toEqual([
       "Under review",
@@ -104,8 +115,12 @@ describe("rows", () => {
       "Second semester, 2026/2027",
     ]);
     expect(row).toContain("Female");
+    expect(row).toContain("Married");
+    expect(row).toContain("Yes");
     expect(row).toContain("0803 123 4567");
-    expect(row).toContain("WAEC, Fake College, 2007");
+    expect(row).toContain("WAEC, Fake College, 2001-2007");
+    expect(row).toContain("Rev. Okeke, 0803 000 0002");
+    expect(row.at(-2)).toBe(""); // Referee 2, not given
   });
 
   test("a student row has one value per header", () => {

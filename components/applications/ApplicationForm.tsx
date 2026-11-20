@@ -1,74 +1,81 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useState, useTransition, type HTMLInputTypeAttribute } from "react";
-import { get, useFieldArray, useForm, type Path, type UseFormReturn } from "react-hook-form";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { useForm, useWatch, type Path } from "react-hook-form";
 
-import DocumentUpload from "@/components/applications/DocumentUpload";
-import Field, { describedBy } from "@/components/forms/Field";
+import AboutStep from "@/components/applications/steps/AboutStep";
+import AddressesStep from "@/components/applications/steps/AddressesStep";
+import ChurchStep from "@/components/applications/steps/ChurchStep";
+import DocumentsStep, { type DocumentsByKind } from "@/components/applications/steps/DocumentsStep";
+import EducationStep, { EMPTY_EDUCATION } from "@/components/applications/steps/EducationStep";
+import ProgrammeStep, { type ProgrammeOption } from "@/components/applications/steps/ProgrammeStep";
+import RefereesStep from "@/components/applications/steps/RefereesStep";
+import ReviewStep from "@/components/applications/steps/ReviewStep";
+import WorkStep from "@/components/applications/steps/WorkStep";
 import FormMessage from "@/components/forms/FormMessage";
-import FormSection from "@/components/forms/FormSection";
-import Select from "@/components/forms/Select";
+import Stepper from "@/components/forms/Stepper";
 import SubmitButton from "@/components/forms/SubmitButton";
-import Textarea from "@/components/forms/Textarea";
-import TextInput from "@/components/forms/TextInput";
+import { useUrlStep } from "@/components/forms/useUrlStep";
+import type { ApplicationActionResult, RecordedDocument } from "@/lib/applications/actions";
+import { APPLICATION_DOCUMENTS, type ApplicationDocumentKind } from "@/lib/applications/documents";
 import {
-  saveApplication,
-  submitApplication,
-  type ApplicationActionResult,
-  type RecordedDocument,
-} from "@/lib/applications/actions";
-import { LEVEL_LABELS, PROGRAMME_LEVELS, type ProgrammeLevel } from "@/lib/programmes";
+  APPLICATION_STEPS,
+  firstStepWithError,
+  issuesForStep,
+  parseStep,
+  STEP_COUNT,
+  stepOfField,
+} from "@/lib/applications/steps";
 import {
   applicationDraftSchema,
   applicationSubmitSchema,
-  MAX_EDUCATION_ENTRIES,
-  NIGERIAN_STATES,
+  MISSING_FIELD_MESSAGES,
   type ApplicationValues,
 } from "@/lib/validation/application";
 
-type Form = UseFormReturn<ApplicationValues>;
-type DocKind = "transcript" | "id_card" | "photo";
+const DOCUMENTS_STEP = APPLICATION_STEPS.findIndex((step) => step.id === "documents") + 1;
+const DOCUMENT_KINDS = new Set<string>(APPLICATION_DOCUMENTS.map((slot) => slot.kind));
 
-/** Which documents to ask for. Required/optional to confirm with GHTI (client input #5). */
-const DOCUMENTS: { kind: DocKind; label: string; hint: string; required: boolean }[] = [
-  {
-    kind: "transcript",
-    label: "Transcript or result",
-    hint: "Your most recent transcript, certificate or WAEC/NECO result. A clear phone photo is fine.",
-    required: true,
-  },
-  {
-    kind: "id_card",
-    label: "Means of identification",
-    hint: "National ID (NIN slip), international passport, driver's licence or voter's card.",
-    required: false,
-  },
-  {
-    kind: "photo",
-    label: "Passport photograph",
-    hint: "A recent photo of your face against a plain background.",
-    required: false,
-  },
-];
+type Errors = Record<string, string>;
+type Save = (values: ApplicationValues) => Promise<ApplicationActionResult>;
 
-const EMPTY_EDUCATION = { institution: "", qualification: "", year: "" };
+function errorsFrom(issues: readonly { path: readonly PropertyKey[]; message: string }[]): Errors {
+  const errors: Errors = {};
+  for (const issue of issues) errors[issue.path.map(String).join(".")] ??= issue.message;
+  return errors;
+}
 
+/**
+ * The application form, in the steps of GHTI's paper form. One React Hook
+ * Form holds every answer, so nothing is lost between steps. Next checks the
+ * step's required answers; every move between steps saves the draft when it
+ * has changed; `?step=` keeps the step in the URL (no personal data). Submit
+ * checks everything and opens the first step with a problem.
+ */
 function ApplicationForm({
   applicationId,
   ownerId,
   initialValues,
+  initialStep,
+  initialDocuments,
   programmes,
   intakes,
-  documents,
+  fee,
+  save,
+  submit,
 }: {
   applicationId: string;
   ownerId: string;
   initialValues: ApplicationValues;
-  programmes: { id: string; title: string; level: ProgrammeLevel }[];
+  initialStep: number;
+  initialDocuments: DocumentsByKind;
+  programmes: ProgrammeOption[];
   intakes: { id: string; label: string }[];
-  documents: Record<DocKind, RecordedDocument | null>;
+  /** The application fee and how to pay (site content), beside proof of payment. */
+  fee: ReactNode;
+  save: Save;
+  submit: Save;
 }) {
   const form = useForm<ApplicationValues>({
     resolver: zodResolver(applicationDraftSchema),
@@ -78,19 +85,24 @@ function ApplicationForm({
     },
     mode: "onTouched",
   });
-  const education = useFieldArray({ control: form.control, name: "education" });
+  const values = useWatch({ control: form.control }) as ApplicationValues;
 
+  const [step, goTo] = useUrlStep(initialStep, parseStep);
+  const [visited, setVisited] = useState(() => new Set([initialStep]));
+  const [documents, setDocuments] = useState(initialDocuments);
+  const [documentErrors, setDocumentErrors] = useState<Errors>({});
   const [result, setResult] = useState<ApplicationActionResult | null>(null);
-  const [transcriptError, setTranscriptError] = useState<string>();
   const [saving, startSaving] = useTransition();
   const [submitting, startSubmitting] = useTransition();
   const busy = saving || submitting;
-  const savedAt = result?.savedAt;
+  const isDirty = form.formState.isDirty;
+  /** What to focus once the next step has rendered: its heading or a field. */
+  const pendingFocus = useRef<string | null>(null);
+  /** The step last shown: focus moves only on a change, never on first load. */
+  const shownStep = useRef(initialStep);
 
-  // Errors from Submit (set with setError) are not re-checked until the field
-  // loses focus, so they lingered after the answer was fixed. Clear a field's
-  // submit error as soon as its value changes; an edit to any education row
-  // also clears the "add at least one school" message.
+  // A server error on a field goes as soon as its answer changes; an edit to
+  // any education row or referee also clears the message for the whole list.
   useEffect(
     () =>
       form.subscribe({
@@ -98,7 +110,8 @@ function ApplicationForm({
         callback: ({ name, type }) => {
           if (!name || type !== "change") return;
           const fields = [name as Path<ApplicationValues>];
-          if (name.startsWith("education.")) fields.push("education");
+          const list = name.split(".")[0];
+          if (list === "education" || list === "referees") fields.push(list);
           for (const field of fields) {
             if (form.getFieldState(field).error?.type === "server") form.clearErrors(field);
           }
@@ -108,7 +121,6 @@ function ApplicationForm({
   );
 
   // Warn before leaving with unsaved answers.
-  const isDirty = form.formState.isDirty;
   useEffect(() => {
     if (!isDirty) return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();
@@ -116,281 +128,192 @@ function ApplicationForm({
     return () => window.removeEventListener("beforeunload", warn);
   }, [isDirty]);
 
+  // After a step change (buttons, the stepper or the browser's Back button):
+  // remember the visit, move focus, and save anything the Back button skipped.
+  useEffect(() => {
+    if (shownStep.current === step) return;
+    shownStep.current = step;
+    setVisited((current) => (current.has(step) ? current : new Set(current).add(step)));
+    const target = pendingFocus.current ?? "heading";
+    pendingFocus.current = null;
+    focus(target);
+    if (form.formState.isDirty) startSaving(async () => void (await persist()));
+    // persist and focus read the latest state when called; only the step matters here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  function focus(target: string) {
+    if (target === "heading") {
+      const heading = document.getElementById(`${APPLICATION_STEPS[step - 1].id}-heading`);
+      heading?.focus();
+      heading?.scrollIntoView?.({ block: "start" });
+    } else if (!DOCUMENT_KINDS.has(target)) {
+      form.setFocus(target as Path<ApplicationValues>);
+    }
+  }
+
+  /** Put errors on their fields (documents on their upload slots). */
+  function applyErrors(errors: Errors) {
+    const forDocuments: Errors = {};
+    for (const [name, message] of Object.entries(errors)) {
+      if (DOCUMENT_KINDS.has(name)) forDocuments[name] = message;
+      else form.setError(name as Path<ApplicationValues>, { type: "server", message });
+    }
+    setDocumentErrors(forDocuments);
+  }
+
+  /** Open the first step with an error and focus its first problem. */
+  function showErrors(errors: Errors) {
+    applyErrors(errors);
+    const first = firstStepWithError(errors);
+    if (first === null) return;
+    const field = Object.keys(errors).find((name) => stepOfField(name) === first) ?? "heading";
+    if (first === step) focus(field);
+    else {
+      pendingFocus.current = field;
+      goTo(first);
+    }
+  }
+
   function showResult(outcome: ApplicationActionResult) {
     setResult(outcome);
     // Answers that reached the database are no longer "unsaved".
     if (outcome.status === "saved" || outcome.savedAt) form.reset(form.getValues());
-    if (outcome.status === "saved") return;
-    const fieldErrors = outcome.fieldErrors ?? {};
-    setTranscriptError(fieldErrors.transcript);
-    let focused = false;
-    for (const [name, message] of Object.entries(fieldErrors)) {
-      if (name === "transcript") continue;
-      form.setError(name as Path<ApplicationValues>, { type: "server", message });
-      if (!focused) {
-        form.setFocus(name as Path<ApplicationValues>);
-        focused = true;
-      }
-    }
+    if (outcome.status === "error" && outcome.fieldErrors) showErrors(outcome.fieldErrors);
   }
 
-  const onSave = form.handleSubmit((values) => {
-    startSaving(async () => showResult(await saveApplication(applicationId, values)));
-  });
-
-  function onSubmit() {
-    form.clearErrors();
-    const values = form.getValues();
-    const check = applicationSubmitSchema.safeParse(values);
-    if (!check.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of check.error.issues) fieldErrors[issue.path.join(".")] ??= issue.message;
-      return showResult({
-        status: "error",
-        message: "Your application is not complete yet. Fix the highlighted answers, then submit.",
-        fieldErrors,
-      });
+  /** Save the draft if anything changed. False when it could not be saved. */
+  async function persist(): Promise<boolean> {
+    if (!form.formState.isDirty) return true;
+    const current = form.getValues();
+    const draft = applicationDraftSchema.safeParse(current);
+    if (!draft.success) {
+      showErrors(errorsFrom(draft.error.issues));
+      return false;
     }
-    startSubmitting(async () => {
-      // Redirects to /apply/status on success.
-      showResult(await submitApplication(applicationId, values));
+    const outcome = await save(current);
+    showResult(outcome);
+    return outcome.status === "saved";
+  }
+
+  function moveTo(next: number) {
+    if (next === step || busy) return;
+    startSaving(async () => {
+      if (await persist()) goTo(next);
     });
   }
 
-  const byLevel = PROGRAMME_LEVELS.map((level) => ({
-    level,
-    items: programmes.filter((programme) => programme.level === level),
-  })).filter((group) => group.items.length > 0);
+  function onNext() {
+    // Documents are checked by the server on submit; every other step must be complete.
+    if (step !== DOCUMENTS_STEP) {
+      const check = applicationSubmitSchema.safeParse(form.getValues());
+      const errors = check.success ? {} : issuesForStep(check.error.issues, step);
+      if (Object.keys(errors).length > 0) {
+        applyErrors(errors);
+        focus(Object.keys(errors)[0]);
+        return;
+      }
+    }
+    moveTo(step + 1);
+  }
+
+  function onSubmit() {
+    form.clearErrors();
+    setDocumentErrors({});
+    const check = applicationSubmitSchema.safeParse(form.getValues());
+    const errors = check.success ? {} : errorsFrom(check.error.issues);
+    for (const slot of APPLICATION_DOCUMENTS) {
+      if (slot.required && documents[slot.kind].length === 0) {
+        errors[slot.kind] = MISSING_FIELD_MESSAGES[slot.kind].message;
+      }
+    }
+    if (Object.keys(errors).length > 0) {
+      setResult({
+        status: "error",
+        message: "Your application is not complete yet. Fix the highlighted answers, then submit.",
+      });
+      showErrors(errors);
+      return;
+    }
+    // Redirects to /apply/status on success.
+    startSubmitting(async () => showResult(await submit(form.getValues())));
+  }
+
+  function setDocumentsOf(kind: ApplicationDocumentKind, next: RecordedDocument[]) {
+    setDocuments((current) => ({ ...current, [kind]: next }));
+    if (next.length > 0) {
+      setDocumentErrors((current) => {
+        const rest = { ...current };
+        delete rest[kind];
+        return rest;
+      });
+    }
+  }
+
+  // A step is done once visited and its required answers are in.
+  const check = applicationSubmitSchema.safeParse(values);
+  const done = new Set(
+    APPLICATION_STEPS.flatMap((_, index) => {
+      const number = index + 1;
+      if (!visited.has(number) || number === STEP_COUNT) return [];
+      if (number === DOCUMENTS_STEP) {
+        const complete = APPLICATION_DOCUMENTS.every(
+          (slot) => !slot.required || documents[slot.kind].length > 0,
+        );
+        return complete ? [number] : [];
+      }
+      const issues = check.success ? {} : issuesForStep(check.error.issues, number);
+      return Object.keys(issues).length === 0 ? [number] : [];
+    }),
+  );
+
+  const savedAt = result?.savedAt;
 
   return (
-    <form onSubmit={onSave} noValidate className="space-y-6">
-      <FormSection id="programme" step={1} title="Programme">
-        <SelectField form={form} name="programmeId" label="Programme">
-          <option value="">Choose a programme</option>
-          {byLevel.map(({ level, items }) => (
-            <optgroup key={level} label={LEVEL_LABELS[level].plural}>
-              {items.map((programme) => (
-                <option key={programme.id} value={programme.id}>
-                  {programme.title}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </SelectField>
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (step === STEP_COUNT) onSubmit();
+        else onNext();
+      }}
+      noValidate
+      className="space-y-6"
+    >
+      <Stepper
+        label="Application steps"
+        steps={APPLICATION_STEPS}
+        current={step}
+        done={done}
+        onSelect={moveTo}
+      />
 
-        {intakes.length > 0 ? (
-          <SelectField
-            form={form}
-            name="intakeTermId"
-            label="Intake"
-            hint="When you would like to start."
-          >
-            <option value="">Choose an intake</option>
-            {intakes.map((intake) => (
-              <option key={intake.id} value={intake.id}>
-                {intake.label}
-              </option>
-            ))}
-          </SelectField>
-        ) : (
-          <FormMessage
-            status="error"
-            message="Applications are not open right now. You can fill in and save your answers, and submit when the next intake opens."
-          />
-        )}
-      </FormSection>
-
-      <FormSection
-        id="personal"
-        step={2}
-        title="Personal details"
-        description="As they appear on your official documents."
-      >
-        <div className="grid gap-5 sm:grid-cols-2">
-          <TextField form={form} name="surname" label="Surname" autoComplete="family-name" />
-          <TextField form={form} name="firstName" label="First name" autoComplete="given-name" />
-        </div>
-        <TextField
-          form={form}
-          name="otherNames"
-          label="Other names (optional)"
-          autoComplete="additional-name"
+      {step === 1 && <ProgrammeStep form={form} programmes={programmes} intakes={intakes} />}
+      {step === 2 && <AboutStep form={form} />}
+      {step === 3 && <AddressesStep form={form} />}
+      {step === 4 && <WorkStep form={form} />}
+      {step === 5 && <ChurchStep form={form} />}
+      {step === 6 && <EducationStep form={form} />}
+      {step === 7 && <RefereesStep form={form} />}
+      {step === DOCUMENTS_STEP && (
+        <DocumentsStep
+          applicationId={applicationId}
+          ownerId={ownerId}
+          documents={documents}
+          onChange={setDocumentsOf}
+          errors={documentErrors}
+          fee={fee}
         />
-        <div className="grid gap-5 sm:grid-cols-2">
-          <TextField
-            form={form}
-            name="dateOfBirth"
-            label="Date of birth"
-            type="date"
-            autoComplete="bday"
-          />
-          <GenderField form={form} />
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <TextField
-            form={form}
-            name="phone"
-            label="Phone number"
-            type="tel"
-            autoComplete="tel"
-            hint="Nigerian numbers can start with 0 or +234."
-          />
-          <TextField
-            form={form}
-            name="email"
-            label="Email address"
-            type="email"
-            autoComplete="email"
-          />
-        </div>
-        <TextAreaField
+      )}
+      {step === STEP_COUNT && (
+        <ReviewStep
           form={form}
-          name="address"
-          label="Home address"
-          autoComplete="street-address"
+          values={values}
+          programmes={programmes}
+          intakes={intakes}
+          documents={documents}
+          onEdit={moveTo}
         />
-        <div className="grid gap-5 sm:grid-cols-2">
-          <SelectField form={form} name="stateOfOrigin" label="State of origin">
-            <option value="">Choose a state</option>
-            {NIGERIAN_STATES.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
-          </SelectField>
-          <TextField
-            form={form}
-            name="nationality"
-            label="Nationality"
-            autoComplete="country-name"
-          />
-        </div>
-        <TextField
-          form={form}
-          name="crmBranch"
-          label="CRM branch or church (optional)"
-          hint="The branch or church you attend."
-        />
-      </FormSection>
-
-      <FormSection
-        id="education"
-        step={3}
-        title="Education"
-        description="Your schools and qualifications, most recent first."
-      >
-        {education.fields.map((entry, index) => (
-          <fieldset key={entry.id} className="rounded-md border border-border p-4">
-            <legend className="px-1 text-sm font-semibold text-primary">
-              School or qualification {index + 1}
-            </legend>
-            <div className="space-y-4">
-              <TextField
-                form={form}
-                name={`education.${index}.institution`}
-                label="School or institution"
-              />
-              <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
-                <TextField
-                  form={form}
-                  name={`education.${index}.qualification`}
-                  label="Qualification"
-                  hint="e.g. WASSCE, OND, B.Sc."
-                />
-                <TextField
-                  form={form}
-                  name={`education.${index}.year`}
-                  label="Year"
-                  inputMode="numeric"
-                />
-              </div>
-              {education.fields.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => education.remove(index)}
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-danger hover:underline"
-                >
-                  <Trash2 className="size-4" aria-hidden />
-                  Remove this entry
-                </button>
-              )}
-            </div>
-          </fieldset>
-        ))}
-        {errorFor(form, "education") && (
-          <p className="text-sm font-medium text-danger">{errorFor(form, "education")}</p>
-        )}
-        {education.fields.length < MAX_EDUCATION_ENTRIES && (
-          <button
-            type="button"
-            onClick={() => education.append(EMPTY_EDUCATION)}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border px-4 py-2.5 text-sm font-semibold text-primary hover:bg-muted"
-          >
-            <Plus className="size-4" aria-hidden />
-            Add another
-          </button>
-        )}
-      </FormSection>
-
-      <FormSection id="contacts" step={4} title="Next of kin and referee">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <TextField form={form} name="nextOfKinName" label="Next of kin's full name" />
-          <TextField
-            form={form}
-            name="nextOfKinRelationship"
-            label="Relationship to you"
-            hint="e.g. Mother, Husband, Brother."
-          />
-        </div>
-        <TextField
-          form={form}
-          name="nextOfKinPhone"
-          label="Next of kin's phone number"
-          type="tel"
-        />
-
-        <p className="border-t border-border pt-5 text-sm text-secondary">
-          A referee who knows you well, such as your pastor or branch leader (optional).
-        </p>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <TextField form={form} name="refereeName" label="Referee's full name" />
-          <TextField
-            form={form}
-            name="refereePosition"
-            label="Their position"
-            hint="e.g. Pastor, CRM Lekki branch."
-          />
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <TextField form={form} name="refereePhone" label="Referee's phone number" type="tel" />
-          <TextField form={form} name="refereeEmail" label="Referee's email" type="email" />
-        </div>
-      </FormSection>
-
-      <FormSection
-        id="documents"
-        step={5}
-        title="Documents"
-        description="Files upload as soon as you choose them. On a phone you can take a photo instead."
-      >
-        {DOCUMENTS.map((doc) => (
-          <DocumentUpload
-            key={doc.kind}
-            applicationId={applicationId}
-            ownerId={ownerId}
-            kind={doc.kind}
-            label={doc.label}
-            hint={doc.hint}
-            required={doc.required}
-            initial={documents[doc.kind]}
-            error={doc.kind === "transcript" ? transcriptError : undefined}
-          />
-        ))}
-      </FormSection>
-
-      <FormSection id="declaration" step={6} title="Declaration">
-        <ConsentField form={form} />
-      </FormSection>
+      )}
 
       <div className="sticky bottom-0 z-10 -mx-4 border-t border-border bg-bg/95 px-4 py-4 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
         {result?.status === "error" && (
@@ -400,193 +323,44 @@ function ApplicationForm({
         )}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <p role="status" className="text-center text-xs text-secondary sm:text-left sm:text-sm">
-            {savedAt && !isDirty
-              ? `Draft saved at ${new Date(savedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`
-              : isDirty
-                ? "You have unsaved changes."
-                : "Your answers are saved as a draft until you submit."}
+            {saving
+              ? "Saving…"
+              : savedAt && !isDirty
+                ? `Draft saved at ${new Date(savedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.`
+                : isDirty
+                  ? "You have unsaved changes."
+                  : "Your answers are saved as a draft until you submit."}
           </p>
-          <div className="grid grid-cols-2 gap-3 sm:flex">
+          <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-3">
             <button
-              type="submit"
-              disabled={busy}
-              className="inline-flex items-center justify-center rounded-md border border-brand bg-card px-4 py-3 text-base font-semibold text-brand hover:bg-muted disabled:opacity-60 sm:px-5"
-            >
-              {saving ? "Saving…" : "Save draft"}
-            </button>
-            <SubmitButton
               type="button"
-              onClick={onSubmit}
-              pending={submitting}
-              className="px-4 sm:w-auto sm:px-5"
+              onClick={() => moveTo(step - 1)}
+              disabled={busy || step === 1}
+              className="inline-flex items-center justify-center rounded-md border border-border bg-card px-3 py-3 text-base font-semibold text-primary hover:bg-muted disabled:opacity-50 sm:px-5"
             >
-              Submit<span className="hidden sm:inline">&nbsp;application</span>
-            </SubmitButton>
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={() => startSaving(async () => void (await persist()))}
+              disabled={busy}
+              className="inline-flex items-center justify-center rounded-md border border-brand bg-card px-3 py-3 text-base font-semibold text-brand hover:bg-muted disabled:opacity-60 sm:px-5"
+            >
+              Save<span className="hidden sm:inline">&nbsp;draft</span>
+            </button>
+            {step < STEP_COUNT ? (
+              <SubmitButton pending={saving} className="px-3 sm:w-auto sm:px-5">
+                Next
+              </SubmitButton>
+            ) : (
+              <SubmitButton pending={submitting} className="px-3 sm:w-auto sm:px-5">
+                Submit<span className="hidden sm:inline">&nbsp;application</span>
+              </SubmitButton>
+            )}
           </div>
         </div>
       </div>
     </form>
-  );
-}
-
-// Field helpers ------------------------------------------------------------------
-
-function errorFor(form: Form, name: Path<ApplicationValues>): string | undefined {
-  const error = get(form.formState.errors, name) as { message?: string } | undefined;
-  return error?.message;
-}
-
-function TextField({
-  form,
-  name,
-  label,
-  hint,
-  type = "text",
-  autoComplete,
-  inputMode,
-}: {
-  form: Form;
-  name: Path<ApplicationValues>;
-  label: string;
-  hint?: string;
-  type?: HTMLInputTypeAttribute;
-  autoComplete?: string;
-  inputMode?: "numeric" | "tel" | "email" | "text";
-}) {
-  const id = `field-${name.replaceAll(".", "-")}`;
-  const error = errorFor(form, name);
-  return (
-    <Field id={id} label={label} hint={hint} error={error}>
-      <TextInput
-        id={id}
-        type={type}
-        autoComplete={autoComplete}
-        inputMode={inputMode}
-        aria-invalid={Boolean(error)}
-        aria-describedby={describedBy(id, { hint, error })}
-        {...form.register(name)}
-      />
-    </Field>
-  );
-}
-
-function TextAreaField({
-  form,
-  name,
-  label,
-  autoComplete,
-}: {
-  form: Form;
-  name: Path<ApplicationValues>;
-  label: string;
-  autoComplete?: string;
-}) {
-  const id = `field-${name}`;
-  const error = errorFor(form, name);
-  return (
-    <Field id={id} label={label} error={error}>
-      <Textarea
-        id={id}
-        autoComplete={autoComplete}
-        aria-invalid={Boolean(error)}
-        aria-describedby={describedBy(id, { error })}
-        {...form.register(name)}
-      />
-    </Field>
-  );
-}
-
-function SelectField({
-  form,
-  name,
-  label,
-  hint,
-  children,
-}: {
-  form: Form;
-  name: Path<ApplicationValues>;
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  const id = `field-${name}`;
-  const error = errorFor(form, name);
-  return (
-    <Field id={id} label={label} hint={hint} error={error}>
-      <Select
-        id={id}
-        aria-invalid={Boolean(error)}
-        aria-describedby={describedBy(id, { hint, error })}
-        {...form.register(name)}
-      >
-        {children}
-      </Select>
-    </Field>
-  );
-}
-
-function GenderField({ form }: { form: Form }) {
-  const error = errorFor(form, "gender");
-  return (
-    <fieldset aria-describedby={error ? "field-gender-error" : undefined}>
-      <legend className="block text-sm font-semibold text-primary">Gender</legend>
-      <div className="mt-1.5 grid grid-cols-2 gap-3">
-        {(["female", "male"] as const).map((value) => (
-          <label
-            key={value}
-            className="flex cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-3.5 py-3 text-base text-primary has-checked:border-brand has-checked:bg-brand/5"
-          >
-            <input
-              type="radio"
-              value={value}
-              className="size-4 accent-(--brand)"
-              {...form.register("gender")}
-            />
-            {value === "female" ? "Female" : "Male"}
-          </label>
-        ))}
-      </div>
-      {error && (
-        <p id="field-gender-error" className="mt-1.5 text-sm font-medium text-danger">
-          {error}
-        </p>
-      )}
-    </fieldset>
-  );
-}
-
-function ConsentField({ form }: { form: Form }) {
-  const error = errorFor(form, "consent");
-  return (
-    <div>
-      <label className="flex cursor-pointer gap-3 text-sm leading-relaxed text-primary">
-        <input
-          type="checkbox"
-          className="mt-0.5 size-5 shrink-0 accent-(--brand)"
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? "field-consent-error" : undefined}
-          {...form.register("consent")}
-        />
-        <span>
-          The information I have given is true and complete. I agree that GHTI may store and use it,
-          and the documents I upload, to consider my application for admission, as described in the{" "}
-          <a
-            href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-accent-strong underline"
-          >
-            privacy notice
-          </a>
-          .
-        </span>
-      </label>
-      {error && (
-        <p id="field-consent-error" className="mt-1.5 text-sm font-medium text-danger">
-          {error}
-        </p>
-      )}
-    </div>
   );
 }
 
