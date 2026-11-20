@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import PageHeader from "@/components/shared/PageHeader";
@@ -14,7 +15,20 @@ export const metadata: Metadata = {
 function AboutPage() {
   return (
     <>
-      <PageHeader eyebrow="About" title={`About ${site.name}`}>
+      <PageHeader
+        eyebrow="About"
+        title={`About ${site.name}`}
+        aside={
+          <Image
+            src="/brand/ghti-crest.svg"
+            alt="The GHTI crest: a dove descending on an open Bible, with the name Great Harvest Theological Institute"
+            width={400}
+            height={480}
+            preload
+            className="h-auto w-28 sm:w-36 lg:w-44"
+          />
+        }
+      >
         <p>{site.fullName ?? `A ${site.ministry} institution.`}</p>
       </PageHeader>
 

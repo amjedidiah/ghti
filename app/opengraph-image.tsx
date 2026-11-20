@@ -23,13 +23,14 @@ const colors = {
 
 async function OpengraphImage() {
   // Literal paths so the build traces only these files.
-  const [playfair, interMedium, interSemiBold, mark] = await Promise.all([
+  const [playfair, interMedium, interSemiBold, crest] = await Promise.all([
     readFile(join(process.cwd(), "assets/fonts/playfair-display-latin-700-normal.woff")),
     readFile(join(process.cwd(), "assets/fonts/inter-latin-500-normal.woff")),
     readFile(join(process.cwd(), "assets/fonts/inter-latin-600-normal.woff")),
-    readFile(join(process.cwd(), "public/brand/ghti-mark.svg")),
+    readFile(join(process.cwd(), "public/brand/ghti-crest.svg")),
   ]);
-  const markSrc = `data:image/svg+xml;base64,${mark.toString("base64")}`;
+  // The full crest (lettering outlined, so it needs no fonts here).
+  const crestSrc = `data:image/svg+xml;base64,${crest.toString("base64")}`;
 
   return new ImageResponse(
     <div
@@ -94,7 +95,7 @@ async function OpengraphImage() {
             {`Apply online · ${site.ministry}`}
           </div>
         </div>
-        <img src={markSrc} alt="" width={330} height={396} />
+        <img src={crestSrc} alt="" width={330} height={396} />
       </div>
       <div style={{ height: 12, background: colors.gold }} />
     </div>,
