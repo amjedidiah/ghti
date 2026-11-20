@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getGradingScale, getPendingReturn, scoreText } from "@/lib/queries/grade-sheet";
 import { createClient } from "@/lib/supabase/server";
 
 // Reads for the lecturer area (/teach), as the signed-in lecturer: RLS returns
@@ -54,4 +55,42 @@ export async function getClassList(offeringId: string) {
   const { data, error } = await supabase.rpc("class_list", { p_offering_id: offeringId });
   if (error) throw new Error(`Could not load the class list: ${error.message}`);
   return data;
+}
+
+/**
+ * The lecturer's grade sheet: the class (class_list: name and matric only),
+ * each student's grade, the grading scale and any note from the office.
+ */
+export async function getMyGradeSheet(offeringId: string) {
+  const supabase = await createClient();
+  const [students, grades, scale] = await Promise.all([
+    getClassList(offeringId),
+    supabase
+      .from("registrations")
+      .select("id, grade:grades(ca_score, exam_score, status, updated_at)")
+      .eq("offering_id", offeringId),
+    getGradingScale(),
+  ]);
+  if (grades.error) throw new Error(`Could not load the grades: ${grades.error.message}`);
+
+  const gradeOf = new Map(grades.data.map((row) => [row.id, row.grade]));
+  const rows = students.map((student) => {
+    const grade = gradeOf.get(student.registration_id) ?? null;
+    return {
+      registrationId: student.registration_id,
+      name: student.full_name,
+      matric: student.matric_no,
+      ca: scoreText(grade?.ca_score),
+      exam: scoreText(grade?.exam_score),
+      status: grade?.status ?? null,
+      updatedAt: grade?.updated_at ?? null,
+    };
+  });
+  const returned = await getPendingReturn(
+    offeringId,
+    rows.flatMap((row) =>
+      row.status && row.updatedAt ? [{ status: row.status, updatedAt: row.updatedAt }] : [],
+    ),
+  );
+  return { rows, scale, returned };
 }

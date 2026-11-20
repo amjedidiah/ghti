@@ -4,12 +4,15 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import GradeSheetForm from "@/components/admin/GradeSheetForm";
-import { saveGradeSheet } from "@/lib/admin/grades";
+import ReturnGradesForm from "@/components/admin/ReturnGradesForm";
+import GradeSheetForm from "@/components/grades/GradeSheetForm";
+import ReturnedNote from "@/components/grades/ReturnedNote";
+import { returnGrades, saveGradeSheet } from "@/lib/admin/grades";
 import { requireRole } from "@/lib/auth/session";
 import { GRADE_SPLIT } from "@/lib/grades";
 import { isUuid } from "@/lib/queries/admin-academics";
 import { getGradeSheet } from "@/lib/queries/admin-grades";
+import { scoreText } from "@/lib/queries/grade-sheet";
 import { termLabel } from "@/lib/validation/academics";
 
 // Generic title: student names never go in titles, URLs or analytics.
@@ -27,8 +30,6 @@ function GradeSheetPage({ params }: PageProps<"/admin/grades/[offeringId]">) {
   );
 }
 
-const score = (value: number | null | undefined) => (value == null ? "" : String(Number(value)));
-
 async function GradeSheetContent({
   params,
 }: Pick<PageProps<"/admin/grades/[offeringId]">, "params">) {
@@ -38,6 +39,7 @@ async function GradeSheetContent({
   if (!sheet || !sheet.term || !sheet.course) notFound();
 
   const published = sheet.registrations.filter((r) => r.grade?.status === "published").length;
+  const submitted = sheet.registrations.filter((r) => r.grade?.status === "submitted").length;
 
   return (
     <>
@@ -55,6 +57,7 @@ async function GradeSheetContent({
             {published}/{sheet.registrations.length} published
           </span>
         </p>
+        <p>Lecturer: {sheet.lecturer?.full_name ?? "none assigned"}</p>
       </AdminPageHeader>
 
       <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
@@ -82,6 +85,41 @@ async function GradeSheetContent({
           )}
         </details>
 
+        {submitted > 0 && (
+          <section
+            aria-labelledby="awaiting-approval"
+            className="space-y-3 rounded-xl border border-brand/30 bg-brand/5 p-4 sm:p-5"
+          >
+            <h2 id="awaiting-approval" className="font-semibold text-primary">
+              {submitted} grade{submitted === 1 ? " is" : "s are"} waiting for approval
+            </h2>
+            <p className="text-sm text-secondary">
+              Submitted by the lecturer and marked “Submitted” below. Check them, then press{" "}
+              <strong>Save and publish</strong> to show them to students, or return them to the
+              lecturer with a note.
+            </p>
+            <details>
+              <summary className="cursor-pointer text-sm font-semibold text-accent-strong">
+                Return them to the lecturer
+              </summary>
+              <div className="mt-3">
+                <ReturnGradesForm
+                  action={returnGrades.bind(null, sheet.id)}
+                  hasLecturer={Boolean(sheet.lecturer)}
+                />
+              </div>
+            </details>
+          </section>
+        )}
+
+        {sheet.returned && (
+          <ReturnedNote
+            returned={sheet.returned}
+            audience="admin"
+            hasLecturer={Boolean(sheet.lecturer)}
+          />
+        )}
+
         {sheet.registrations.length === 0 ? (
           <p className="rounded-xl border border-dashed border-border bg-card p-6 text-center text-secondary">
             Nobody is registered on this course yet.{" "}
@@ -95,6 +133,7 @@ async function GradeSheetContent({
         ) : (
           <GradeSheetForm
             key={sheet.id}
+            mode="admin"
             action={saveGradeSheet.bind(null, sheet.id)}
             split={GRADE_SPLIT}
             scale={sheet.scale}
@@ -102,8 +141,8 @@ async function GradeSheetContent({
               registrationId: registration.id,
               name: registration.student?.profile?.full_name ?? "",
               matric: registration.student?.matric_no ?? "",
-              ca: score(registration.grade?.ca_score),
-              exam: score(registration.grade?.exam_score),
+              ca: scoreText(registration.grade?.ca_score),
+              exam: scoreText(registration.grade?.exam_score),
               status: registration.grade?.status ?? null,
             }))}
           />

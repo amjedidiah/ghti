@@ -18,7 +18,8 @@ function GradesPage({ searchParams }: PageProps<"/admin/grades">) {
     <>
       <PageHeader eyebrow="Admin" title="Grades">
         <p>
-          Enter CA and exam scores per course, then publish. Students see only published grades.
+          Enter CA and exam scores per course, or approve what lecturers submit, then publish.
+          Students see only published grades.
         </p>
       </PageHeader>
       <div className="mx-auto w-full max-w-7xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
@@ -106,6 +107,11 @@ async function GradesContent({ searchParams }: Pick<PageProps<"/admin/grades">, 
                           <span className="block">
                             {offering.graded}/{offering.registered} graded
                           </span>
+                          {offering.submitted > 0 && (
+                            <span className="block font-semibold text-brand">
+                              {offering.submitted} to approve
+                            </span>
+                          )}
                           <span className="block">
                             {offering.published}/{offering.registered} published
                           </span>

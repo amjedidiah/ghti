@@ -5,6 +5,8 @@ import ApplicationDecision, { applicationDecisionSubject } from "@/emails/Applic
 import ApplicationSubmitted from "@/emails/ApplicationSubmitted";
 import ContactMessage from "@/emails/ContactMessage";
 import ContactReceipt from "@/emails/ContactReceipt";
+import GradesReturned from "@/emails/GradesReturned";
+import GradesSubmitted from "@/emails/GradesSubmitted";
 import ResultsPublished, { resultsPublishedSubject } from "@/emails/ResultsPublished";
 import StudentWelcome from "@/emails/StudentWelcome";
 
@@ -84,5 +86,37 @@ describe("email templates", () => {
     const { text: plain } = await text(<ContactReceipt name="Ada" siteUrl={siteUrl} />);
     expect(plain).toContain("Dear Ada");
     expect(plain).not.toContain("intake");
+  });
+
+  test("the office hears how many grades wait for approval, with no names or scores", async () => {
+    const { html, text: plain } = await text(
+      <GradesSubmitted
+        lecturer="Rev. Okoro"
+        course="BIB 101: Old Testament Survey"
+        term="First semester, 2026/2027"
+        count={2}
+        offeringId="o1"
+        siteUrl={siteUrl}
+      />,
+    );
+    expect(plain).toContain("Rev. Okoro has submitted 2 grades");
+    expect(html).toContain(`${siteUrl}/admin/grades/o1`);
+  });
+
+  test("a returned sheet carries the office's note and links to the lecturer's sheet", async () => {
+    const { html, text: plain } = await text(
+      <GradesReturned
+        name="Rev. Okoro"
+        course="BIB 101: Old Testament Survey"
+        term="First semester, 2026/2027"
+        note="GHTI/002's exam looks low."
+        count={1}
+        offeringId="o1"
+        siteUrl={siteUrl}
+      />,
+    );
+    expect(plain).toContain("returned 1 grade");
+    expect(plain).toContain("GHTI/002's exam looks low.");
+    expect(html).toContain(`${siteUrl}/teach/o1/grades`);
   });
 });

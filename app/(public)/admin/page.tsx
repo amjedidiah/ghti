@@ -60,12 +60,16 @@ async function AdminOverview() {
         ) : null,
     },
     {
-      label: "Grades not yet published",
-      value: records.unpublishedGrades,
-      href: records.firstTermWithDrafts
-        ? `/admin/grades?term=${records.firstTermWithDrafts}`
-        : "/admin/grades",
-      detail: "Drafts students cannot see yet.",
+      label: "Grades awaiting approval",
+      value: records.awaitingApproval,
+      href:
+        (records.firstTermAwaiting ?? records.firstTermWithDrafts)
+          ? `/admin/grades?term=${records.firstTermAwaiting ?? records.firstTermWithDrafts}`
+          : "/admin/grades",
+      detail: (() => {
+        const drafts = records.unpublishedGrades - records.awaitingApproval;
+        return `Submitted by lecturers. ${drafts} more ${drafts === 1 ? "is a draft" : "are drafts"} students cannot see yet.`;
+      })(),
     },
     {
       label: "Results emails to send",

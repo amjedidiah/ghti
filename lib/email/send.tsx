@@ -6,8 +6,10 @@ import type { ReactElement } from "react";
 import ApplicationDecision, { applicationDecisionSubject } from "@/emails/ApplicationDecision";
 import ApplicationSubmitted, { applicationSubmittedSubject } from "@/emails/ApplicationSubmitted";
 import ContactMessage, { contactMessageSubject } from "@/emails/ContactMessage";
-import LecturerAssigned, { lecturerAssignedSubject } from "@/emails/LecturerAssigned";
 import ContactReceipt, { contactReceiptSubject } from "@/emails/ContactReceipt";
+import GradesReturned, { gradesReturnedSubject } from "@/emails/GradesReturned";
+import GradesSubmitted, { gradesSubmittedSubject } from "@/emails/GradesSubmitted";
+import LecturerAssigned, { lecturerAssignedSubject } from "@/emails/LecturerAssigned";
 import ResultsPublished, { resultsPublishedSubject } from "@/emails/ResultsPublished";
 import StudentWelcome, { studentWelcomeSubject } from "@/emails/StudentWelcome";
 import { sendEmails, type EmailMessage, type SendOutcome } from "@/lib/email/transport";
@@ -133,6 +135,48 @@ export async function sendLecturerAssigned(input: {
       to,
       lecturerAssignedSubject(props.course),
       <LecturerAssigned {...props} siteUrl={siteUrl()} />,
+    ),
+  ]);
+}
+
+/** "Grades are waiting for approval" to the office (EMAIL_TO). Counts only. */
+export async function sendGradesSubmitted(input: {
+  lecturer: string;
+  course: string;
+  term: string;
+  count: number;
+  offeringId: string;
+}): Promise<SendOutcome | null> {
+  const office = process.env.EMAIL_TO;
+  if (!office) {
+    console.error("[grades-submitted] EMAIL_TO is not set; the office was not emailed.");
+    return null;
+  }
+  return sendEmails("grades-submitted", [
+    await message(
+      office,
+      gradesSubmittedSubject(input.course),
+      <GradesSubmitted {...input} siteUrl={siteUrl()} />,
+    ),
+  ]);
+}
+
+/** "Grades returned to you", with the office's note, to the lecturer. */
+export async function sendGradesReturned(input: {
+  to: string;
+  name: string;
+  course: string;
+  term: string;
+  note: string;
+  count: number;
+  offeringId: string;
+}): Promise<SendOutcome> {
+  const { to, ...props } = input;
+  return sendEmails("grades-returned", [
+    await message(
+      to,
+      gradesReturnedSubject(props.course),
+      <GradesReturned {...props} siteUrl={siteUrl()} />,
     ),
   ]);
 }

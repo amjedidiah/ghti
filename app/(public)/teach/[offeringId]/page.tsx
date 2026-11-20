@@ -30,6 +30,8 @@ async function Overview({ params }: Pick<PageProps<"/teach/[offeringId]">, "para
     getClassList(offering.id),
     getCourseContent(offering.course.id),
   ]);
+  const submitted = students.filter((s) => s.grade_status === "submitted").length;
+  const published = students.filter((s) => s.grade_status === "published").length;
   const materials = content.lessons.reduce(
     (sum, lesson) => sum + lesson.materials.length,
     content.materials.length,
@@ -67,6 +69,22 @@ async function Overview({ params }: Pick<PageProps<"/teach/[offeringId]">, "para
           )}
         </p>
       </section>
+      {students.length > 0 && (
+        <section className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+          <h2 className="font-display text-xl font-bold text-primary">Grades</h2>
+          <p className="mt-2 text-secondary">
+            <span className="tabular-nums">
+              {submitted} of {students.length} waiting for approval, {published} published.
+            </span>{" "}
+            <Link
+              href={`/teach/${offering.id}/grades`}
+              className="font-semibold text-accent-strong hover:underline"
+            >
+              Enter grades
+            </Link>
+          </p>
+        </section>
+      )}
     </div>
   );
 }

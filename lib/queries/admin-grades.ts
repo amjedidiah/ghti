@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { GradeBand } from "@/lib/grades";
+import { getGradingScale, getPendingReturn } from "@/lib/queries/grade-sheet";
 import { planResultNotices } from "@/lib/result-notices";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,6 +32,7 @@ export async function getGradeProgress(termId: string | null) {
     programme: string;
     registered: number;
     graded: number;
+    submitted: number;
     published: number;
   }[] = [];
 
@@ -52,6 +53,7 @@ export async function getGradeProgress(termId: string | null) {
         programme: offering.course?.programme?.title ?? "",
         registered: offering.registrations.length,
         graded: offering.registrations.filter((r) => r.grade?.total != null).length,
+        submitted: offering.registrations.filter((r) => r.grade?.status === "submitted").length,
         published: offering.registrations.filter((r) => r.grade?.status === "published").length,
       }))
       .sort((a, b) => a.programme.localeCompare(b.programme) || a.code.localeCompare(b.code));
@@ -64,35 +66,38 @@ export async function getGradeProgress(termId: string | null) {
   };
 }
 
-/** One offering's grade sheet: course, term, scale and every registered student's grade. */
+/**
+ * One offering's grade sheet: course, term, lecturer, scale, every registered
+ * student's grade and any note returned to the lecturer that still applies.
+ */
 export async function getGradeSheet(offeringId: string) {
   const supabase = await createClient();
   const [offering, scale] = await Promise.all([
     supabase
       .from("course_offerings")
       .select(
-        "id, term:terms(id, session, name), course:courses(code, title, credit_units, programme:programmes(title)), registrations(id, student:students(matric_no, profile:profiles(full_name)), grade:grades(id, ca_score, exam_score, total, letter, status))",
+        "id, term:terms(id, session, name), lecturer:profiles!course_offerings_lecturer_id_fkey(full_name), course:courses(code, title, credit_units, programme:programmes(title)), registrations(id, student:students(matric_no, profile:profiles(full_name)), grade:grades(id, ca_score, exam_score, total, letter, status, updated_at))",
       )
       .eq("id", offeringId)
       .maybeSingle(),
-    supabase.from("grading_scale").select("min_score, letter, grade_point").order("min_score", {
-      ascending: false,
-    }),
+    getGradingScale(),
   ]);
   if (offering.error) throw new Error(`Could not load the grade sheet: ${offering.error.message}`);
-  if (scale.error) throw new Error(`Could not load the grading scale: ${scale.error.message}`);
   if (!offering.data) return null;
 
+  const returned = await getPendingReturn(
+    offeringId,
+    offering.data.registrations.flatMap((r) =>
+      r.grade ? [{ status: r.grade.status, updatedAt: r.grade.updated_at }] : [],
+    ),
+  );
   return {
     ...offering.data,
     registrations: [...offering.data.registrations].sort((a, b) =>
       (a.student?.matric_no ?? "").localeCompare(b.student?.matric_no ?? ""),
     ),
-    scale: scale.data.map((band): GradeBand => ({
-      min_score: Number(band.min_score),
-      letter: band.letter,
-      grade_point: Number(band.grade_point),
-    })),
+    scale,
+    returned,
   };
 }
 

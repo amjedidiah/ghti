@@ -1,10 +1,17 @@
 import { GRADE_SPLIT, parseScore } from "@/lib/grades";
 
-// Saving a grade sheet (Stage 2, step 2.3): from the current grades and what
-// the admin typed, work out what to insert, update, delete and change. Pure,
-// tested in grade-sheet.test.ts; the database still checks everything.
+// Saving a grade sheet (steps 2.3 and 3.3): from the current grades and what
+// was typed, work out what to insert, update, delete and change. Pure, tested
+// in grade-sheet.test.ts; the database still checks everything.
+//
+// Two modes share the sheet:
+// - admin: "finalise" publishes complete grades; every row can be edited,
+//   and a change to a published grade needs a reason.
+// - lecturer: "finalise" submits complete grades for approval; only empty
+//   and draft rows can be edited (submitted and published ones are locked).
 
 export type GradeStatus = "draft" | "submitted" | "published";
+export type SheetMode = "admin" | "lecturer";
 
 export type CurrentRow = {
   registrationId: string;
@@ -29,18 +36,29 @@ export type SheetPlan = {
     status: GradeStatus;
   }[];
   deletes: string[];
-  /** Changes to published grades: need a reason (change_published_grade). */
+  /** Changes to published grades: need a reason (change_published_grade). Admin only. */
   publishedChanges: { id: string; ca_score: number; exam_score: number }[];
-  /** Rows that end up published by this save (newly). */
-  newlyPublished: number;
-  /** Rows the admin asked to publish but which still miss a score. */
+  /** Rows this save newly publishes (admin) or submits for approval (lecturer). */
+  newlyFinal: number;
+  /** Rows that were to be published or submitted but still miss a score. */
   incomplete: number;
 };
+
+/** The status "finalise" moves complete grades to. */
+export const FINAL_STATUS: Record<SheetMode, GradeStatus> = {
+  admin: "published",
+  lecturer: "submitted",
+};
+
+/** Whether a row can be edited in this mode. Lecturers change only drafts. */
+export function isLocked(mode: SheetMode, status: GradeStatus | null): boolean {
+  return mode === "lecturer" && (status === "submitted" || status === "published");
+}
 
 export function planGradeSheet(
   rows: readonly CurrentRow[],
   typed: ReadonlyMap<string, TypedScores>,
-  { publish, reason }: { publish: boolean; reason: string },
+  { mode, finalise, reason }: { mode: SheetMode; finalise: boolean; reason: string },
 ): SheetPlan {
   const plan: SheetPlan = {
     errors: {},
@@ -48,9 +66,10 @@ export function planGradeSheet(
     updates: [],
     deletes: [],
     publishedChanges: [],
-    newlyPublished: 0,
+    newlyFinal: 0,
     incomplete: 0,
   };
+  const finalStatus = FINAL_STATUS[mode];
 
   for (const row of rows) {
     const input = typed.get(row.registrationId);
@@ -71,19 +90,29 @@ export function planGradeSheet(
 
     if (!grade) {
       if (empty) continue;
-      const status: GradeStatus = publish && complete ? "published" : "draft";
+      const status: GradeStatus = finalise && complete ? finalStatus : "draft";
       plan.inserts.push({
         registration_id: row.registrationId,
         ca_score: ca,
         exam_score: exam,
         status,
       });
-      if (status === "published") plan.newlyPublished += 1;
-      else if (publish) plan.incomplete += 1;
+      if (status === finalStatus) plan.newlyFinal += 1;
+      else if (finalise) plan.incomplete += 1;
       continue;
     }
 
     const changed = ca !== grade.ca || exam !== grade.exam;
+
+    if (isLocked(mode, grade.status)) {
+      if (changed) {
+        plan.errors[`ca:${row.registrationId}`] =
+          grade.status === "published"
+            ? "Published: only the office can change it"
+            : "Submitted for approval: only the office can change it";
+      }
+      continue;
+    }
 
     if (grade.status === "published") {
       if (!changed) continue;
@@ -99,12 +128,19 @@ export function planGradeSheet(
       plan.deletes.push(grade.id);
       continue;
     }
-    const status: GradeStatus = publish && complete ? "published" : grade.status;
+    // A submitted grade an admin edits stays submitted unless it is published,
+    // or goes back to draft if it loses a score (submitted grades are complete).
+    const status: GradeStatus =
+      finalise && complete
+        ? finalStatus
+        : grade.status === "submitted" && !complete
+          ? "draft"
+          : grade.status;
     if (changed || status !== grade.status) {
       plan.updates.push({ id: grade.id, ca_score: ca, exam_score: exam, status });
     }
-    if (status === "published") plan.newlyPublished += 1;
-    else if (publish) plan.incomplete += 1;
+    if (status === finalStatus && grade.status !== finalStatus) plan.newlyFinal += 1;
+    else if (finalise && !complete) plan.incomplete += 1;
   }
 
   if (plan.publishedChanges.length > 0 && reason.trim() === "") {
@@ -113,26 +149,51 @@ export function planGradeSheet(
   return plan;
 }
 
-/** "Saved 3 grades. Published 2; 1 still misses a score and stays a draft." */
-export function describeSheetSave(plan: SheetPlan, publish: boolean): string {
+const plural = (count: number, one: string, many: string) => (count === 1 ? one : many);
+
+/** "Saved 3 grades. Published 2. 1 still misses a score and stays a draft." */
+export function describeSheetSave(plan: SheetPlan, mode: SheetMode, finalise: boolean): string {
   const saved =
     plan.inserts.length + plan.updates.length + plan.deletes.length + plan.publishedChanges.length;
   if (saved === 0) return "No changes to save.";
-  const parts = [`Saved ${saved} grade${saved === 1 ? "" : "s"}.`];
-  if (publish) {
-    parts.push(
-      plan.newlyPublished > 0 ? `Published ${plan.newlyPublished}.` : "Nothing new to publish.",
-    );
+  const parts = [`Saved ${saved} grade${plural(saved, "", "s")}.`];
+  if (finalise) {
+    if (mode === "admin") {
+      parts.push(plan.newlyFinal > 0 ? `Published ${plan.newlyFinal}.` : "Nothing new to publish.");
+    } else {
+      parts.push(
+        plan.newlyFinal > 0
+          ? `Submitted ${plan.newlyFinal} for approval.`
+          : "Nothing new to submit.",
+      );
+    }
     if (plan.incomplete > 0) {
       parts.push(
-        `${plan.incomplete} still miss${plan.incomplete === 1 ? "es" : ""} a score and stay${plan.incomplete === 1 ? "s" : ""} a draft.`,
+        `${plan.incomplete} still ${plural(plan.incomplete, "misses", "miss")} a score and ${plural(plan.incomplete, "stays", "stay")} a draft.`,
       );
     }
   }
   if (plan.publishedChanges.length > 0) {
     parts.push(
-      `${plan.publishedChanges.length} published grade${plan.publishedChanges.length === 1 ? " was" : "s were"} changed and logged.`,
+      `${plan.publishedChanges.length} published grade${plural(plan.publishedChanges.length, " was", "s were")} changed and logged.`,
     );
   }
   return parts.join(" ");
+}
+
+/**
+ * The latest "returned to lecturer" note while it still applies: until the
+ * lecturer submits again (or an admin publishes) after it. Grades untouched
+ * since before the return do not count.
+ */
+export function pendingReturn<T extends { returnedAt: string }>(
+  latest: T | null,
+  grades: readonly { status: GradeStatus; updatedAt: string }[],
+): T | null {
+  if (!latest) return null;
+  const returnedAt = Date.parse(latest.returnedAt);
+  const actedOn = grades.some(
+    (grade) => grade.status !== "draft" && Date.parse(grade.updatedAt) > returnedAt,
+  );
+  return actedOn ? null : latest;
 }

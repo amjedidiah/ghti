@@ -3,8 +3,8 @@
 
 export type OverviewInput = {
   students: { programme: string; status: string }[];
-  /** One entry per grade that is not yet published. */
-  unpublishedGrades: { termId: string }[];
+  /** One entry per grade that is not yet published: a draft, or submitted for approval. */
+  unpublishedGrades: { termId: string; status: "draft" | "submitted" }[];
   /** One entry per published grade: whose and which term. */
   publishedGrades: { studentId: string; termId: string }[];
   /** Students already emailed that a term's results are out. */
@@ -33,11 +33,11 @@ export function summariseRecords(input: OverviewInput) {
     return students > 0 ? [{ termId: term.id, label: term.label, students }] : [];
   });
 
-  const draftsByTerm = new Map<string, number>();
-  for (const grade of input.unpublishedGrades) {
-    draftsByTerm.set(grade.termId, (draftsByTerm.get(grade.termId) ?? 0) + 1);
-  }
-  const firstTermWithDrafts = input.terms.find((term) => draftsByTerm.has(term.id))?.id ?? null;
+  const unpublishedTerms = new Set(input.unpublishedGrades.map((grade) => grade.termId));
+  const submitted = input.unpublishedGrades.filter((grade) => grade.status === "submitted");
+  const submittedTerms = new Set(submitted.map((grade) => grade.termId));
+  const firstTermWithDrafts = input.terms.find((term) => unpublishedTerms.has(term.id))?.id ?? null;
+  const firstTermAwaiting = input.terms.find((term) => submittedTerms.has(term.id))?.id ?? null;
 
   return {
     activeStudents: [...byProgramme.values()].reduce((sum, count) => sum + count, 0),
@@ -45,7 +45,9 @@ export function summariseRecords(input: OverviewInput) {
       .map(([programme, count]) => ({ programme, count }))
       .sort((a, b) => b.count - a.count || a.programme.localeCompare(b.programme)),
     unpublishedGrades: input.unpublishedGrades.length,
+    awaitingApproval: submitted.length,
     firstTermWithDrafts,
+    firstTermAwaiting,
     resultsEmails,
   };
 }

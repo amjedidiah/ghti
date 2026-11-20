@@ -12,7 +12,7 @@ export async function getRecordsOverview() {
     supabase.from("students").select("status, programme:programmes(title)"),
     supabase
       .from("grades")
-      .select("registration:registrations!inner(offering:course_offerings!inner(term_id))")
+      .select("status, registration:registrations!inner(offering:course_offerings!inner(term_id))")
       .neq("status", "published"),
     supabase
       .from("grades")
@@ -37,9 +37,11 @@ export async function getRecordsOverview() {
       programme: row.programme?.title ?? "No programme",
       status: row.status,
     })),
-    unpublishedGrades: (unpublished.data ?? []).map((row) => ({
-      termId: row.registration.offering.term_id,
-    })),
+    unpublishedGrades: (unpublished.data ?? []).flatMap((row) =>
+      row.status === "published"
+        ? []
+        : [{ termId: row.registration.offering.term_id, status: row.status }],
+    ),
     publishedGrades: (published.data ?? []).map((row) => ({
       studentId: row.registration.student_id,
       termId: row.registration.offering.term_id,

@@ -440,6 +440,48 @@ export type Database = {
           },
         ]
       }
+      grade_returns: {
+        Row: {
+          grades_returned: number
+          id: number
+          note: string
+          offering_id: string
+          returned_at: string
+          returned_by: string | null
+        }
+        Insert: {
+          grades_returned: number
+          id?: never
+          note: string
+          offering_id: string
+          returned_at?: string
+          returned_by?: string | null
+        }
+        Update: {
+          grades_returned?: number
+          id?: never
+          note?: string
+          offering_id?: string
+          returned_at?: string
+          returned_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grade_returns_offering_id_fkey"
+            columns: ["offering_id"]
+            isOneToOne: false
+            referencedRelation: "course_offerings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grade_returns_returned_by_fkey"
+            columns: ["returned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grades: {
         Row: {
           ca_score: number | null
@@ -1139,6 +1181,10 @@ export type Database = {
         }
       }
       is_admin: { Args: never; Returns: boolean }
+      return_grades: {
+        Args: { p_note: string; p_offering_id: string }
+        Returns: number
+      }
       search_students: {
         Args: {
           p_entry_term_id?: string

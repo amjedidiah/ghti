@@ -50,12 +50,34 @@ describe("summariseRecords", () => {
   test("unpublished grades point to the newest term that has them", () => {
     const summary = summariseRecords({
       students: [],
-      unpublishedGrades: [{ termId: "t1" }, { termId: "t1" }],
+      unpublishedGrades: [
+        { termId: "t1", status: "draft" },
+        { termId: "t1", status: "draft" },
+      ],
       publishedGrades: [],
       notices: [],
       terms,
     });
     expect(summary.unpublishedGrades).toBe(2);
     expect(summary.firstTermWithDrafts).toBe("t1");
+    expect(summary.awaitingApproval).toBe(0);
+    expect(summary.firstTermAwaiting).toBeNull();
+  });
+
+  test("grades submitted by lecturers count as awaiting approval, by newest term", () => {
+    const summary = summariseRecords({
+      students: [],
+      unpublishedGrades: [
+        { termId: "t2", status: "draft" },
+        { termId: "t1", status: "submitted" },
+        { termId: "t1", status: "submitted" },
+      ],
+      publishedGrades: [],
+      notices: [],
+      terms,
+    });
+    expect(summary.awaitingApproval).toBe(2);
+    expect(summary.firstTermAwaiting).toBe("t1");
+    expect(summary.firstTermWithDrafts).toBe("t2");
   });
 });
