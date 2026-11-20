@@ -63,7 +63,9 @@ select policies_are('public', 'documents', array[
   'Owners read their own documents',
   'Admins read all documents',
   'Applicants add documents to their own draft',
-  'Applicants remove documents from their own draft'
+  'Applicants remove documents from their own draft',
+  'Admins add documents to a student''s file',
+  'Admins remove documents from a student''s file'
 ], 'documents has only the expected policies');
 
 select is(

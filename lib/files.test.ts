@@ -6,6 +6,7 @@ import {
   fileProblem,
   formatBytes,
   isDocumentPathFor,
+  RECORDS_FOLDER,
   scaledDimensions,
 } from "@/lib/files";
 
@@ -69,5 +70,13 @@ describe("document paths", () => {
     expect(isDocumentPathFor(path, application, owner)).toBe(false);
     expect(isDocumentPathFor(`${path}/../x.pdf`, owner, application)).toBe(false);
     expect(isDocumentPathFor(`${owner}/${application}/evil.exe`, owner, application)).toBe(false);
+  });
+
+  test("documents on a student's file go in their records folder", () => {
+    const path = documentPath(owner, RECORDS_FOLDER, doc, "application/pdf");
+    expect(path).toBe(`${owner}/records/${doc}.pdf`);
+    expect(isDocumentPathFor(path, owner, RECORDS_FOLDER)).toBe(true);
+    expect(isDocumentPathFor(path, owner, application)).toBe(false);
+    expect(isDocumentPathFor(`${owner}/other/${doc}.pdf`, owner, "other")).toBe(false);
   });
 });

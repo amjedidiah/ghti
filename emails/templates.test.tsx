@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test";
 
 import ApplicationDecision, { applicationDecisionSubject } from "@/emails/ApplicationDecision";
 import ApplicationSubmitted from "@/emails/ApplicationSubmitted";
+import ChangeRequestReceived from "@/emails/ChangeRequestReceived";
 import ContactMessage from "@/emails/ContactMessage";
 import ContactReceipt from "@/emails/ContactReceipt";
 import GradesReturned from "@/emails/GradesReturned";
@@ -118,5 +119,13 @@ describe("email templates", () => {
     expect(plain).toContain("returned 1 grade");
     expect(plain).toContain("GHTI/002's exam looks low.");
     expect(html).toContain(`${siteUrl}/teach/o1/grades`);
+  });
+
+  test("the office hears of a change request, with a link and no personal details", async () => {
+    const { html, text: plain } = await text(
+      <ChangeRequestReceived studentId="s1" siteUrl={siteUrl} />,
+    );
+    expect(html).toContain(`${siteUrl}/admin/students/s1`);
+    expect(plain).toContain("asked for a correction to their record");
   });
 });

@@ -201,6 +201,54 @@ export type Database = {
           },
         ]
       }
+      change_requests: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["change_request_status"]
+          student_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["change_request_status"]
+          student_id?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["change_request_status"]
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_requests_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "change_requests_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_sends: {
         Row: {
           created_at: string
@@ -356,6 +404,7 @@ export type Database = {
           owner_id: string
           size_bytes: number
           storage_path: string
+          uploaded_by: string | null
         }
         Insert: {
           application_id?: string | null
@@ -367,6 +416,7 @@ export type Database = {
           owner_id?: string
           size_bytes: number
           storage_path: string
+          uploaded_by?: string | null
         }
         Update: {
           application_id?: string | null
@@ -378,6 +428,7 @@ export type Database = {
           owner_id?: string
           size_bytes?: number
           storage_path?: string
+          uploaded_by?: string | null
         }
         Relationships: [
           {
@@ -390,6 +441,13 @@ export type Database = {
           {
             foreignKeyName: "documents_owner_id_fkey"
             columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1258,6 +1316,25 @@ export type Database = {
         }
       }
       is_admin: { Args: never; Returns: boolean }
+      resolve_change_request: {
+        Args: { p_note: string; p_request_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["change_request_status"]
+          student_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       return_grades: {
         Args: { p_note: string; p_offering_id: string }
         Returns: number
@@ -1457,6 +1534,7 @@ export type Database = {
         | "admitted"
         | "rejected"
         | "withdrawn"
+      change_request_status: "open" | "resolved"
       document_kind:
         | "transcript"
         | "id_card"
@@ -1475,7 +1553,7 @@ export type Database = {
         | "widowed"
       programme_level: "certificate" | "diploma" | "postgraduate_diploma"
       programme_status: "draft" | "published" | "archived"
-      record_note_kind: "note" | "status_change"
+      record_note_kind: "note" | "status_change" | "change_request"
       student_status: "active" | "deferred" | "withdrawn" | "graduated"
     }
     CompositeTypes: {
@@ -1616,6 +1694,7 @@ export const Constants = {
         "rejected",
         "withdrawn",
       ],
+      change_request_status: ["open", "resolved"],
       document_kind: [
         "transcript",
         "id_card",
@@ -1636,7 +1715,7 @@ export const Constants = {
       ],
       programme_level: ["certificate", "diploma", "postgraduate_diploma"],
       programme_status: ["draft", "published", "archived"],
-      record_note_kind: ["note", "status_change"],
+      record_note_kind: ["note", "status_change", "change_request"],
       student_status: ["active", "deferred", "withdrawn", "graduated"],
     },
   },

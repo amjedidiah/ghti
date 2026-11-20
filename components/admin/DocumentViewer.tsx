@@ -3,6 +3,7 @@
 import { Eye, ExternalLink, FileText, X } from "lucide-react";
 import { useState } from "react";
 
+import ConfirmDeleteButton from "@/components/shared/ConfirmDeleteButton";
 import { DOCUMENT_LABELS } from "@/lib/applications/labels";
 import { formatBytes } from "@/lib/files";
 import type { Database } from "@/lib/supabase/database.types";
@@ -19,12 +20,21 @@ type Doc = {
  * /admin/documents/[id], which logs the view and redirects to a signed URL
  * that expires after 10 minutes. Nothing loads until the admin asks.
  */
-function DocumentViewer({ documents }: { documents: Doc[] }) {
+function DocumentViewer({
+  documents,
+  empty = "No documents uploaded.",
+  onRemove,
+}: {
+  documents: Doc[];
+  empty?: string;
+  /** Documents an admin added to a student's file can be removed (two-step). */
+  onRemove?: (documentId: string) => Promise<{ ok: true } | { ok: false; message: string }>;
+}) {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const preview = documents.find((doc) => doc.id === previewId);
 
   if (documents.length === 0) {
-    return <p className="text-sm text-secondary">No documents uploaded.</p>;
+    return <p className="text-sm text-secondary">{empty}</p>;
   }
 
   return (
@@ -58,6 +68,12 @@ function DocumentViewer({ documents }: { documents: Doc[] }) {
                 <ExternalLink className="size-4" aria-hidden />
                 Open
               </a>
+              {onRemove && (
+                <ConfirmDeleteButton
+                  label={DOCUMENT_LABELS[doc.kind]}
+                  action={() => onRemove(doc.id)}
+                />
+              )}
             </div>
           </li>
         ))}

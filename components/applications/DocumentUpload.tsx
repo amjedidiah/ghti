@@ -4,9 +4,8 @@ import { FileText, LoaderCircle, Trash2, Upload } from "lucide-react";
 import { useId, useRef, useState, type DragEvent, type ReactNode } from "react";
 
 import { errorId, hintId } from "@/components/forms/Field";
-import { recordDocument, removeDocument, type RecordedDocument } from "@/lib/applications/actions";
-import type { ApplicationDocumentKind } from "@/lib/applications/documents";
-import { documentPath, fileProblem, formatBytes, isAllowedMimeType } from "@/lib/files";
+import type { RecordedDocument } from "@/lib/applications/actions";
+import { fileProblem, formatBytes, isAllowedMimeType, type AllowedMimeType } from "@/lib/files";
 import { compressImage, UploadError, uploadWithProgress } from "@/lib/upload-browser";
 import { cn } from "@/lib/utils";
 
@@ -16,16 +15,25 @@ type State =
   | { step: "uploading"; progress: number }
   | { step: "saving" };
 
+export type UploadedFile = {
+  path: string;
+  fileName: string;
+  sizeBytes: number;
+  mime: AllowedMimeType;
+};
+
 /**
  * Upload documents into one slot (FileDrop): choose or drop a file, check type
- * and size, compress photos, upload with progress, record it, and allow
- * removal. A slot holds up to `max` files; with 1, a new file replaces the
- * old one. The parent keeps the list, so it survives moving between steps.
+ * and size, compress photos, upload with progress straight to Storage, record
+ * it, and allow removal. A slot holds up to `max` files; with 1, a new file
+ * replaces the old one. The parent keeps the list (so it survives moving
+ * between steps) and supplies where files go and how they are recorded, so
+ * applicants and admins share this control.
  */
 function DocumentUpload({
-  applicationId,
-  ownerId,
-  kind,
+  pathFor,
+  record,
+  remove,
   label,
   hint,
   required,
@@ -34,11 +42,15 @@ function DocumentUpload({
   onChange,
   error: externalError,
 }: {
-  applicationId: string;
-  ownerId: string;
-  kind: ApplicationDocumentKind;
+  /** Storage path for a new file (a fresh UUID and its type). */
+  pathFor: (id: string, type: AllowedMimeType) => string;
+  record: (
+    file: UploadedFile,
+  ) => Promise<{ ok: true; document: RecordedDocument } | { ok: false; message: string }>;
+  remove: (documentId: string) => Promise<{ ok: boolean }>;
   label: string;
   hint: ReactNode;
+  /** Whether the slot must be filled; omit it to show neither "(required)" nor "(optional)". */
   required?: boolean;
   max?: number;
   documents: RecordedDocument[];
@@ -68,7 +80,8 @@ function DocumentUpload({
       return setError(problem ?? "Upload a PDF, JPG or PNG file.");
     }
 
-    const path = documentPath(ownerId, applicationId, crypto.randomUUID(), file.type);
+    const type = file.type as AllowedMimeType;
+    const path = pathFor(crypto.randomUUID(), type);
     try {
       setState({ step: "uploading", progress: 0 });
       await uploadWithProgress({
@@ -77,13 +90,11 @@ function DocumentUpload({
         onProgress: (progress) => setState({ step: "uploading", progress }),
       });
       setState({ step: "saving" });
-      const result = await recordDocument({
-        applicationId,
-        kind,
+      const result = await record({
         path,
         fileName: file.name.slice(0, 200),
         sizeBytes: file.size,
-        mime: file.type,
+        mime: type,
       });
       if (!result.ok) throw new UploadError(result.message);
       onChange(max === 1 ? [result.document] : [...documents, result.document]);
@@ -102,7 +113,7 @@ function DocumentUpload({
   async function handleRemove(document: RecordedDocument) {
     setError(null);
     setRemoving(document.id);
-    const result = await removeDocument(document.id);
+    const result = await remove(document.id);
     setRemoving(null);
     if (result.ok) onChange(documents.filter((doc) => doc.id !== document.id));
     else setError("We could not remove that file. Refresh the page and try again.");
@@ -120,7 +131,7 @@ function DocumentUpload({
       <p id={`${inputId}-label`} className="block text-sm font-semibold text-primary">
         {label}{" "}
         <span className="font-normal text-secondary">
-          {required ? "(required)" : "(optional)"}
+          {required !== undefined && (required ? "(required)" : "(optional)")}
           {max > 1 && `, up to ${max} files`}
         </span>
       </p>

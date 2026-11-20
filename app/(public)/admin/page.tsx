@@ -72,6 +72,17 @@ async function AdminOverview() {
       })(),
     },
     {
+      label: "Open change requests",
+      value: records.openChangeRequests,
+      href: records.oldestChangeRequestStudent
+        ? `/admin/students/${records.oldestChangeRequestStudent}`
+        : "/admin/students",
+      detail:
+        records.openChangeRequests > 0
+          ? "Students asking for a correction. Opens the one waiting longest."
+          : "No student is waiting for a correction.",
+    },
+    {
       label: "Results emails to send",
       value: emailsWaiting,
       href: records.resultsEmails[0]
@@ -104,7 +115,7 @@ async function AdminOverview() {
       </PageHeader>
       <div className="mx-auto w-full max-w-7xl space-y-10 px-4 py-10 sm:px-6 lg:px-8">
         <TileSection title="Applications" tiles={applicationTiles} />
-        <TileSection title="Students and results" tiles={recordTiles} columns={3} />
+        <TileSection title="Students and results" tiles={recordTiles} />
       </div>
     </>
   );

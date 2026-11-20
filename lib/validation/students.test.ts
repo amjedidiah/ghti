@@ -3,7 +3,9 @@ import { describe, expect, test } from "bun:test";
 import {
   DEFAULT_STUDENT_SEARCH,
   pageCount,
+  changeRequestSchema,
   recordNoteSchema,
+  resolveChangeRequestSchema,
   studentSearchSchema,
   studentStatusSchema,
 } from "@/lib/validation/students";
@@ -84,5 +86,25 @@ describe("studentStatusSchema", () => {
 
   test("a status is required", () => {
     expect(studentStatusSchema.safeParse({ status: "" }).success).toBe(false);
+  });
+});
+
+describe("changeRequestSchema", () => {
+  test("says what is wrong in 10 to 1,000 characters", () => {
+    expect(changeRequestSchema.safeParse({ body: " too short " }).success).toBe(false);
+    expect(changeRequestSchema.safeParse({ body: "x".repeat(1001) }).success).toBe(false);
+    expect(changeRequestSchema.parse({ body: "  My middle name is Chukwuemeka.  " })).toEqual({
+      body: "My middle name is Chukwuemeka.",
+    });
+  });
+});
+
+describe("resolveChangeRequestSchema", () => {
+  test("needs a note under 800 characters", () => {
+    expect(resolveChangeRequestSchema.safeParse({ note: "  " }).success).toBe(false);
+    expect(resolveChangeRequestSchema.safeParse({ note: "x".repeat(801) }).success).toBe(false);
+    expect(resolveChangeRequestSchema.parse({ note: "Corrected." })).toEqual({
+      note: "Corrected.",
+    });
   });
 });

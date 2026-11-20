@@ -6,14 +6,23 @@ import { Suspense } from "react";
 
 import DocumentViewer from "@/components/admin/DocumentViewer";
 import RecordNoteForm from "@/components/admin/RecordNoteForm";
+import ResolveChangeRequestForm from "@/components/admin/ResolveChangeRequestForm";
+import StudentDocumentUpload from "@/components/admin/StudentDocumentUpload";
 import StudentStatusForm from "@/components/admin/StudentStatusForm";
 import ApplicationDetails, {
   detailsOf,
   Panel,
   Rows,
 } from "@/components/applications/ApplicationDetails";
+import ChangeRequestList from "@/components/records/ChangeRequestList";
 import StatusBadge from "@/components/shared/StatusBadge";
-import { addRecordNote, changeStudentStatus } from "@/lib/admin/students";
+import {
+  addRecordNote,
+  changeStudentStatus,
+  recordStudentDocument,
+  removeStudentDocument,
+  resolveChangeRequest,
+} from "@/lib/admin/students";
 import { requireRole } from "@/lib/auth/session";
 import { formatGpa } from "@/lib/grades";
 import { LEVEL_LABELS } from "@/lib/programmes";
@@ -49,7 +58,8 @@ async function StudentFileContent({ params }: Pick<PageProps<"/admin/students/[i
   const file = /^[0-9a-f-]{36}$/.test(id) ? await getStudentFile(id) : null;
   if (!file) notFound();
 
-  const { student, application, notes } = file;
+  const { student, application, notes, fileDocuments, changeRequests } = file;
+  const openRequests = changeRequests.filter((request) => request.status === "open").length;
   const results = studentFileResults(
     file.registrations.map((registration) => ({
       term: registration.offering?.term ?? null,
@@ -101,6 +111,22 @@ async function StudentFileContent({ params }: Pick<PageProps<"/admin/students/[i
             <Results results={results} />
           </Panel>
 
+          <Panel
+            title={
+              openRequests > 0 ? `Change requests (${openRequests} waiting)` : "Change requests"
+            }
+          >
+            <ChangeRequestList
+              requests={changeRequests}
+              empty="The student has not asked for any changes."
+              resolve={(requestId) => (
+                <ResolveChangeRequestForm
+                  action={resolveChangeRequest.bind(null, student.id, requestId)}
+                />
+              )}
+            />
+          </Panel>
+
           <Panel title="Notes">
             <RecordNoteForm action={addRecordNote.bind(null, student.id)} />
             <NotesLog notes={notes} />
@@ -116,7 +142,34 @@ async function StudentFileContent({ params }: Pick<PageProps<"/admin/students/[i
           </Panel>
 
           <Panel title="Documents">
-            <DocumentViewer documents={application?.documents ?? []} />
+            <div className="space-y-6">
+              <section aria-labelledby="file-documents">
+                <h3 id="file-documents" className="mb-2 text-sm font-semibold text-primary">
+                  Added to this file
+                </h3>
+                <DocumentViewer
+                  documents={fileDocuments}
+                  empty="None yet."
+                  onRemove={removeStudentDocument.bind(null, student.id)}
+                />
+              </section>
+              <StudentDocumentUpload
+                studentId={student.id}
+                record={recordStudentDocument.bind(null, student.id)}
+                remove={removeStudentDocument.bind(null, student.id)}
+              />
+              {application && (
+                <section aria-labelledby="application-documents">
+                  <h3
+                    id="application-documents"
+                    className="mb-2 text-sm font-semibold text-primary"
+                  >
+                    From the application
+                  </h3>
+                  <DocumentViewer documents={application.documents} />
+                </section>
+              )}
+            </div>
           </Panel>
 
           {application ? (
@@ -192,6 +245,8 @@ function Results({ results }: { results: ReturnType<typeof studentFileResults> }
   );
 }
 
+const NOTE_KINDS = { status_change: "Status change", change_request: "Change request" } as const;
+
 function NotesLog({ notes }: { notes: StudentFile["notes"] }) {
   if (notes.length === 0) {
     return <p className="mt-6 text-sm text-secondary">No notes yet.</p>;
@@ -206,9 +261,9 @@ function NotesLog({ notes }: { notes: StudentFile["notes"] }) {
             </time>
             {" · "}
             {note.author?.full_name || "Unknown"}
-            {note.kind === "status_change" && (
+            {note.kind !== "note" && (
               <span className="ml-2 font-semibold whitespace-nowrap text-accent-strong">
-                Status change
+                {NOTE_KINDS[note.kind]}
               </span>
             )}
           </p>

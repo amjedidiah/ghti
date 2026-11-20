@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import ApplicationDetails, { detailsOf } from "@/components/applications/ApplicationDetails";
+import ApplicationDetails, { detailsOf, Panel } from "@/components/applications/ApplicationDetails";
+import ChangeRequestForm from "@/components/portal/ChangeRequestForm";
 import StudentRecordCard from "@/components/portal/StudentRecordCard";
+import ChangeRequestList from "@/components/records/ChangeRequestList";
 import PageHeader from "@/components/shared/PageHeader";
 import { requireRole } from "@/lib/auth/session";
 import { getMyApplication } from "@/lib/queries/applications";
-import { getMyStudentRecord } from "@/lib/queries/student";
+import { requestChange } from "@/lib/portal/change-requests";
+import { getMyChangeRequests, getMyStudentRecord } from "@/lib/queries/student";
 
 export const metadata: Metadata = { title: "My record", robots: { index: false } };
 
@@ -16,8 +19,8 @@ function RecordPage() {
     <>
       <PageHeader eyebrow="Student portal" title="My record">
         <p>
-          Your student record and the details from your application. You cannot change them here: to
-          correct anything, contact the registrar.
+          Your student record and the details from your application. Something wrong? Ask the
+          registrar to correct it below.
         </p>
       </PageHeader>
       <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
@@ -31,9 +34,10 @@ function RecordPage() {
 
 async function Record() {
   const user = await requireRole("student");
-  const [record, application] = await Promise.all([
+  const [record, application, requests] = await Promise.all([
     getMyStudentRecord(user.id),
     getMyApplication(user.id),
+    getMyChangeRequests(user.id),
   ]);
 
   return (
@@ -45,6 +49,12 @@ async function Record() {
           We could not find your student record. Please contact the registrar.
         </p>
       )}
+      <Panel title="Request a change">
+        <div className="space-y-6">
+          <ChangeRequestForm action={requestChange} />
+          <ChangeRequestList requests={requests} empty="You have not asked for any changes." />
+        </div>
+      </Panel>
       {application ? (
         <ApplicationDetails {...detailsOf(application)} />
       ) : (

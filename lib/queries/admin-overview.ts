@@ -8,7 +8,7 @@ import { termLabel } from "@/lib/validation/academics";
 
 export async function getRecordsOverview() {
   const supabase = await createClient();
-  const [students, unpublished, published, notices, terms] = await Promise.all([
+  const [students, unpublished, published, notices, terms, requests] = await Promise.all([
     supabase.from("students").select("status, programme:programmes(title)"),
     supabase
       .from("grades")
@@ -27,12 +27,17 @@ export async function getRecordsOverview() {
       .order("session", { ascending: false })
       .order("starts_on", { ascending: false, nullsFirst: false })
       .order("name"),
+    supabase
+      .from("change_requests")
+      .select("student_id, created_at")
+      .eq("status", "open")
+      .order("created_at"),
   ]);
-  for (const result of [students, unpublished, published, notices, terms]) {
+  for (const result of [students, unpublished, published, notices, terms, requests]) {
     if (result.error) throw new Error(`Could not load the overview: ${result.error.message}`);
   }
 
-  return summariseRecords({
+  const summary = summariseRecords({
     students: (students.data ?? []).map((row) => ({
       programme: row.programme?.title ?? "No programme",
       status: row.status,
@@ -52,4 +57,10 @@ export async function getRecordsOverview() {
     })),
     terms: (terms.data ?? []).map((term) => ({ id: term.id, label: termLabel(term) })),
   });
+  return {
+    ...summary,
+    // Open change requests, and the student whose request has waited longest.
+    openChangeRequests: requests.data?.length ?? 0,
+    oldestChangeRequestStudent: requests.data?.[0]?.student_id ?? null,
+  };
 }

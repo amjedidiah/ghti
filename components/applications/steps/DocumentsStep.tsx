@@ -2,8 +2,9 @@ import type { ReactNode } from "react";
 
 import DocumentUpload from "@/components/applications/DocumentUpload";
 import StepSection from "@/components/applications/steps/StepSection";
-import type { RecordedDocument } from "@/lib/applications/actions";
+import { recordDocument, removeDocument, type RecordedDocument } from "@/lib/applications/actions";
 import { APPLICATION_DOCUMENTS, type ApplicationDocumentKind } from "@/lib/applications/documents";
+import { documentPath } from "@/lib/files";
 
 export type DocumentsByKind = Record<ApplicationDocumentKind, RecordedDocument[]>;
 
@@ -32,9 +33,9 @@ function DocumentsStep({
       {APPLICATION_DOCUMENTS.map((slot) => (
         <DocumentUpload
           key={slot.kind}
-          applicationId={applicationId}
-          ownerId={ownerId}
-          kind={slot.kind}
+          pathFor={(id, type) => documentPath(ownerId, applicationId, id, type)}
+          record={(file) => recordDocument({ applicationId, kind: slot.kind, ...file })}
+          remove={removeDocument}
           label={slot.label}
           hint={
             slot.kind === "payment_proof" ? (

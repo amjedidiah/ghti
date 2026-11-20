@@ -52,19 +52,20 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Storage path for a document: {owner_id}/{application_id}/{uuid}.{ext}. */
-export function documentPath(
-  ownerId: string,
-  applicationId: string,
-  id: string,
-  type: AllowedMimeType,
-) {
-  return `${ownerId}/${applicationId}/${id}.${extensionFor(type)}`;
+/** The folder for documents admins add to a student's file (no application). */
+export const RECORDS_FOLDER = "records";
+
+/**
+ * Storage path for a document: {owner_id}/{folder}/{uuid}.{ext}, where the
+ * folder is the application's ID, or RECORDS_FOLDER on a student's file.
+ */
+export function documentPath(ownerId: string, folder: string, id: string, type: AllowedMimeType) {
+  return `${ownerId}/${folder}/${id}.${extensionFor(type)}`;
 }
 
-/** Does `path` belong in this owner's folder for this application? */
-export function isDocumentPathFor(path: string, ownerId: string, applicationId: string): boolean {
-  const pattern = /^([0-9a-f-]{36})\/([0-9a-f-]{36})\/[0-9a-f-]{36}\.(pdf|jpg|png)$/;
+/** Does `path` belong in this owner's folder (an application ID or RECORDS_FOLDER)? */
+export function isDocumentPathFor(path: string, ownerId: string, folder: string): boolean {
+  const pattern = /^([0-9a-f-]{36})\/([0-9a-f-]{36}|records)\/[0-9a-f-]{36}\.(pdf|jpg|png)$/;
   const match = pattern.exec(path);
-  return Boolean(match && match[1] === ownerId && match[2] === applicationId);
+  return Boolean(match && match[1] === ownerId && match[2] === folder);
 }

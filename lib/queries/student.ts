@@ -91,3 +91,17 @@ export async function getMyProgrammeId(studentId: string) {
     .maybeSingle();
   return data?.programme_id ?? null;
 }
+
+/** The student's change requests, newest first, with the registrar's outcome. */
+export async function getMyChangeRequests(studentId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("change_requests")
+    .select("id, body, status, resolution, created_at, resolved_at")
+    .eq("student_id", studentId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(`Could not load your requests: ${error.message}`);
+  return data;
+}
+
+export type MyChangeRequest = Awaited<ReturnType<typeof getMyChangeRequests>>[number];

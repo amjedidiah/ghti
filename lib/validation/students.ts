@@ -68,6 +68,31 @@ export const recordNoteSchema = z.object({
 
 export type RecordNoteValues = z.input<typeof recordNoteSchema>;
 
+/** A student's request to correct their record (Stage 3, step 3.5). */
+export const changeRequestSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(10, "Say what is wrong and what it should be (at least 10 characters).")
+    .max(1000, "Keep the request under 1,000 characters."),
+});
+
+export type ChangeRequestValues = z.input<typeof changeRequestSchema>;
+
+/** An admin's note when resolving a change request; it goes on the student's file. */
+export const resolveChangeRequestSchema = z.object({
+  note: z
+    .string()
+    .trim()
+    .min(1, "Say what was done, or why nothing was changed.")
+    .max(800, "Keep the note under 800 characters."),
+});
+
+export type ResolveChangeRequestValues = z.input<typeof resolveChangeRequestSchema>;
+
+/** Kinds of document an admin can add to a student's file. */
+export const STUDENT_DOCUMENT_KINDS = ["transcript", "id_card", "photo", "other"] as const;
+
 export const studentStatusSchema = z.object({
   status: z.enum(STUDENT_STATUSES, "Choose a status."),
   note: z.string().trim().max(1000, "Keep the reason under 1,000 characters.").default(""),

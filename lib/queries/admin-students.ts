@@ -71,7 +71,7 @@ export async function getStudentFile(id: string) {
   if (error) throw new Error(`Could not load the student: ${error.message}`);
   if (!student) return null;
 
-  const [application, registrations, notes] = await Promise.all([
+  const [application, registrations, notes, fileDocuments, changeRequests] = await Promise.all([
     student.application_id
       ? supabase
           .from("applications")
@@ -92,6 +92,19 @@ export async function getStudentFile(id: string) {
       .select("id, kind, body, created_at, author:profiles!record_notes_author_id_fkey(full_name)")
       .eq("student_id", id)
       .order("created_at", { ascending: false }),
+    // Documents admins added to the file (no application).
+    supabase
+      .from("documents")
+      .select("id, kind, file_name, size_bytes, mime, created_at")
+      .eq("owner_id", id)
+      .is("application_id", null)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("change_requests")
+      .select("id, body, status, resolution, created_at, resolved_at")
+      .eq("student_id", id)
+      .order("status")
+      .order("created_at", { ascending: false }),
   ]);
   if (application.error)
     throw new Error(`Could not load the application: ${application.error.message}`);
@@ -99,12 +112,20 @@ export async function getStudentFile(id: string) {
     throw new Error(`Could not load registrations: ${registrations.error.message}`);
   }
   if (notes.error) throw new Error(`Could not load notes: ${notes.error.message}`);
+  if (fileDocuments.error) {
+    throw new Error(`Could not load documents: ${fileDocuments.error.message}`);
+  }
+  if (changeRequests.error) {
+    throw new Error(`Could not load change requests: ${changeRequests.error.message}`);
+  }
 
   return {
     student,
     application: application.data,
     registrations: registrations.data,
     notes: notes.data,
+    fileDocuments: fileDocuments.data,
+    changeRequests: changeRequests.data,
   };
 }
 

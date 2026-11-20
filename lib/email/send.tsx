@@ -5,6 +5,9 @@ import type { ReactElement } from "react";
 
 import ApplicationDecision, { applicationDecisionSubject } from "@/emails/ApplicationDecision";
 import ApplicationSubmitted, { applicationSubmittedSubject } from "@/emails/ApplicationSubmitted";
+import ChangeRequestReceived, {
+  changeRequestReceivedSubject,
+} from "@/emails/ChangeRequestReceived";
 import ContactMessage, { contactMessageSubject } from "@/emails/ContactMessage";
 import ContactReceipt, { contactReceiptSubject } from "@/emails/ContactReceipt";
 import GradesReturned, { gradesReturnedSubject } from "@/emails/GradesReturned";
@@ -177,6 +180,22 @@ export async function sendGradesReturned(input: {
       to,
       gradesReturnedSubject(props.course),
       <GradesReturned {...props} siteUrl={siteUrl()} />,
+    ),
+  ]);
+}
+
+/** "A student asked for a change" to the office (EMAIL_TO). No name or request text. */
+export async function sendChangeRequestReceived(studentId: string): Promise<SendOutcome | null> {
+  const office = process.env.EMAIL_TO;
+  if (!office) {
+    console.error("[change-request] EMAIL_TO is not set; the office was not emailed.");
+    return null;
+  }
+  return sendEmails("change-request", [
+    await message(
+      office,
+      changeRequestReceivedSubject,
+      <ChangeRequestReceived studentId={studentId} siteUrl={siteUrl()} />,
     ),
   ]);
 }
