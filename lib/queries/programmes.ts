@@ -2,7 +2,7 @@ import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
 
-import type { Programme, ProgrammeSummary } from "@/lib/programmes";
+import type { CourseListing, Programme, ProgrammeSummary } from "@/lib/programmes";
 import { createPublicClient } from "@/lib/supabase/public";
 
 /** Cache tag for published programme data; revalidate it when admins edit programmes (Stage 2). */
@@ -40,5 +40,26 @@ export async function getPublishedProgramme(slug: string): Promise<Programme | n
     .maybeSingle();
 
   if (error) throw new Error(`Could not load programme: ${error.message}`);
+  return data;
+}
+
+/**
+ * Courses of a published programme, for its public page. RLS shows the public
+ * only the courses of published programmes. Course edits refresh PROGRAMMES_TAG.
+ */
+export async function getProgrammeCourses(programmeId: string): Promise<CourseListing[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(PROGRAMMES_TAG);
+
+  const { data, error } = await createPublicClient()
+    .from("courses")
+    .select("code, title, credit_units, year, semester")
+    .eq("programme_id", programmeId)
+    .order("year")
+    .order("semester")
+    .order("code");
+
+  if (error) throw new Error(`Could not load courses: ${error.message}`);
   return data;
 }

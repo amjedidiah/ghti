@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { groupProgrammesByLevel, toParagraphs, type ProgrammeLevel } from "@/lib/programmes";
+import {
+  courseTermLabel,
+  groupCoursesByTerm,
+  groupProgrammesByLevel,
+  toParagraphs,
+  type ProgrammeLevel,
+} from "@/lib/programmes";
 
 function programme(slug: string, level: ProgrammeLevel) {
   return { slug, level };
@@ -53,5 +59,41 @@ describe("toParagraphs", () => {
 
   test("returns nothing for empty text", () => {
     expect(toParagraphs("   ")).toEqual([]);
+  });
+});
+
+describe("groupCoursesByTerm", () => {
+  const course = (code: string, year: number, semester: number, credit_units = 2) => ({
+    code,
+    title: code,
+    credit_units,
+    year,
+    semester,
+  });
+
+  test("groups by year then semester, in study order, codes sorted", () => {
+    const groups = groupCoursesByTerm([
+      course("THE 201", 2, 1),
+      course("THE 102", 1, 2),
+      course("BIB 101", 1, 1, 3),
+      course("ANT 101", 1, 1),
+    ]);
+    expect(groups.map((g) => g.label)).toEqual([
+      "Year 1, first semester",
+      "Year 1, second semester",
+      "Year 2, first semester",
+    ]);
+    expect(groups[0].courses.map((c) => c.code)).toEqual(["ANT 101", "BIB 101"]);
+    expect(groups[0].creditUnits).toBe(5);
+  });
+
+  test("no courses, no groups", () => {
+    expect(groupCoursesByTerm([])).toEqual([]);
+  });
+});
+
+describe("courseTermLabel", () => {
+  test("names the semester", () => {
+    expect(courseTermLabel(1, 3)).toBe("Year 1, third semester");
   });
 });
