@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import PageHeader from "@/components/shared/PageHeader";
 import Placeholder from "@/components/shared/Placeholder";
-import { content } from "@/lib/content";
+import { getSiteContent } from "@/lib/queries/site-content";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,7 +10,8 @@ export const metadata: Metadata = {
   description: `What ${site.name} believes.`,
 };
 
-function StatementOfFaithPage() {
+async function StatementOfFaithPage() {
+  const content = await getSiteContent();
   const articles = content.statementOfFaith;
 
   return (

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import PageHeader from "@/components/shared/PageHeader";
 import Placeholder from "@/components/shared/Placeholder";
-import { content } from "@/lib/content";
+import { getSiteContent } from "@/lib/queries/site-content";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -15,7 +15,8 @@ export const metadata: Metadata = {
 // model and storage). GHTI must review it and supply the controller details
 // (client input #13) and the retention period (client input #19).
 
-function PrivacyPage() {
+async function PrivacyPage() {
+  const content = await getSiteContent();
   const controller = content.dataController;
   const privacyEmail = content.privacyEmail;
 

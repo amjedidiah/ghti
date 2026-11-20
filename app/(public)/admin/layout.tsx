@@ -8,6 +8,7 @@ const ADMIN_LINKS = [
   { href: "/admin/offerings", label: "Offerings" },
   { href: "/admin/grades", label: "Grades" },
   { href: "/admin/exports", label: "Exports" },
+  { href: "/admin/content", label: "Site content" },
   { href: "/admin/users", label: "Staff" },
 ] as const;
 

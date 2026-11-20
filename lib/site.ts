@@ -1,6 +1,6 @@
-// Site-wide settings and the shared CRM links.
-// Contact details stay null until the client supplies them (development plan,
-// "Content needed from the client"); components hide anything that is null.
+// Site-wide settings and the shared CRM links. GHTI's own words (mission,
+// contact details, privacy contacts) are site content, edited in
+// /admin/content (lib/site-content.ts).
 
 export const site = {
   name: "GHTI",
@@ -10,11 +10,6 @@ export const site = {
   ministryUrl: "https://crm-world.org.ng",
   description:
     "Certificate, Ordinary Diploma and Post Graduate Diploma in Theology at Great Harvest Theological Institute, a Charismatic Renewal Ministries institution. Apply online, follow your studies and see your results, all in one place.",
-  contact: {
-    address: null as string | null,
-    phone: null as string | null,
-    email: null as string | null,
-  },
 };
 
 /** GHTI's own navigation. */

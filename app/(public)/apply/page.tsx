@@ -15,8 +15,8 @@ import { rowToValues } from "@/lib/applications/mapping";
 import { parseStep } from "@/lib/applications/steps";
 import { requireRole } from "@/lib/auth/session";
 import { getMyApplication, getOpenIntakes } from "@/lib/queries/applications";
-import { content } from "@/lib/content";
 import { getPublishedProgrammes } from "@/lib/queries/programmes";
+import { getSiteContent } from "@/lib/queries/site-content";
 
 export const metadata: Metadata = { title: "My application", robots: { index: false } };
 
@@ -37,10 +37,11 @@ async function ApplyContent({ searchParams }: Pick<PageProps<"/apply">, "searchP
   }
   if (application.status !== "draft") redirect("/apply/status");
 
-  const [programmes, intakes, { step }] = await Promise.all([
+  const [programmes, intakes, { step }, content] = await Promise.all([
     getPublishedProgrammes(),
     getOpenIntakes(),
     searchParams,
+    getSiteContent(),
   ]);
   const documents = Object.fromEntries(
     APPLICATION_DOCUMENTS.map((slot) => [

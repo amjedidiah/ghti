@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import ContactForm from "@/components/contact/ContactForm";
 import PageHeader from "@/components/shared/PageHeader";
 import Placeholder from "@/components/shared/Placeholder";
-import { content } from "@/lib/content";
+import { getSiteContent } from "@/lib/queries/site-content";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -14,8 +14,9 @@ export const metadata: Metadata = {
 
 // Details come from client input #10. The form sends to EMAIL_TO (step 2.6).
 
-function ContactPage() {
-  const { address, phone, email } = site.contact;
+async function ContactPage() {
+  const content = await getSiteContent();
+  const { contactAddress: address, contactPhone: phone, contactEmail: email } = content;
   const mapQuery = content.mapQuery;
 
   return (

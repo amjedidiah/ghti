@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import SocialIcon from "@/components/layout/SocialIcon";
 import { footerLinks, ghtiNavLinks, site, socialLinks } from "@/lib/site";
+import { getSiteContent } from "@/lib/queries/site-content";
 
 /** Cached so the prerendered shell can show the year (Cache Components forbids a bare `new Date()`). */
 async function CurrentYear() {
@@ -17,8 +18,12 @@ async function CurrentYear() {
  * copyright line, whose "Charismatic Renewal Ministries" links to
  * crm-world.org.ng, and the CRM social links.
  */
-function Footer() {
-  const { address, phone, email } = site.contact;
+async function Footer() {
+  const {
+    contactAddress: address,
+    contactPhone: phone,
+    contactEmail: email,
+  } = await getSiteContent();
   const hasContact = Boolean(address || phone || email);
 
   return (

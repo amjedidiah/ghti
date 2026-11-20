@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import PageHeader from "@/components/shared/PageHeader";
 import Placeholder from "@/components/shared/Placeholder";
-import { content } from "@/lib/content";
+import { getSiteContent } from "@/lib/queries/site-content";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   description: `About ${site.name}: our mission and history.`,
 };
 
-function AboutPage() {
+async function AboutPage() {
+  const content = await getSiteContent();
   return (
     <>
       <PageHeader

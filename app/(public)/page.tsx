@@ -3,14 +3,15 @@ import Link from "next/link";
 
 import ProgrammeCard from "@/components/programmes/ProgrammeCard";
 import Placeholder from "@/components/shared/Placeholder";
-import { content } from "@/lib/content";
+import { getSiteContent } from "@/lib/queries/site-content";
 import { getPublishedProgrammes } from "@/lib/queries/programmes";
 import { site } from "@/lib/site";
 
-// Welcome text, mission and faith come from lib/content.ts (client input #9).
+// Welcome text, mission and faith come from site content (/admin/content; client input #9).
 // Banner images are still to come.
 
 async function HomePage() {
+  const content = await getSiteContent();
   const programmes = await getPublishedProgrammes();
 
   return (

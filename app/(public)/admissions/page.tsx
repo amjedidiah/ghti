@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import PageHeader from "@/components/shared/PageHeader";
 import Placeholder from "@/components/shared/Placeholder";
-import { content } from "@/lib/content";
+import { getSiteContent } from "@/lib/queries/site-content";
 import { getOpenIntakes } from "@/lib/queries/applications";
 
 export const metadata: Metadata = {
@@ -38,6 +38,7 @@ const STEPS = [
 ];
 
 async function AdmissionsPage() {
+  const content = await getSiteContent();
   const intakes = await getOpenIntakes();
 
   return (
