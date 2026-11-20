@@ -9,7 +9,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `About ${site.name}: our vision, mission and history.`,
+  description: `About ${site.name}: our mission and history.`,
 };
 
 function AboutPage() {
@@ -33,17 +33,9 @@ function AboutPage() {
       </PageHeader>
 
       <div className="mx-auto w-full max-w-3xl space-y-12 px-4 py-12 sm:px-6 lg:px-8">
-        <Section title="Our vision">
-          {content.vision ? (
-            <p className="font-display text-2xl leading-snug text-primary">{content.vision}</p>
-          ) : (
-            <Placeholder what="the vision statement." input={9} />
-          )}
-        </Section>
-
         <Section title="Our mission">
           {content.mission ? (
-            <p className="text-lg leading-relaxed text-secondary">{content.mission}</p>
+            <p className="font-display text-2xl leading-snug text-primary">{content.mission}</p>
           ) : (
             <Placeholder what="the mission statement." input={9} />
           )}

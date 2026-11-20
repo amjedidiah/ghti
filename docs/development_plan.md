@@ -233,7 +233,7 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 3.5. Admin and applicant polish
 
-- [ ] `site_content` table + RLS + pgTAP tests; `/admin/content` so vision, history, Statement of Faith and contact details can change without a developer (moves the Stage 1 text into the database). Built in our own admin, not with a headless CMS: see "Content management: when to revisit Payload CMS" under Post-MVP Ideas.
+- [ ] `site_content` table + RLS + pgTAP tests; `/admin/content` so the mission, history, Statement of Faith and contact details can change without a developer (moves the Stage 1 text into the database). Built in our own admin, not with a headless CMS: see "Content management: when to revisit Payload CMS" under Post-MVP Ideas.
 - [x] `/admin` overview: applications pending, students by programme, grades awaiting approval. _(Done 20 Nov 2026: "Students and results" tiles for active students by programme, grades awaiting approval (submitted by lecturers since step 3.3, with drafts counted beside them) and results emails still to send, per term (`lib/admin-overview.ts`, tested).)_
 - [x] CSV exports for applications, students, results. _(Done 20 Nov 2026: `/admin/exports`. Built on request and never stored; every download is written to `export_log` first (who, which export, filters, rows, when; append-only, admins only, 10 pgTAP tests) and listed on the page, for accountability under the NDPA. File names carry the kind and date, never a name; URLs carry statuses and ids only. Cells that could run as spreadsheet formulas are neutralised, and Nigerian phone numbers export as 0803 123 4567 (`lib/csv.ts`, `lib/exports.ts`, tested). Results export published grades unless the admin includes drafts.)_
 - [ ] Admins upload documents on a student's behalf.
@@ -295,7 +295,7 @@ Migrations live in `supabase/migrations/` (versioned in Git, never edited in the
 | `lessons`      | `id`, `course_id`, `title`, `body`, `youtube_id`, `position`                                         | Store the **video ID**, not the raw URL               | 3     |
 | `materials`    | `id`, `course_id`, `lesson_id?`, `title`, `kind`, `drive_file_id`                                    | Slides, PDFs, handouts                                | 3     |
 | `awards`       | `id` (uuid), `serial`, `student_id`, `programme_id`, `kind`, `issued_at`, `issued_by`, `revoked_at?` | Certificate, Diploma or Post Graduate Diploma awarded | 3     |
-| `site_content` | `key`, `title`, `body_md`, `updated_by`                                                              | Vision, history, Statement of Faith, contact details  | 3     |
+| `site_content` | `key`, `title`, `body_md`, `updated_by`                                                              | Mission, history, Statement of Faith, contact details | 3     |
 
 ### Row-Level Security (the real access control)
 
@@ -318,8 +318,8 @@ RLS is enabled on every table and the storage bucket; no table is reachable with
 
 | #   | Page                 | Route                                                                                     | Stage                        |
 | --- | -------------------- | ----------------------------------------------------------------------------------------- | ---------------------------- |
-| 1   | Home                 | `/` (welcome banner, vision, history summary, Statement of Faith teaser)                  | 1                            |
-| 2   | About                | `/about` (vision, full history)                                                           | 1                            |
+| 1   | Home                 | `/` (welcome banner, mission, history summary, Statement of Faith teaser)                 | 1                            |
+| 2   | About                | `/about` (mission, full history)                                                          | 1                            |
 | 3   | Statement of Faith   | `/statement-of-faith`                                                                     | 1                            |
 | 4   | Academics            | `/academics` (programmes grouped by Certificate, Diploma, Post Graduate Diploma)          | 1                            |
 | 5   | Programme detail     | `/academics/[slug]` (overview, requirements, courses by year/semester, lecture schedules) | 1 (courses: 2, schedules: 3) |
@@ -369,7 +369,7 @@ RLS is enabled on every table and the storage bucket; no table is reachable with
 | 5   | Grades                     | `/admin/grades`                                                                       | 2 (entry), 3 (approval) |
 | 6   | Programmes, courses, terms | `/admin/academics`                                                                    | 2                       |
 | 7   | Offerings & lecturers      | `/admin/offerings`                                                                    | 2 (lecturers: 3)        |
-| 8   | Site content               | `/admin/content` (vision, history, Statement of Faith, contact details, schedules)    | 3                       |
+| 8   | Site content               | `/admin/content` (mission, history, Statement of Faith, contact details, schedules)   | 3                       |
 | 9   | Users & roles              | `/admin/users`                                                                        | 3                       |
 | 10  | Awards                     | `/admin/awards`                                                                       | 3                       |
 

@@ -7,9 +7,10 @@ import MobileMenu from "@/components/layout/MobileMenu";
 import { ghtiNavLinks, site } from "@/lib/site";
 
 /**
- * GHTI's own header: the app's navigation comes first. The CRM affiliation
- * stays visible in the wordmark's tagline; the shared CRM links and logo live
- * in the footer (decision 15 Nov 2026, AGENTS.md "Design System").
+ * GHTI's own header: the app's navigation comes first. The wordmark spells
+ * out what GHTI stands for (GHTI asked on 20 Nov 2026 that the header not
+ * carry the CRM name, which read as the meaning of "GHTI"); the CRM links and
+ * logo live in the footer (AGENTS.md "Design System").
  */
 function Header() {
   return (
@@ -17,7 +18,7 @@ function Header() {
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-20 lg:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <Image
-            src="/brand/ghti-mark.svg"
+            src="/brand/ghti-crest.svg"
             alt=""
             width={40}
             height={48}
@@ -28,9 +29,11 @@ function Header() {
             <span className="font-display text-2xl font-bold tracking-wide lg:text-3xl">
               {site.name}
             </span>
-            <span className="mt-1 truncate text-[0.7rem] font-medium tracking-wide text-on-brand-muted lg:text-xs">
-              {site.ministry}
-            </span>
+            {site.fullName && (
+              <span className="mt-1 text-[0.7rem] leading-tight font-medium tracking-wide text-on-brand-muted lg:text-xs">
+                {site.fullName}
+              </span>
+            )}
           </span>
         </Link>
 

@@ -8,7 +8,7 @@
         "value": "*",
         "files": ["app/opengraph-image.tsx"],
         "createdAt": "2026-11-16T08:03:38.747Z",
-        "reason": "model triage: src is a base64 data URI of public/brand/ghti-mark.svg built at render time"
+        "reason": "model triage: src is a base64 data URI of public/brand/ghti-crest.svg built at render time"
       }
     ]
   }

@@ -7,7 +7,7 @@ import { content } from "@/lib/content";
 import { getPublishedProgrammes } from "@/lib/queries/programmes";
 import { site } from "@/lib/site";
 
-// Welcome text, vision and faith come from lib/content.ts (client input #9).
+// Welcome text, mission and faith come from lib/content.ts (client input #9).
 // Banner images are still to come.
 
 async function HomePage() {
@@ -52,14 +52,14 @@ async function HomePage() {
 
       <section aria-labelledby="faith-heading" className="border-b border-border">
         <h2 id="faith-heading" className="sr-only">
-          Vision and faith
+          Mission and faith
         </h2>
         <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-14 sm:px-6 md:grid-cols-2 lg:px-8">
-          <Pillar title="Our vision" href="/about" linkLabel="About GHTI">
-            {content.vision ? (
-              <p className="font-display text-xl leading-snug text-primary">{content.vision}</p>
+          <Pillar title="Our mission" href="/about" linkLabel="About GHTI">
+            {content.mission ? (
+              <p className="font-display text-xl leading-snug text-primary">{content.mission}</p>
             ) : (
-              <Placeholder what="the vision statement." input={9} />
+              <Placeholder what="the mission statement." input={9} />
             )}
           </Pillar>
           <Pillar title="What we believe" href="/statement-of-faith" linkLabel="Statement of Faith">
