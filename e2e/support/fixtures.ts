@@ -7,14 +7,19 @@ import { authFile, type Role } from "./accounts";
 // signed in as each seeded role.
 
 type Fixtures = {
-  makeAxeBuilder: () => AxeBuilder;
+  /** An axe builder for `target` (default: the test's `page`). */
+  makeAxeBuilder: (target?: Page) => AxeBuilder;
   pageAs: (role: Role) => Promise<Page>;
 };
 
 export const test = base.extend<Fixtures>({
   makeAxeBuilder: async ({ page }, provide) => {
-    await provide(() =>
-      new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]),
+    await provide((target = page) =>
+      new AxeBuilder({ page: target })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+        // YouTube's own player document is third-party (no title or lang we can
+        // set). Our <iframe> itself is still checked, e.g. for its title.
+        .exclude('iframe[src*="youtube-nocookie.com"]'),
     );
   },
   pageAs: async ({ browser }, provide) => {
@@ -29,3 +34,14 @@ export const test = base.extend<Fixtures>({
 });
 
 export { expect } from "@playwright/test";
+
+/** Axe violations as readable lines (rule, help, elements), for clear failures. */
+export function describeViolations(results: Awaited<ReturnType<AxeBuilder["analyze"]>>) {
+  return results.violations.map(
+    (violation) =>
+      `${violation.id}: ${violation.help} — ${violation.nodes
+        .slice(0, 3)
+        .map((node) => node.target.join(" "))
+        .join(", ")}`,
+  );
+}

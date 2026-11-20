@@ -4,8 +4,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import ScheduleList from "@/components/content/ScheduleList";
 import LevelBadge from "@/components/programmes/LevelBadge";
 import { groupCoursesByTerm, LEVEL_LABELS, toParagraphs } from "@/lib/programmes";
+import { getProgrammeSchedules } from "@/lib/queries/content";
 import { getProgrammeCourses, getPublishedProgramme } from "@/lib/queries/programmes";
 
 export async function generateMetadata({
@@ -35,7 +37,11 @@ async function ProgrammeDetail({ params }: Pick<PageProps<"/academics/[slug]">, 
 
   const about = toParagraphs(programme.description);
   const requirements = toParagraphs(programme.requirements);
-  const courseGroups = groupCoursesByTerm(await getProgrammeCourses(programme.id));
+  const [courses, schedules] = await Promise.all([
+    getProgrammeCourses(programme.id),
+    getProgrammeSchedules(programme.id),
+  ]);
+  const courseGroups = groupCoursesByTerm(courses);
 
   return (
     <>
@@ -134,6 +140,17 @@ async function ProgrammeDetail({ params }: Pick<PageProps<"/academics/[slug]">, 
                 ))}
               </div>
               <p className="mt-3 text-sm text-secondary">CU: credit units.</p>
+            </section>
+          )}
+
+          {schedules.length > 0 && (
+            <section aria-labelledby="schedules-heading">
+              <h2 id="schedules-heading" className="font-display text-2xl font-bold text-primary">
+                Lecture schedules
+              </h2>
+              <div className="mt-4">
+                <ScheduleList schedules={schedules} />
+              </div>
             </section>
           )}
         </div>

@@ -78,6 +78,12 @@ async function ClassListContent({
             Register students
           </Link>
           <Link
+            href={`/admin/offerings/${termId}/${offeringId}/content`}
+            className="inline-flex items-center rounded-md border border-brand bg-card px-4 py-2.5 text-sm font-semibold text-brand hover:bg-muted"
+          >
+            Lessons and materials
+          </Link>
+          <Link
             href={`/admin/grades/${offeringId}`}
             className="inline-flex items-center rounded-md border border-brand bg-card px-4 py-2.5 text-sm font-semibold text-brand hover:bg-muted"
           >

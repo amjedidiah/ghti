@@ -70,7 +70,9 @@ describe("parseDriveLink", () => {
 
 describe("building links from stored IDs", () => {
   test("privacy-enhanced YouTube embed", () => {
-    expect(youTubeEmbedUrl(VIDEO)).toBe(`https://www.youtube-nocookie.com/embed/${VIDEO}?rel=0`);
+    expect(youTubeEmbedUrl(VIDEO)).toBe(
+      `https://www.youtube-nocookie.com/embed/${VIDEO}?rel=0&cc_load_policy=1`,
+    );
     expect(() => youTubeEmbedUrl("../../evil")).toThrow();
   });
 

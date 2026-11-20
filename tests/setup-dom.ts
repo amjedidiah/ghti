@@ -2,7 +2,8 @@
 // It must run before Testing Library loads (it binds `screen` to
 // document.body on import), hence a preload. happy-dom also brings its own
 // streams and fetch classes; server code under test (e.g. React Email
-// rendering) needs Bun's, so those are kept.
+// rendering) needs Bun's, so those are kept. FormData, Blob and File stay
+// happy-dom's, so `new FormData(form)` reads the rendered form.
 // jest-dom and Testing Library load @testing-library/dom, so both are imported
 // only after the DOM exists.
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
@@ -18,9 +19,6 @@ const KEEP = [
   "Request",
   "Response",
   "Headers",
-  "FormData",
-  "Blob",
-  "File",
   "URL",
   "URLSearchParams",
   "AbortController",

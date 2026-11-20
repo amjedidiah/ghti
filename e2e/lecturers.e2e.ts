@@ -9,7 +9,7 @@ test("a lecturer sees their course and its class list", async ({ pageAs }) => {
   await page.goto("/teach");
   await page.getByRole("link", { name: /BIB 101/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("BIB 101");
-  await page.getByRole("link", { name: "Students" }).click();
+  await page.getByRole("link", { name: "Students", exact: true }).click();
   await expect(page.getByText("Chidi Eze")).toBeVisible();
   await expect(page.getByText("GHTI/2026/CERT/102")).toBeVisible();
 });

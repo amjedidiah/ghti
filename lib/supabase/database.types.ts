@@ -537,6 +537,176 @@ export type Database = {
         }
         Relationships: []
       }
+      lecture_schedules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          drive_file_id: string
+          drive_kind: Database["public"]["Enums"]["drive_kind"]
+          id: string
+          programme_id: string
+          term_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          drive_file_id: string
+          drive_kind: Database["public"]["Enums"]["drive_kind"]
+          id?: string
+          programme_id: string
+          term_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          drive_file_id?: string
+          drive_kind?: Database["public"]["Enums"]["drive_kind"]
+          id?: string
+          programme_id?: string
+          term_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lecture_schedules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lecture_schedules_programme_id_fkey"
+            columns: ["programme_id"]
+            isOneToOne: false
+            referencedRelation: "programmes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lecture_schedules_term_id_fkey"
+            columns: ["term_id"]
+            isOneToOne: false
+            referencedRelation: "terms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          body: string
+          course_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          position: number
+          title: string
+          updated_at: string
+          youtube_id: string | null
+        }
+        Insert: {
+          body?: string
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+          youtube_id?: string | null
+        }
+        Update: {
+          body?: string
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          youtube_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      materials: {
+        Row: {
+          course_id: string
+          created_at: string
+          created_by: string | null
+          drive_file_id: string
+          drive_kind: Database["public"]["Enums"]["drive_kind"]
+          id: string
+          lesson_id: string | null
+          position: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          created_by?: string | null
+          drive_file_id: string
+          drive_kind: Database["public"]["Enums"]["drive_kind"]
+          id?: string
+          lesson_id?: string | null
+          position?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          created_by?: string | null
+          drive_file_id?: string
+          drive_kind?: Database["public"]["Enums"]["drive_kind"]
+          id?: string
+          lesson_id?: string | null
+          position?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_lesson_fkey"
+            columns: ["lesson_id", "course_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id", "course_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -1141,6 +1311,7 @@ export type Database = {
         | "rejected"
         | "withdrawn"
       document_kind: "transcript" | "id_card" | "photo" | "other"
+      drive_kind: "file" | "document" | "presentation" | "spreadsheet"
       export_kind: "applications" | "students" | "results"
       grade_status: "draft" | "submitted" | "published"
       programme_level: "certificate" | "diploma" | "postgraduate_diploma"
@@ -1287,6 +1458,7 @@ export const Constants = {
         "withdrawn",
       ],
       document_kind: ["transcript", "id_card", "photo", "other"],
+      drive_kind: ["file", "document", "presentation", "spreadsheet"],
       export_kind: ["applications", "students", "results"],
       grade_status: ["draft", "submitted", "published"],
       programme_level: ["certificate", "diploma", "postgraduate_diploma"],

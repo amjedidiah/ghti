@@ -209,12 +209,12 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 3.2. Course content
 
-- [ ] `lessons`, `materials`, `lecture_schedules` tables + RLS + pgTAP tests (students read content only for offerings they are registered on).
+- [x] `lessons`, `materials`, `lecture_schedules` tables + RLS + pgTAP tests (students read content only for offerings they are registered on). _(Done 20 Nov 2026, `20261120053409_course_content.sql`: lessons and materials belong to the course and carry over terms (students of any offering of the course read them; its lecturers and admins write them); only YouTube and Drive IDs are stored, checked by format; a material's lesson must be in the same course, and deleting a lesson keeps its materials. Schedules are public for published programmes and written by admins. 21 pgTAP tests.)_
 - [x] `lib/links.ts` with Bun tests: extract the ID from YouTube (`youtu.be/…`, `watch?v=…`, `/live/…`) and Drive (`drive.google.com/file/d/…`, `open?id=…`, Docs/Slides URLs) links; reject anything it can't parse. _(Done 20 Nov 2026, 41 tests: also `/embed/`, `/shorts/`, links without "https://", `/u/0/` Drive links and Sheets; refuses folders, look-alike domains and other schemes. `youTubeEmbedUrl()` and `driveViewUrl()` rebuild links from stored IDs.)_
-- [ ] `/teach` (my courses this term) and `/teach/[offering]/content`: paste a link, preview, save. Help panel: upload to YouTube as _Unlisted_; upload to the ministry Drive with sharing set to _Anyone with the link → Viewer_.
-- [ ] `/materials/[id]` and `/schedules/[id]`: check access, then redirect to Drive. Never render raw Drive links.
-- [ ] `LessonPlayer` (privacy-enhanced `youtube-nocookie.com` embed) and `MaterialList` (icon by kind, title, "Open").
-- [ ] `/portal/courses/[offering]` and `/portal/schedules`; lecture schedules on programme pages.
+- [x] `/teach` (my courses this term) and `/teach/[offering]/content`: paste a link, preview, save. Help panel: upload to YouTube as _Unlisted_; upload to the ministry Drive with sharing set to _Anyone with the link → Viewer_. _(Done 20 Nov 2026: `components/content/CourseContentEditor` (add, edit, reorder, two-step delete; the pasted YouTube link previews before saving), also at `/admin/offerings/[termId]/[offeringId]/content` for courses without a lecturer.)_
+- [x] `/materials/[id]` and `/schedules/[id]`: check access, then redirect to Drive. Never render raw Drive links. _(Both read through RLS; materials need sign-in, schedules are public for published programmes. Pages carry only these redirect links, never Drive URLs or IDs for students.)_
+- [x] `LessonPlayer` (privacy-enhanced `youtube-nocookie.com` embed) and `MaterialList` (icon by kind, title, "Open"). _(Captions on by default where the video has them.)_
+- [x] `/portal/courses/[offering]` and `/portal/schedules`; lecture schedules on programme pages. _(Done 20 Nov 2026: portal Courses and Schedules tabs; admins add and delete schedules on the programme's admin page.)_
 
 #### 3.3. Grade workflow
 

@@ -94,10 +94,14 @@ export function parseDriveLink(input: string): { kind: DriveKind; id: string } |
   return kind && id && DRIVE_ID.test(id) ? { kind, id } : null;
 }
 
-/** Privacy-enhanced embed for a stored video ID. */
+/**
+ * Privacy-enhanced embed for a stored video ID: no YouTube cookies until the
+ * viewer plays it, related videos from the same channel only, and captions
+ * shown by default where the video has them.
+ */
 export function youTubeEmbedUrl(id: string): string {
   if (!YOUTUBE_ID.test(id)) throw new Error("Not a YouTube video ID");
-  return `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
+  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&cc_load_policy=1`;
 }
 
 /** Where /materials/[id] redirects after its access check. */

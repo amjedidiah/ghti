@@ -5,18 +5,28 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import ScheduleForm from "@/components/admin/ScheduleForm";
+import ScheduleList from "@/components/content/ScheduleList";
+import ConfirmDeleteButton from "@/components/shared/ConfirmDeleteButton";
 import CourseForm from "@/components/admin/CourseForm";
 import ProgrammeForm from "@/components/admin/ProgrammeForm";
 import ProgrammeStatusBadge from "@/components/admin/ProgrammeStatusBadge";
 import LevelBadge from "@/components/programmes/LevelBadge";
-import { createCourse, updateProgramme } from "@/lib/admin/academics";
+import {
+  createCourse,
+  createSchedule,
+  deleteSchedule,
+  updateProgramme,
+} from "@/lib/admin/academics";
 import { requireRole } from "@/lib/auth/session";
 import {
   getProgrammeForAdmin,
+  listTermsForAdmin,
   isUuid,
   type ProgrammeForAdmin,
 } from "@/lib/queries/admin-academics";
-import { emptyCourseValues, programmeRowValues } from "@/lib/validation/academics";
+import { listProgrammeSchedules } from "@/lib/queries/content";
+import { emptyCourseValues, programmeRowValues, termLabel } from "@/lib/validation/academics";
 
 export const metadata: Metadata = { title: "Programme", robots: { index: false } };
 
@@ -39,6 +49,10 @@ async function ProgrammeContent({
   const { id } = await params;
   const programme = isUuid(id) ? await getProgrammeForAdmin(id) : null;
   if (!programme) notFound();
+  const [schedules, terms] = await Promise.all([
+    listProgrammeSchedules(programme.id),
+    listTermsForAdmin(),
+  ]);
 
   return (
     <>
@@ -101,6 +115,42 @@ async function ProgrammeContent({
               />
             </div>
           </div>
+        </section>
+
+        <section aria-labelledby="schedules-heading" className="space-y-6 lg:col-span-2">
+          <div>
+            <h2 id="schedules-heading" className="font-display text-2xl font-bold text-primary">
+              Lecture schedules
+            </h2>
+            <p className="mt-2 text-secondary">
+              Timetables as Google Drive files. They show on the programme page once it is
+              published, and in its students&apos; portal.
+            </p>
+          </div>
+          {schedules.length === 0 ? (
+            <p className="text-sm text-secondary">No schedules yet.</p>
+          ) : (
+            <ScheduleList
+              schedules={schedules}
+              actions={(schedule) => (
+                <ConfirmDeleteButton
+                  label={schedule.title}
+                  action={deleteSchedule.bind(null, schedule.id)}
+                />
+              )}
+            />
+          )}
+          {terms.length > 0 && (
+            <div className="max-w-2xl rounded-xl border border-border bg-card p-5 sm:p-6">
+              <h3 className="font-display text-xl font-bold text-primary">Add a schedule</h3>
+              <div className="mt-4">
+                <ScheduleForm
+                  action={createSchedule.bind(null, programme.id)}
+                  terms={terms.map((term) => ({ id: term.id, label: termLabel(term) }))}
+                />
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </>

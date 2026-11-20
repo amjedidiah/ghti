@@ -18,18 +18,20 @@ import { initialFormState, type FormState } from "@/lib/validation/auth";
  *   submits the form's FormData to the action.
  * - Without JavaScript the form still posts to the action natively.
  * - Field errors returned by the server are shown on the matching fields.
+ * - Schemas may transform what is typed (e.g. a link into an ID): `TOutput` is
+ *   what the schema returns; the action still parses the raw FormData itself.
  */
-export function useActionForm<TValues extends FieldValues>({
+export function useActionForm<TValues extends FieldValues, TOutput extends FieldValues = TValues>({
   resolver,
   action,
   defaultValues,
 }: {
-  resolver: Resolver<TValues>;
+  resolver: Resolver<TValues, unknown, TOutput>;
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   defaultValues: DefaultValues<TValues>;
 }) {
   const [state, formAction, pending] = useActionState(action, initialFormState);
-  const form = useForm<TValues>({ resolver, defaultValues, mode: "onTouched" });
+  const form = useForm<TValues, unknown, TOutput>({ resolver, defaultValues, mode: "onTouched" });
 
   useEffect(() => {
     if (state.status !== "error" || !state.fieldErrors) return;

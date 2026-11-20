@@ -187,3 +187,22 @@ set lecturer_id = '00000000-0000-0000-0000-00000000ec01'
 from public.courses c, public.terms t
 where c.id = o.course_id and t.id = o.term_id
   and c.code = 'BIB 101' and t.session = '2026/2027' and t.name = 'First semester';
+
+-- Course content (FAKE): a lesson with an unlisted video, a material and a
+-- programme schedule. The YouTube and Drive IDs are made up.
+insert into public.lessons (course_id, title, body, youtube_id, created_by)
+select c.id, 'Week 1: How the Bible came to us',
+  'Read the introduction in your study guide before the class.', 'dQw4w9WgXcQ',
+  '00000000-0000-0000-0000-00000000ec01'
+from public.courses c where c.code = 'BIB 101';
+
+insert into public.materials (course_id, lesson_id, title, drive_kind, drive_file_id, created_by)
+select c.id, l.id, 'Week 1 slides', 'presentation', '1FakeDriveFileIdForLocalTesting0001',
+  '00000000-0000-0000-0000-00000000ec01'
+from public.courses c join public.lessons l on l.course_id = c.id
+where c.code = 'BIB 101';
+
+insert into public.lecture_schedules (programme_id, term_id, title, drive_kind, drive_file_id)
+select p.id, t.id, 'Lecture timetable', 'document', '1FakeDriveFileIdForLocalTesting0002'
+from public.programmes p, public.terms t
+where p.slug = 'certificate-in-theology' and t.session = '2026/2027' and t.name = 'First semester';

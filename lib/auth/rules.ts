@@ -20,8 +20,8 @@ const ROLE_AREAS: { prefix: string; role: AppRole; except?: string[] }[] = [
   { prefix: "/admin", role: "admin" },
 ];
 
-/** Pages for any signed-in user. */
-const SIGNED_IN_PAGES = ["/reset-password"];
+/** Pages for any signed-in user (each also covers its sub-paths). */
+const SIGNED_IN_PAGES = ["/reset-password", "/materials"];
 
 /** Pages that make no sense once signed in; send the user to their home instead. */
 const GUEST_PAGES = [SIGN_IN_PATH, "/apply/register", "/forgot-password"];

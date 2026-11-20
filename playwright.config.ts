@@ -17,6 +17,9 @@ export default defineConfig({
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
     trace: "retain-on-failure",
+    // Fail a stuck click or page load with its own error, not a test timeout.
+    actionTimeout: 15_000,
+    navigationTimeout: 30_000,
     screenshot: "only-on-failure",
   },
   projects: [

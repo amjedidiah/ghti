@@ -32,6 +32,8 @@ describe("requiresSignIn", () => {
     ["/teach", true],
     ["/teach/offering/1", true],
     ["/teacher", false],
+    ["/materials/abc", true],
+    ["/schedules/abc", false],
     ["/reset-password", true],
     ["/apply/register", false],
     ["/applying", false],

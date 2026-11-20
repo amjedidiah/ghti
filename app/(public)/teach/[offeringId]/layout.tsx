@@ -48,6 +48,7 @@ async function OfferingHeader({ params }: Pick<LayoutProps<"/teach/[offeringId]"
             root={base}
             links={[
               { href: base, label: "Overview" },
+              { href: `${base}/content`, label: "Content" },
               { href: `${base}/students`, label: "Students" },
             ]}
           />

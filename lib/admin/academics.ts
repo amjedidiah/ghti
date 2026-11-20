@@ -20,6 +20,7 @@ import {
   toTermRow,
 } from "@/lib/validation/academics";
 import type { FormState } from "@/lib/validation/auth";
+import { scheduleSchema } from "@/lib/validation/content";
 import { parseFormData } from "@/lib/validation/form";
 
 // Admin actions for programmes, courses and terms (Stage 2, step 2.1).
@@ -359,4 +360,52 @@ export async function assignLecturer(
     status: "success",
     message: lecturerId ? "Lecturer assigned. They have been emailed." : "Lecturer removed.",
   };
+}
+
+// Lecture schedules ---------------------------------------------------------------------
+
+/** Add a lecture schedule (a Drive file, stored as its ID) to a programme. */
+export async function createSchedule(
+  programmeId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireRole("admin");
+  if (!z.guid().safeParse(programmeId).success) return UNKNOWN;
+  const parsed = parseFormData(scheduleSchema, formData);
+  if (!parsed.ok) return parsed.state;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("lecture_schedules").insert({
+    programme_id: programmeId,
+    term_id: parsed.data.termId,
+    title: parsed.data.title,
+    drive_kind: parsed.data.driveLink.kind,
+    drive_file_id: parsed.data.driveLink.id,
+  });
+  if (error?.code === "23503") return UNKNOWN;
+  if (error) return GENERIC;
+
+  refreshProgrammes();
+  revalidatePath("/portal/schedules");
+  return { status: "success", message: "Schedule added." };
+}
+
+export async function deleteSchedule(
+  scheduleId: string,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  await requireRole("admin");
+  if (!z.guid().safeParse(scheduleId).success) return { ok: false, message: UNKNOWN_MESSAGE };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("lecture_schedules")
+    .delete()
+    .eq("id", scheduleId)
+    .select("id");
+  if (error || data.length === 0) {
+    return { ok: false, message: error ? GENERIC_MESSAGE : UNKNOWN_MESSAGE };
+  }
+  refreshProgrammes();
+  revalidatePath("/portal/schedules");
+  return { ok: true };
 }

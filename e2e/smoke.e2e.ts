@@ -1,4 +1,4 @@
-import { expect, test } from "./support/fixtures";
+import { describeViolations, expect, test } from "./support/fixtures";
 
 // Each role lands in its own area and is kept out of the others.
 
@@ -21,6 +21,5 @@ test("the home page has no automatically detectable accessibility issues", async
   makeAxeBuilder,
 }) => {
   await page.goto("/");
-  const results = await makeAxeBuilder().analyze();
-  expect(results.violations.map((violation) => violation.id)).toEqual([]);
+  expect(describeViolations(await makeAxeBuilder().analyze())).toEqual([]);
 });
