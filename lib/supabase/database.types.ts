@@ -360,6 +360,41 @@ export type Database = {
           },
         ]
       }
+      export_log: {
+        Row: {
+          exported_at: string
+          exported_by: string | null
+          filters: Json
+          id: number
+          kind: Database["public"]["Enums"]["export_kind"]
+          row_count: number
+        }
+        Insert: {
+          exported_at?: string
+          exported_by?: string | null
+          filters?: Json
+          id?: never
+          kind: Database["public"]["Enums"]["export_kind"]
+          row_count: number
+        }
+        Update: {
+          exported_at?: string
+          exported_by?: string | null
+          filters?: Json
+          id?: never
+          kind?: Database["public"]["Enums"]["export_kind"]
+          row_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_log_exported_by_fkey"
+            columns: ["exported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grade_changes: {
         Row: {
           changed_at: string
@@ -1057,6 +1092,7 @@ export type Database = {
         | "rejected"
         | "withdrawn"
       document_kind: "transcript" | "id_card" | "photo" | "other"
+      export_kind: "applications" | "students" | "results"
       grade_status: "draft" | "submitted" | "published"
       programme_level: "certificate" | "diploma" | "postgraduate_diploma"
       programme_status: "draft" | "published" | "archived"
@@ -1202,6 +1238,7 @@ export const Constants = {
         "withdrawn",
       ],
       document_kind: ["transcript", "id_card", "photo", "other"],
+      export_kind: ["applications", "students", "results"],
       grade_status: ["draft", "submitted", "published"],
       programme_level: ["certificate", "diploma", "postgraduate_diploma"],
       programme_status: ["draft", "published", "archived"],

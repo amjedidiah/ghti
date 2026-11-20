@@ -234,15 +234,15 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 #### 3.5. Admin and applicant polish
 
 - [ ] `site_content` table + RLS + pgTAP tests; `/admin/content` so vision, history, Statement of Faith and contact details can change without a developer (moves the Stage 1 text into the database). Built in our own admin, not with a headless CMS: see "Content management: when to revisit Payload CMS" under Post-MVP Ideas.
-- [ ] `/admin` overview: applications pending, students by programme, grades awaiting approval.
-- [ ] CSV exports for applications, students, results.
+- [x] `/admin` overview: applications pending, students by programme, grades awaiting approval. _(Done 20 Nov 2026: "Students and results" tiles for active students by programme, grades not yet published (until lecturers submit grades in step 3.3, "awaiting approval" means drafts) and results emails still to send, per term (`lib/admin-overview.ts`, tested).)_
+- [x] CSV exports for applications, students, results. _(Done 20 Nov 2026: `/admin/exports`. Built on request and never stored; every download is written to `export_log` first (who, which export, filters, rows, when; append-only, admins only, 10 pgTAP tests) and listed on the page, for accountability under the NDPA. File names carry the kind and date, never a name; URLs carry statuses and ids only. Cells that could run as spreadsheet formulas are neutralised, and Nigerian phone numbers export as 0803 123 4567 (`lib/csv.ts`, `lib/exports.ts`, tested). Results export published grades unless the admin includes drafts.)_
 - [ ] Admins upload documents on a student's behalf.
 - [ ] Students request biodata corrections through a "Request a change" form that lands in the admin log.
 - [ ] `StepForm`: the application becomes a multi-step form with progress indicator and **autosave** on every step.
 
 #### 3.6. Launch
 
-- [ ] Open Graph images and a sitemap.
+- [x] Open Graph images and a sitemap. _(Share image with the crest since 20 Nov 2026; `/sitemap.xml` lists the public pages and published programmes, `/robots.txt` keeps signed-in areas, account pages and API routes out, and asks crawlers to skip preview deployments entirely (`lib/seo.ts`, tested).)_
 - [ ] Accessibility pass (keyboard, contrast, form errors, captions where available).
 - [ ] **Staff training** (the spec's "Admin Dashboard Training"): a one-page handbook each for admins and lecturers, with screenshots, plus a live walkthrough session.
 - [ ] **Milestone: full launch.**
