@@ -202,15 +202,15 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 
 #### 3.1. Staff
 
-- [ ] Staff accounts (lecturer, admin) invited by an admin, never self-registered; invitation email.
-- [ ] `/admin/users`: users and roles.
+- [x] Staff accounts (lecturer, admin) invited by an admin, never self-registered; invitation email. _(Done 20 Nov 2026: "Invite staff" on `/admin/users` sends Supabase's branded invitation (the link lands on "choose a password"); an applicant's or student's email is refused, not converted; pending invitations can be resent. Uses `SUPABASE_SECRET_KEY` (Production only), after `requireRole("admin")`. `bun run admin:create` still works for the very first admin.)_
+- [x] `/admin/users`: users and roles. _(Done 20 Nov 2026 as the staff list: name, email, role, invited or last signed in; make lecturer/admin or remove staff access through `set_staff_role()`, which refuses your own role and the last admin. `staff_accounts()`, `account_by_email()` and `set_staff_role()` are admin-only, 16 pgTAP tests. Applicants and students are managed from their own pages, not here.)_
 - [ ] Assign lecturers to offerings; "lecturer assigned" email.
-- [ ] `proxy.ts` guards `/teach`. Lecturers write content and `draft`/`submitted` grades only for their own offerings; RLS + pgTAP tests for the lecturer role on every table it touches.
+- [ ] `proxy.ts` guards `/teach`. Lecturers write content and `draft`/`submitted` grades only for their own offerings; RLS + pgTAP tests for the lecturer role on every table it touches. _(Guard done 20 Nov 2026: `/teach` is lecturers only and shows a "coming soon" page. Lecturer RLS waits for steps 3.2 and 3.3.)_
 
 #### 3.2. Course content
 
 - [ ] `lessons`, `materials`, `lecture_schedules` tables + RLS + pgTAP tests (students read content only for offerings they are registered on).
-- [ ] `lib/links.ts` with Bun tests: extract the ID from YouTube (`youtu.be/…`, `watch?v=…`, `/live/…`) and Drive (`drive.google.com/file/d/…`, `open?id=…`, Docs/Slides URLs) links; reject anything it can't parse.
+- [x] `lib/links.ts` with Bun tests: extract the ID from YouTube (`youtu.be/…`, `watch?v=…`, `/live/…`) and Drive (`drive.google.com/file/d/…`, `open?id=…`, Docs/Slides URLs) links; reject anything it can't parse. _(Done 20 Nov 2026, 41 tests: also `/embed/`, `/shorts/`, links without "https://", `/u/0/` Drive links and Sheets; refuses folders, look-alike domains and other schemes. `youTubeEmbedUrl()` and `driveViewUrl()` rebuild links from stored IDs.)_
 - [ ] `/teach` (my courses this term) and `/teach/[offering]/content`: paste a link, preview, save. Help panel: upload to YouTube as _Unlisted_; upload to the ministry Drive with sharing set to _Anyone with the link → Viewer_.
 - [ ] `/materials/[id]` and `/schedules/[id]`: check access, then redirect to Drive. Never render raw Drive links.
 - [ ] `LessonPlayer` (privacy-enhanced `youtube-nocookie.com` embed) and `MaterialList` (icon by kind, title, "Open").
@@ -225,9 +225,9 @@ The [Architecture Reference](#architecture-reference) below holds the full data 
 #### 3.4. Awards, transcripts and verification
 
 - [ ] `awards` table + RLS + pgTAP tests. Only admins issue awards.
-- [ ] PDFs generated **on demand** with `@react-pdf/renderer`. Nothing stored, so storage cost stays at zero.
+- [x] PDFs generated **on demand** with `@react-pdf/renderer`. Nothing stored, so storage cost stays at zero. _(20 Nov 2026: `components/pdf/`, fonts from `assets/fonts`, crest as `assets/images/ghti-crest.png` because react-pdf images cannot be SVG. Text drawn through react-pdf's `render` callback comes out invisible with the embedded fonts, so there are no "Page x of y" numbers.)_
 - [ ] Award certificate: logo, name, programme, level, date, serial, signatories, QR code linking to `/verify/[id]`.
-- [ ] Unofficial transcript: all published grades, GPA per term, CGPA, "Unofficial" watermark; downloadable from `/portal/history`.
+- [x] Unofficial transcript: all published grades, GPA per term, CGPA, "Unofficial" watermark; downloadable from `/portal/history`. _(Done 20 Nov 2026: `/portal/transcript` (students only, their own published grades through RLS); A4 with the crest, student details, a table per term with its GPA, CGPA and credit units, a diagonal watermark and a footer saying it is not an official record. File name `ghti-transcript-<date>.pdf`, no name in it (`lib/transcript.ts`, tested).)_
 - [ ] `/verify/[id]` shows valid or revoked, name, award and date. No other personal data.
 - [ ] `/admin/awards` and `/portal/awards`.
 
